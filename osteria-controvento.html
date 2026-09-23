@@ -1,0 +1,1117 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Osteria Controvento — Gestionale prenotazioni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-page:#EDE7D8; --bg-surface:#F8F5EC; --bg-raised:#FFFFFF;
+    --text-primary:#1B2620; --text-muted:#5B6459; --line:#DAD2BE;
+    --pine:#1F3B32; --pine-2:#2B4E42; --on-pine:#F1EEDD;
+    --brass:#A9812F; --brass-soft:#EFE2BC; --brass-ink:#5B4415;
+    --clay:#A0503C; --clay-soft:#F1D8CE; --clay-ink:#6A2F20;
+    --sage:#6C8A6F; --sage-soft:#DCE6D6; --sage-ink:#2F4A2C;
+    --shadow:0 1px 2px rgba(20,20,10,.05), 0 8px 24px rgba(20,20,10,.06);
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg-page:#12201B; --bg-surface:#182B24; --bg-raised:#1E362D;
+      --text-primary:#F1EDDE; --text-muted:#A9B3A5; --line:#33473C;
+      --pine:#0E1B16; --pine-2:#1A3029;
+      --brass-soft:#3E3217; --brass-ink:#EBD59A;
+      --clay-soft:#43261E; --clay-ink:#F0C2B2;
+      --sage-soft:#243B29; --sage-ink:#C8DEC4;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg-page:#12201B; --bg-surface:#182B24; --bg-raised:#1E362D;
+    --text-primary:#F1EDDE; --text-muted:#A9B3A5; --line:#33473C;
+    --pine:#0E1B16; --pine-2:#1A3029;
+    --brass-soft:#3E3217; --brass-ink:#EBD59A;
+    --clay-soft:#43261E; --clay-ink:#F0C2B2;
+    --sage-soft:#243B29; --sage-ink:#C8DEC4;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg-page);color:var(--text-primary);
+    font-family:"Public Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:14.5px;-webkit-font-smoothing:antialiased;min-height:100%;
+  }
+  h1,h2,h3,.serif{font-family:"Fraunces",ui-serif,Georgia,"Times New Roman",serif;font-weight:500;letter-spacing:-.01em;margin:0;}
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+  [hidden]{display:none !important;}
+  :focus-visible{outline:2px solid var(--brass);outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important;transition:none !important;} }
+
+  /* top bar */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 26px;background:var(--pine);color:var(--on-pine);flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:11px;}
+  .brand-mark{width:34px;height:34px;border-radius:50%;border:1.5px solid #C7B77A;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;}
+  .brand-name{font-family:"Fraunces",Georgia,serif;font-size:19px;line-height:1.1;}
+  .brand-sub{font-size:11.5px;color:#B9C7BC;}
+  .tabs{display:flex;gap:4px;background:rgba(0,0,0,.2);padding:4px;border-radius:11px;}
+  .tab{border:none;background:transparent;color:#CFE0D4;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;}
+  .tab.active{background:var(--on-pine);color:#1F3B32;}
+  .tab:not(.active):hover{background:rgba(255,255,255,.08);}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* shared */
+  .card{background:var(--bg-raised);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);}
+  .btn{border:none;cursor:pointer;font-weight:600;padding:10px 16px;border-radius:9px;white-space:nowrap;}
+  .btn-primary{background:var(--pine-2);color:var(--on-pine);}
+  .btn-primary:hover{background:var(--pine);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-line{background:var(--bg-surface);border:1px solid var(--line);color:var(--text-primary);}
+  .btn-line:hover{border-color:var(--brass);}
+  .btn-ghost{background:transparent;color:var(--text-muted);}
+  .btn-ghost:hover{color:var(--text-primary);}
+  .btn-danger{background:transparent;border:1px solid var(--clay);color:var(--clay-ink);}
+  .btn-sm{padding:6px 10px;font-size:12.5px;border-radius:7px;}
+  label.lbl{display:block;font-size:12.5px;font-weight:600;color:var(--text-muted);margin-bottom:6px;}
+  .inp{width:100%;border:1px solid var(--line);background:var(--bg-surface);border-radius:9px;padding:10px 12px;}
+  textarea.inp{resize:vertical;min-height:70px;line-height:1.45;}
+  .field{margin-bottom:16px;}
+  .row{display:flex;gap:12px;}
+  .row>*{flex:1;min-width:0;}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--bg-surface);}
+  .seg button{border:none;background:transparent;padding:8px 14px;font-weight:600;color:var(--text-muted);cursor:pointer;border-right:1px solid var(--line);}
+  .seg button:last-child{border-right:none;}
+  .seg button.active{background:var(--pine-2);color:var(--on-pine);}
+  .seg button:disabled{opacity:.45;cursor:not-allowed;}
+  .muted{color:var(--text-muted);}
+  .small{font-size:12.5px;}
+  .err{color:var(--clay-ink);background:var(--clay-soft);border-radius:8px;padding:8px 11px;font-size:13px;margin-bottom:12px;}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;}
+  .b-confermata{background:var(--brass-soft);color:var(--brass-ink);}
+  .b-arrivato{background:var(--sage-soft);color:var(--sage-ink);}
+  .b-no-show{background:var(--clay-soft);color:var(--clay-ink);}
+  .b-annullata{background:var(--line);color:var(--text-muted);}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;border:1px solid var(--line);color:var(--text-muted);background:var(--bg-surface);}
+  .tag.t-VIP{border-color:var(--brass);color:var(--brass-ink);background:var(--brass-soft);}
+  .tag.t-Allergie,.tag.t-Attenzione{border-color:var(--clay);color:var(--clay-ink);background:var(--clay-soft);}
+  .tag.t-Habitué{border-color:var(--sage);color:var(--sage-ink);background:var(--sage-soft);}
+
+  /* ============ BOOKING ============ */
+  .booking-shell{display:grid;grid-template-columns:1.05fr 1fr;min-height:calc(100vh - 68px);}
+  @media (max-width:880px){.booking-shell{grid-template-columns:1fr;}}
+  .hero{background:var(--pine);color:var(--on-pine);padding:60px 48px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;}
+  .hero::before,.hero::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(201,181,120,.22);}
+  .hero::before{right:-40px;bottom:-40px;width:220px;height:220px;}
+  .hero::after{right:-100px;bottom:-100px;width:340px;height:340px;}
+  .hero-kicker{color:#C9B578;font-size:14px;margin-bottom:16px;}
+  .hero h1{font-size:clamp(34px,4.6vw,54px);line-height:1.03;max-width:10ch;}
+  .hero p{margin-top:20px;max-width:44ch;color:#C7D3CA;font-size:15.5px;line-height:1.6;}
+  .hero-hours{margin-top:30px;display:grid;gap:6px;font-size:14px;color:#DCE6DF;}
+  .hero-hours b{color:var(--on-pine);}
+  .booking-panel{background:var(--bg-surface);padding:44px 32px;}
+  .wizard{max-width:460px;margin:0 auto;padding:28px;}
+  .step-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;}
+  .step-title{font-family:"Fraunces",Georgia,serif;font-size:21px;}
+  .progress{display:flex;gap:5px;margin-bottom:20px;}
+  .progress i{flex:1;height:3px;border-radius:3px;background:var(--line);}
+  .progress i.on{background:var(--brass);}
+  .stepper{display:inline-flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:9px;padding:5px 8px;background:var(--bg-surface);}
+  .stepper button{width:32px;height:32px;border-radius:7px;border:1px solid var(--line);background:var(--bg-raised);cursor:pointer;font-size:17px;}
+  .stepper span{min-width:84px;text-align:center;font-weight:600;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{border:1px solid var(--line);background:var(--bg-surface);padding:9px 14px;border-radius:8px;font-weight:600;cursor:pointer;}
+  .chip:hover{border-color:var(--brass);}
+  .chip.sel{background:var(--pine-2);color:var(--on-pine);border-color:var(--pine-2);}
+  .note-box{background:var(--sage-soft);color:var(--sage-ink);border-radius:9px;padding:10px 12px;font-size:13px;margin-bottom:16px;}
+  .check{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;margin-bottom:16px;cursor:pointer;}
+  .check input{margin-top:3px;accent-color:var(--pine-2);}
+  .btn-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px;}
+  .ok-mark{width:50px;height:50px;border-radius:50%;background:var(--sage-soft);color:var(--sage-ink);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;}
+  .kv{list-style:none;margin:16px 0 0;padding:0;}
+  .kv li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);}
+  .kv li:last-child{border-bottom:none;}
+  .kv b{font-weight:600;text-align:right;}
+  .code{display:inline-block;margin-top:14px;background:var(--brass-soft);color:var(--brass-ink);padding:6px 11px;border-radius:7px;font-weight:700;letter-spacing:.04em;}
+  .sent-list{margin-top:16px;padding:12px;border-radius:10px;background:var(--bg-surface);border:1px solid var(--line);font-size:13px;display:grid;gap:6px;}
+
+  /* ============ STAFF ============ */
+  .staff-wrap{padding:22px 26px 60px;max-width:1340px;margin:0 auto;}
+  .staff-nav{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:22px;overflow-x:auto;}
+  .staff-nav button{border:none;background:transparent;padding:10px 14px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;}
+  .staff-nav button.active{color:var(--text-primary);border-bottom-color:var(--brass);}
+  .sync{margin-left:auto;align-self:center;font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px;white-space:nowrap;padding-left:12px;}
+  .sync i{width:8px;height:8px;border-radius:50%;background:var(--line);}
+  .sync.live i{background:var(--sage);}
+  .pane{display:none;}
+  .pane.active{display:block;}
+  .pane-top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:18px;}
+  .pane-title{font-size:26px;}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .controls .inp{width:auto;padding:8px 10px;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+  @media (max-width:880px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{padding:14px 16px;}
+  .stat .k{font-size:12px;color:var(--text-muted);font-weight:600;}
+  .stat .v{font-family:"Fraunces",Georgia,serif;font-size:27px;margin-top:4px;}
+  .stat .v small{font-family:"Public Sans",sans-serif;font-size:13px;color:var(--text-muted);}
+  .sala-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start;}
+  @media (max-width:1060px){.sala-grid{grid-template-columns:1fr;}}
+  .panel{padding:20px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .panel-title{font-family:"Fraunces",Georgia,serif;font-size:17px;}
+  .legend{display:flex;gap:14px;font-size:12px;color:var(--text-muted);margin-top:12px;flex-wrap:wrap;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+
+  .edit-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--brass-soft);color:var(--brass-ink);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;}
+  .edit-bar .btns{display:flex;gap:6px;flex-wrap:wrap;}
+
+  .floor{position:relative;width:100%;aspect-ratio:8/5;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    background-color:var(--bg-raised);
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:5% 8%;background-position:-1px -1px;}
+  .floor:not(.editing){background-image:none;}
+  .tbl{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    border:1.5px solid;font-size:12px;font-weight:700;cursor:pointer;user-select:none;line-height:1.15;text-align:center;}
+  .tbl small{font-size:9.5px;font-weight:600;opacity:.8;}
+  .tbl .who{font-size:9.5px;font-weight:600;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tbl.round{width:60px;height:60px;border-radius:50%;}
+  .tbl.square{width:60px;height:60px;border-radius:10px;}
+  .tbl.rect{width:94px;height:56px;border-radius:10px;}
+  .s-free{background:var(--sage-soft);border-color:var(--sage);color:var(--sage-ink);}
+  .s-res{background:var(--brass-soft);border-color:var(--brass);color:var(--brass-ink);}
+  .s-seat{background:var(--clay-soft);border-color:var(--clay);color:var(--clay-ink);}
+  .s-edit{background:var(--bg-surface);border-color:var(--text-muted);color:var(--text-primary);border-style:dashed;}
+  .floor.editing .tbl{cursor:grab;touch-action:none;}
+  .floor.editing .tbl.dragging{cursor:grabbing;box-shadow:var(--shadow);z-index:3;}
+  .tbl.sel{outline:2px solid var(--pine-2);outline-offset:3px;}
+  .floor-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:13.5px;padding:20px;text-align:center;}
+
+  .inspector{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg-surface);}
+  .inspector .row{flex-wrap:wrap;}
+  .inspector .row>*{min-width:110px;}
+
+  .tlist{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .tlist-wrap{overflow-x:auto;}
+  .tlist th{text-align:left;font-size:12px;color:var(--text-muted);font-weight:600;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  .tlist td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  .tlist tr:last-child td{border-bottom:none;}
+  .tlist .inp{padding:6px 8px;min-width:70px;}
+  .tlist select.inp{min-width:96px;}
+
+  .res-list{display:flex;flex-direction:column;gap:8px;max-height:640px;overflow-y:auto;}
+  .res{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:var(--bg-raised);display:grid;gap:6px;}
+  .res-top{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+  .res-time{font-weight:700;}
+  .res-main{font-size:13.5px;cursor:pointer;}
+  .res-main:hover .res-name{text-decoration:underline;}
+  .res-name{font-weight:600;}
+  .res-tags{display:flex;gap:5px;flex-wrap:wrap;}
+  .res-note{font-size:12.5px;color:var(--text-muted);}
+  .res-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .empty{color:var(--text-muted);text-align:center;padding:28px 10px;font-size:13.5px;}
+
+  /* CRM */
+  .crm-grid{display:grid;grid-template-columns:minmax(260px,1fr) 1.5fr;gap:18px;align-items:start;}
+  @media (max-width:960px){.crm-grid{grid-template-columns:1fr;}}
+  .cust-list{display:flex;flex-direction:column;max-height:640px;overflow-y:auto;margin:0 -8px;}
+  .cust{display:grid;gap:4px;padding:11px 12px;border-radius:10px;cursor:pointer;border:1px solid transparent;text-align:left;background:transparent;width:100%;}
+  .cust:hover{background:var(--bg-surface);}
+  .cust.sel{background:var(--bg-surface);border-color:var(--line);}
+  .cust-top{display:flex;justify-content:space-between;gap:8px;}
+  .cust-name{font-weight:600;}
+  .detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .detail-name{font-size:24px;}
+  .mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+  @media (max-width:600px){.mini-stats{grid-template-columns:repeat(2,1fr);}}
+  .mini-stats div{background:var(--bg-surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+  .mini-stats .v{font-family:"Fraunces",Georgia,serif;font-size:21px;}
+  .tag-toggles{display:flex;gap:6px;flex-wrap:wrap;}
+  .tag-toggle{border:1px dashed var(--line);background:transparent;border-radius:6px;padding:5px 10px;font-size:12.5px;font-weight:600;color:var(--text-muted);cursor:pointer;}
+  .tag-toggle.on{border-style:solid;}
+  .history{display:grid;gap:0;}
+  .hist{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .hist:last-child{border-bottom:none;}
+  .hist-date{font-weight:600;min-width:108px;}
+  .section-label{font-size:12.5px;font-weight:600;color:var(--text-muted);margin:18px 0 8px;}
+
+  /* notifications */
+  .notif-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  @media (max-width:1000px){.notif-grid{grid-template-columns:1fr;}}
+  .ph-list{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+  .ph{font-size:12px;background:var(--bg-surface);border:1px solid var(--line);border-radius:6px;padding:3px 7px;}
+  .preview{white-space:pre-wrap;background:var(--bg-surface);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;line-height:1.5;margin-top:6px;}
+  .notif{border-bottom:1px solid var(--line);padding:12px 0;display:grid;gap:4px;}
+  .notif:last-child{border-bottom:none;}
+  .notif-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;}
+  .notif-body{font-size:13px;color:var(--text-muted);white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+  .info-box{background:var(--bg-surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text-muted);margin-bottom:18px;line-height:1.5;}
+
+  /* modal + toast */
+  .backdrop{position:fixed;inset:0;background:rgba(10,16,12,.5);display:flex;align-items:center;justify-content:center;padding:18px;z-index:40;}
+  .modal{width:100%;max-width:460px;max-height:90vh;overflow-y:auto;padding:24px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap;}
+  .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--pine-2);color:var(--on-pine);padding:10px 16px;border-radius:10px;font-size:13.5px;font-weight:600;z-index:60;box-shadow:var(--shadow);}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">🍷</div>
+    <div><div class="brand-name">Osteria Controvento</div><div class="brand-sub">Cucina di stagione — Milano</div></div>
+  </div>
+  <nav class="tabs" aria-label="Sezioni">
+    <button class="tab active" data-view="booking">Prenota</button>
+    <button class="tab" data-view="staff">Area staff</button>
+  </nav>
+</header>
+
+<!-- ============ BOOKING ============ -->
+<main id="view-booking" class="view active">
+  <div class="booking-shell">
+    <section class="hero">
+      <div class="hero-kicker">Prenotazione online</div>
+      <h1>Un tavolo, controvento.</h1>
+      <p>Una sala piccola e una cucina un po' testarda. Prenoti in meno di un minuto e il tavolo resta tuo per tutto il servizio: nessun secondo turno, nessuna fretta.</p>
+      <div class="hero-hours">
+        <div><b>Pranzo</b> 12:30 – 14:30, da martedì a domenica</div>
+        <div><b>Cena</b> 19:00 – 22:30, tutti i giorni</div>
+      </div>
+    </section>
+    <section class="booking-panel"><div class="card wizard" id="wizard"></div></section>
+  </div>
+</main>
+
+<!-- ============ STAFF ============ -->
+<main id="view-staff" class="view">
+  <div class="staff-wrap">
+    <div class="staff-nav" role="tablist">
+      <button class="active" data-act="staff-tab" data-tab="sala">Sala e prenotazioni</button>
+      <button data-act="staff-tab" data-tab="crm">Clienti</button>
+      <button data-act="staff-tab" data-tab="notif">Notifiche</button>
+      <div class="sync" id="sync"><i></i><span>Connessione…</span></div>
+    </div>
+
+    <!-- SALA -->
+    <section class="pane active" id="pane-sala">
+      <div class="pane-top">
+        <div><h2 class="pane-title">Sala</h2><div class="muted small" id="sala-date-label"></div></div>
+        <div class="controls">
+          <input type="date" class="inp" id="sala-date" aria-label="Data" />
+          <div class="seg" id="sala-service"></div>
+          <button class="btn btn-primary" data-act="new-res">Nuova prenotazione</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="card stat"><div class="k">Coperti del servizio</div><div class="v" id="st-covers">0</div></div>
+        <div class="card stat"><div class="k">Prenotazioni</div><div class="v" id="st-count">0</div></div>
+        <div class="card stat"><div class="k">Tavoli liberi</div><div class="v" id="st-free">0</div></div>
+        <div class="card stat"><div class="k">Prossimo arrivo</div><div class="v" id="st-next" style="font-size:19px">—</div></div>
+      </div>
+      <div class="sala-grid">
+        <div class="card panel">
+          <div class="panel-head">
+            <div class="panel-title">Tavoli</div>
+            <div class="controls">
+              <div class="seg" id="table-view-seg">
+                <button class="active" data-act="table-view" data-v="plan">Planimetria</button>
+                <button data-act="table-view" data-v="list">Lista</button>
+              </div>
+              <button class="btn btn-line btn-sm" data-act="edit-start" id="btn-edit">Modifica sala</button>
+            </div>
+          </div>
+          <div class="edit-bar" id="edit-bar" hidden>
+            <span id="edit-hint">Trascina i tavoli per spostarli, cliccali per modificarli.</span>
+            <div class="btns">
+              <button class="btn btn-line btn-sm" data-act="table-add">Aggiungi tavolo</button>
+              <button class="btn btn-ghost btn-sm" data-act="edit-cancel">Annulla</button>
+              <button class="btn btn-primary btn-sm" data-act="edit-save">Salva sala</button>
+            </div>
+          </div>
+          <div id="floor" class="floor"></div>
+          <div id="tlist" class="tlist-wrap" hidden></div>
+          <div id="inspector"></div>
+          <div class="legend" id="legend">
+            <span><i class="dot" style="background:var(--sage)"></i>Libero</span>
+            <span><i class="dot" style="background:var(--brass)"></i>Prenotato</span>
+            <span><i class="dot" style="background:var(--clay)"></i>Cliente arrivato</span>
+          </div>
+        </div>
+        <div class="card panel">
+          <div class="panel-head"><div class="panel-title">Prenotazioni del servizio</div></div>
+          <input class="inp" id="sala-search" placeholder="Cerca per nome o telefono" style="margin-bottom:12px" />
+          <div class="res-list" id="res-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRM -->
+    <section class="pane" id="pane-crm">
+      <div class="pane-top">
+        <div><h2 class="pane-title">Clienti</h2><div class="muted small" id="crm-summary"></div></div>
+      </div>
+      <div class="crm-grid">
+        <div class="card panel">
+          <input class="inp" id="crm-search" placeholder="Cerca cliente" style="margin-bottom:10px" />
+          <div class="seg" id="crm-filter" style="margin-bottom:12px">
+            <button class="active" data-act="crm-filter" data-f="all">Tutti</button>
+            <button data-act="crm-filter" data-f="regular">Abituali</button>
+            <button data-act="crm-filter" data-f="noshow">Con no-show</button>
+          </div>
+          <div class="cust-list" id="cust-list"></div>
+        </div>
+        <div class="card panel" id="cust-detail"></div>
+      </div>
+    </section>
+
+    <!-- NOTIFICHE -->
+    <section class="pane" id="pane-notif">
+      <div class="pane-top"><div><h2 class="pane-title">Notifiche</h2><div class="muted small">Conferme, promemoria e annullamenti inviati ai clienti</div></div></div>
+      <div class="info-box">In questo prototipo gli invii sono <b>simulati</b>: vedi esattamente cosa riceverebbe il cliente, ma nessun messaggio parte davvero. Nel gestionale definitivo gli SMS partiranno tramite un servizio come Twilio e le email tramite Resend o SendGrid, usando questi stessi modelli.</div>
+      <div class="notif-grid">
+        <div class="card panel" id="tpl-panel"></div>
+        <div class="card panel">
+          <div class="panel-head"><div class="panel-title">Registro invii</div></div>
+          <div id="notif-log"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= CONFIG ================= */
+const RESTAURANT = "Osteria Controvento";
+const SERVICES = {
+  pranzo:{label:"Pranzo", slots:["12:30","13:00","13:30","14:00"]},
+  cena:{label:"Cena", slots:["19:00","19:30","20:00","20:30","21:00","21:30","22:00"]}
+};
+const SHAPES = {round:"Rotondo", square:"Quadrato", rect:"Rettangolare"};
+const DEFAULT_FLOOR = [
+  {id:"t1",name:"T1",cap:2,area:"Sala",shape:"round",x:10,y:18},
+  {id:"t2",name:"T2",cap:2,area:"Sala",shape:"round",x:10,y:50},
+  {id:"t3",name:"T3",cap:2,area:"Sala",shape:"round",x:10,y:82},
+  {id:"t4",name:"T4",cap:4,area:"Sala",shape:"square",x:32,y:18},
+  {id:"t5",name:"T5",cap:4,area:"Sala",shape:"square",x:32,y:50},
+  {id:"t6",name:"T6",cap:4,area:"Sala",shape:"square",x:32,y:82},
+  {id:"t7",name:"T7",cap:6,area:"Sala",shape:"rect",x:56,y:28},
+  {id:"t8",name:"T8",cap:2,area:"Bancone",shape:"round",x:56,y:78},
+  {id:"t9",name:"T9",cap:4,area:"Veranda",shape:"square",x:86,y:24},
+  {id:"t10",name:"T10",cap:8,area:"Veranda",shape:"rect",x:86,y:68}
+];
+const TAGS = ["VIP","Habitué","Allergie","Vegetariano","Attenzione"];
+const STATUS_LABEL = {confermata:"Confermata", arrivato:"Arrivato", "no-show":"No-show", annullata:"Annullata"};
+const DEFAULT_TEMPLATES = {
+  confirmEmailSubject:"Prenotazione confermata — {ristorante}",
+  confirmEmailBody:"Ciao {nome},\n\nti confermiamo il tavolo per {persone} persone, {data} alle {ora}. Il tavolo è tuo per tutto il servizio.\n\nCodice prenotazione: {codice}\n\nPer modificare o annullare rispondi a questa email o chiamaci.\n\nA presto,\n{ristorante}",
+  confirmSms:"{ristorante}: tavolo confermato per {persone}, {data} ore {ora}. Codice {codice}.",
+  reminderSms:"Ciao {nome}, ti aspettiamo oggi alle {ora} per {persone}. Se non riesci a venire avvisaci. {ristorante}",
+  cancelSms:"{ristorante}: la prenotazione di {data} alle {ora} è stata annullata. Per info chiamaci."
+};
+const TPL_FIELDS = [
+  {k:"confirmEmailSubject", label:"Conferma — oggetto email", rows:1},
+  {k:"confirmEmailBody", label:"Conferma — testo email", rows:7},
+  {k:"confirmSms", label:"Conferma — SMS", rows:2},
+  {k:"reminderSms", label:"Promemoria — SMS", rows:2},
+  {k:"cancelSms", label:"Annullamento — SMS", rows:2}
+];
+
+/* ================= UTILS ================= */
+const $ = (id)=>document.getElementById(id);
+const pad = n=> n<10 ? "0"+n : ""+n;
+function dateStr(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function todayStr(){ return dateStr(new Date()); }
+function addDays(n){ const d=new Date(); d.setDate(d.getDate()+n); return dateStr(d); }
+function fmtLong(s){ return new Date(s+"T00:00:00").toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"}); }
+function fmtShort(s){ return new Date(s+"T00:00:00").toLocaleDateString("it-IT",{weekday:"short",day:"numeric",month:"short"}); }
+function fmtStamp(iso){ const d=new Date(iso); return d.toLocaleDateString("it-IT",{day:"numeric",month:"short"})+" "+pad(d.getHours())+":"+pad(d.getMinutes()); }
+function defaultService(){ return new Date().getHours()>=15 ? "cena" : "pranzo"; }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function phoneKey(p){
+  let d=String(p||"").replace(/\D/g,"");
+  if(d.startsWith("0039")) d=d.slice(4); else if(d.startsWith("39") && d.length>=12) d=d.slice(2);
+  return d.length>=6 ? "c"+d : "";
+}
+function code(id){ return String(id||"").replace(/[^a-zA-Z0-9]/g,"").slice(-6).toUpperCase(); }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function newId(p){ return p+Math.random().toString(36).slice(2,9); }
+function isTyping(el){ const a=document.activeElement; return a && el.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); }
+function safeHTML(el, html, force){ if(!force && isTyping(el)) return; el.innerHTML = html; }
+let toastTimer=null;
+function toast(msg){
+  const r=$("toast-root"); r.innerHTML='<div class="toast" role="status">'+esc(msg)+'</div>';
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{ r.innerHTML=""; },2600);
+}
+
+/* ================= STATE ================= */
+const state = {
+  reservations:[], customerDocs:{}, floor:clone(DEFAULT_FLOOR),
+  templates:Object.assign({},DEFAULT_TEMPLATES), notifications:[], mode:"pending"
+};
+let db = null;
+
+/* ================= AVAILABILITY (turno singolo) ================= */
+const isActive = r => r.status==="confermata" || r.status==="arrivato";
+function occupancy(date, service){
+  const m={}; state.reservations.forEach(r=>{ if(r.date===date && r.service===service && isActive(r) && r.tableId) m[r.tableId]=r; }); return m;
+}
+function freeTables(date, service, party, exceptId){
+  const occ=occupancy(date,service);
+  return state.floor.filter(t=> t.cap>=(party||1) && (!occ[t.id] || occ[t.id].id===exceptId)).sort((a,b)=>a.cap-b.cap);
+}
+function findTable(date, service, party){ return freeTables(date,service,party)[0] || null; }
+function tableName(id){ const t=state.floor.find(x=>x.id===id); return t ? t.name : "—"; }
+
+/* ================= CUSTOMERS (derived) ================= */
+function buildCustomers(){
+  const map={};
+  Object.keys(state.customerDocs).forEach(id=>{ map[id]=Object.assign({id,tags:[],notes:"",email:""},clone(state.customerDocs[id]),{res:[]}); });
+  state.reservations.forEach(r=>{
+    const k=phoneKey(r.phone); if(!k) return;
+    if(!map[k]) map[k]={id:k,name:r.name,phone:r.phone,email:r.email||"",notes:"",tags:[],res:[],virtual:true};
+    map[k].res.push(r);
+  });
+  const today=todayStr();
+  Object.values(map).forEach(c=>{
+    c.res.sort((a,b)=> (b.date+b.time).localeCompare(a.date+a.time));
+    const arrived=c.res.filter(r=>r.status==="arrivato");
+    c.visits=arrived.length;
+    c.covers=arrived.reduce((a,r)=>a+Number(r.party||0),0);
+    c.noShows=c.res.filter(r=>r.status==="no-show").length;
+    c.upcoming=c.res.filter(r=>r.status==="confermata" && r.date>=today).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time))[0]||null;
+    c.lastVisit=arrived[0] ? arrived[0].date : null;
+    c.lastActivity=c.res[0] ? c.res[0].date : (c.createdAt||"").slice(0,10);
+  });
+  return map;
+}
+
+/* ================= PERSISTENCE ================= */
+async function addDoc(coll, data){
+  if(db){ const ref=await db.collection(coll).add(data); return ref.id; }
+  const id=newId("L");
+  if(coll==="reservations") state.reservations.push(Object.assign({},data,{id}));
+  if(coll==="notifications") state.notifications.unshift(Object.assign({},data,{id}));
+  renderData(); return id;
+}
+async function patchReservation(id, patch){
+  if(db){ await db.doc("reservations/"+id).update(patch); return; }
+  const r=state.reservations.find(x=>x.id===id); if(r) Object.assign(r,patch); renderData();
+}
+async function writeCustomer(key, patch, base){
+  const exists=!!state.customerDocs[key];
+  if(db){
+    if(exists) await db.doc("customers/"+key).update(patch);
+    else await db.doc("customers/"+key).set(Object.assign({name:base.name||"",phone:base.phone||"",email:base.email||"",notes:"",tags:[],createdAt:new Date().toISOString()},patch));
+    return;
+  }
+  state.customerDocs[key]=Object.assign({name:base.name||"",phone:base.phone||"",email:base.email||"",notes:"",tags:[],createdAt:new Date().toISOString()},state.customerDocs[key]||{},patch);
+  renderData();
+}
+async function upsertCustomerFromBooking(r){
+  const key=phoneKey(r.phone); if(!key) return;
+  const ex=state.customerDocs[key];
+  if(!ex){ await writeCustomer(key,{},{name:r.name,phone:r.phone,email:r.email}); return; }
+  const patch={};
+  if(r.email && !ex.email) patch.email=r.email;
+  if(r.name && !ex.name) patch.name=r.name;
+  if(Object.keys(patch).length) await writeCustomer(key,patch,ex);
+}
+async function saveFloor(tables){
+  if(db){ await db.doc("config/floor").set({tables:tables, updatedAt:new Date().toISOString()}); return; }
+  state.floor=clone(tables); renderData();
+}
+async function saveTemplates(t){
+  if(db){ await db.doc("config/templates").set(Object.assign({},t,{updatedAt:new Date().toISOString()})); return; }
+  state.templates=Object.assign({},t); renderData();
+}
+
+/* ================= NOTIFICATIONS ================= */
+function fill(tpl, r){
+  return String(tpl||"")
+    .replace(/\{nome\}/g, (r.name||"").split(" ")[0] || r.name || "")
+    .replace(/\{data\}/g, fmtShort(r.date))
+    .replace(/\{ora\}/g, r.time||"")
+    .replace(/\{persone\}/g, r.party||"")
+    .replace(/\{codice\}/g, code(r.id))
+    .replace(/\{ristorante\}/g, RESTAURANT);
+}
+async function sendNotifications(r, kind){
+  const T=state.templates, out=[], now=new Date().toISOString();
+  const base={kind, reservationId:r.id, customer:r.name, createdAt:now, simulated:true};
+  if(kind==="conferma"){
+    if(r.email) out.push(Object.assign({},base,{channel:"email",to:r.email,subject:fill(T.confirmEmailSubject,r),body:fill(T.confirmEmailBody,r)}));
+    if(r.phone) out.push(Object.assign({},base,{channel:"sms",to:r.phone,body:fill(T.confirmSms,r)}));
+  } else if(kind==="promemoria"){
+    if(r.phone) out.push(Object.assign({},base,{channel:"sms",to:r.phone,body:fill(T.reminderSms,r)}));
+    else if(r.email) out.push(Object.assign({},base,{channel:"email",to:r.email,subject:"Promemoria — "+RESTAURANT,body:fill(T.reminderSms,r)}));
+  } else if(kind==="annullamento"){
+    if(r.phone) out.push(Object.assign({},base,{channel:"sms",to:r.phone,body:fill(T.cancelSms,r)}));
+    if(r.email) out.push(Object.assign({},base,{channel:"email",to:r.email,subject:"Prenotazione annullata — "+RESTAURANT,body:fill(T.cancelSms,r)}));
+  }
+  for(const n of out){ await addDoc("notifications", n); }
+  return out;
+}
+
+/* ================= RENDER ORCHESTRATION ================= */
+function renderData(){
+  if(wiz.step===2) renderWizard();
+  renderSala();
+  renderCrm();
+  renderNotifLog();
+  if(!tplDirty) renderTemplates();
+}
+function renderSync(){
+  const el=$("sync");
+  if(state.mode==="live"){ el.className="sync live"; el.querySelector("span").textContent="Sincronizzato in tempo reale"; }
+  else if(state.mode==="local"){ el.className="sync"; el.querySelector("span").textContent="Demo locale: i dati si azzerano ricaricando"; }
+}
+
+/* top tabs */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+function showView(v){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x.dataset.view===v));
+  document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active",x.id==="view-"+v));
+  if(v==="staff") renderData();
+}
+
+/* ================= BOOKING WIZARD ================= */
+function newWiz(){ return {step:1,date:todayStr(),party:2,service:defaultService(),time:null,name:"",phone:"",email:"",notes:"",reminder:true,last:null,sent:[],error:""}; }
+let wiz=newWiz();
+const wizEl=$("wizard");
+
+function progress(n){ return '<div class="progress">'+[1,2,3].map(i=>'<i class="'+(i<=n?"on":"")+'"></i>').join("")+'</div>'; }
+
+function renderWizard(force){
+  let h="";
+  if(wiz.step===1){
+    h=progress(1)+
+      '<div class="step-head"><div class="step-title">Quando venite?</div><span class="muted small">1 di 3</span></div>'+
+      '<div class="field"><label class="lbl" for="w-date">Data</label><input class="inp" type="date" id="w-date" data-field="date" value="'+wiz.date+'" min="'+todayStr()+'" max="'+addDays(60)+'"></div>'+
+      '<div class="field"><label class="lbl">Persone</label><div class="stepper"><button type="button" data-act="party" data-d="-1" aria-label="Meno">−</button><span>'+wiz.party+" "+(wiz.party===1?"persona":"persone")+'</span><button type="button" data-act="party" data-d="1" aria-label="Più">+</button></div></div>'+
+      '<p class="muted small">Per gruppi oltre le 8 persone chiamaci: organizziamo la sala insieme.</p>'+
+      '<div class="btn-row" style="justify-content:flex-end"><button class="btn btn-primary" data-act="step" data-s="2">Continua</button></div>';
+  } else if(wiz.step===2){
+    const room={}; Object.keys(SERVICES).forEach(k=>room[k]=!!findTable(wiz.date,k,wiz.party));
+    const seg=Object.keys(SERVICES).map(k=>'<button type="button" class="'+(wiz.service===k?"active":"")+'" data-act="svc" data-svc="'+k+'" '+(room[k]?"":"disabled")+'>'+SERVICES[k].label+(room[k]?"":" · completo")+'</button>').join("");
+    const hasRoom=room[wiz.service];
+    const chips=hasRoom ? SERVICES[wiz.service].slots.map(t=>'<button type="button" class="chip '+(wiz.time===t?"sel":"")+'" data-act="time" data-t="'+t+'">'+t+'</button>').join("") : "";
+    h=progress(2)+
+      '<div class="step-head"><div class="step-title">Pranzo o cena?</div><span class="muted small">2 di 3</span></div>'+
+      (wiz.error?'<div class="err">'+esc(wiz.error)+'</div>':"")+
+      '<div class="field"><label class="lbl">'+esc(fmtLong(wiz.date))+", "+wiz.party+' persone</label><div class="seg">'+seg+'</div></div>'+
+      (hasRoom
+        ? '<div class="field"><label class="lbl">A che ora arrivate?</label><div class="chips">'+chips+'</div></div><div class="note-box">Il tavolo è vostro per tutto il servizio, non c\'è un secondo turno.</div>'
+        : '<div class="err">Questo servizio è al completo per '+wiz.party+' persone. Prova l\'altro servizio o un\'altra data.</div>')+
+      '<div class="btn-row"><button class="btn btn-ghost" data-act="step" data-s="1">Indietro</button><button class="btn btn-primary" data-act="step" data-s="3" '+(wiz.time&&hasRoom?"":"disabled")+'>Continua</button></div>';
+  } else if(wiz.step===3){
+    const ready=wiz.name.trim() && wiz.phone.trim();
+    h=progress(3)+
+      '<div class="step-head"><div class="step-title">A chi intestiamo il tavolo?</div><span class="muted small">3 di 3</span></div>'+
+      '<p class="muted small" style="margin:-6px 0 16px">'+esc(fmtLong(wiz.date))+", "+SERVICES[wiz.service].label.toLowerCase()+" ore "+wiz.time+", "+wiz.party+' persone</p>'+
+      (wiz.error?'<div class="err">'+esc(wiz.error)+'</div>':"")+
+      '<div class="field"><label class="lbl" for="w-name">Nome e cognome</label><input class="inp" id="w-name" data-field="name" value="'+esc(wiz.name)+'" autocomplete="name" placeholder="Giulia Bianchi"></div>'+
+      '<div class="row"><div class="field"><label class="lbl" for="w-phone">Cellulare</label><input class="inp" type="tel" id="w-phone" data-field="phone" value="'+esc(wiz.phone)+'" autocomplete="tel" placeholder="333 123 4567"></div>'+
+      '<div class="field"><label class="lbl" for="w-email">Email (facoltativa)</label><input class="inp" type="email" id="w-email" data-field="email" value="'+esc(wiz.email)+'" autocomplete="email" placeholder="giulia@email.it"></div></div>'+
+      '<div class="field"><label class="lbl" for="w-notes">Note per la cucina e la sala</label><textarea class="inp" id="w-notes" data-field="notes" placeholder="Allergie, un compleanno, un seggiolone…">'+esc(wiz.notes)+'</textarea></div>'+
+      '<label class="check"><input type="checkbox" data-field="reminder" '+(wiz.reminder?"checked":"")+'> Mandatemi un promemoria via SMS il giorno della prenotazione</label>'+
+      '<div class="btn-row"><button class="btn btn-ghost" data-act="step" data-s="2">Indietro</button><button class="btn btn-primary" id="w-confirm" data-act="confirm" '+(ready?"":"disabled")+'>Conferma prenotazione</button></div>';
+  } else {
+    const r=wiz.last;
+    h='<div class="ok-mark">✓</div><div class="step-title">Tavolo confermato</div><p class="muted" style="margin:4px 0 0">Ti aspettiamo, '+esc((r.name||"").split(" ")[0])+'.</p>'+
+      '<ul class="kv"><li><span>Data</span><b>'+esc(fmtLong(r.date))+'</b></li><li><span>Arrivo</span><b>'+r.time+'</b></li><li><span>Persone</span><b>'+r.party+'</b></li><li><span>Tavolo</span><b>'+esc(tableName(r.tableId))+'</b></li></ul>'+
+      '<div class="code">Codice '+code(r.id)+'</div>'+
+      (wiz.sent.length?'<div class="sent-list"><b>Conferma inviata</b>'+wiz.sent.map(n=>'<span>'+(n.channel==="sms"?"💬 SMS a ":"✉️ Email a ")+esc(n.to)+'</span>').join("")+'<span class="muted small">Invio simulato in questo prototipo</span></div>':"")+
+      '<div class="btn-row" style="margin-top:18px"><button class="btn btn-ghost" data-act="restart">Nuova prenotazione</button><button class="btn btn-primary" data-act="to-staff">Vedi in area staff</button></div>';
+  }
+  safeHTML(wizEl, h, force);
+}
+
+wizEl.addEventListener("input", e=>{
+  const f=e.target.dataset.field; if(!f) return;
+  if(f==="reminder") wiz.reminder=e.target.checked; else wiz[f]=e.target.value;
+  if(f==="date"){ wiz.time=null; }
+  const btn=$("w-confirm"); if(btn) btn.disabled=!(wiz.name.trim() && wiz.phone.trim());
+});
+wizEl.addEventListener("click", async e=>{
+  const b=e.target.closest("[data-act]"); if(!b || b.disabled) return;
+  const a=b.dataset.act;
+  if(a==="party"){ wiz.party=Math.min(8,Math.max(1,wiz.party+Number(b.dataset.d))); wiz.time=null; renderWizard(true); }
+  else if(a==="step"){
+    const s=Number(b.dataset.s);
+    if(s===2 && !wiz.date){ return; }
+    wiz.error=""; wiz.step=s;
+    if(s===2 && !findTable(wiz.date,wiz.service,wiz.party)){
+      const other=Object.keys(SERVICES).find(k=>findTable(wiz.date,k,wiz.party)); if(other) wiz.service=other;
+    }
+    renderWizard(true);
+  }
+  else if(a==="svc"){ wiz.service=b.dataset.svc; wiz.time=null; renderWizard(true); }
+  else if(a==="time"){ wiz.time=b.dataset.t; renderWizard(true); }
+  else if(a==="restart"){ wiz=newWiz(); renderWizard(true); }
+  else if(a==="to-staff"){ showView("staff"); }
+  else if(a==="confirm"){
+    const t=findTable(wiz.date,wiz.service,wiz.party);
+    if(!t){ wiz.error="Il servizio si è appena riempito. Scegli un'altra opzione."; wiz.step=2; wiz.time=null; renderWizard(true); return; }
+    b.disabled=true; b.textContent="Conferma in corso…";
+    try{
+      const data={date:wiz.date,service:wiz.service,time:wiz.time,party:wiz.party,name:wiz.name.trim(),phone:wiz.phone.trim(),email:wiz.email.trim(),notes:wiz.notes.trim(),reminder:wiz.reminder,tableId:t.id,customerId:phoneKey(wiz.phone),status:"confermata",source:"online",createdAt:new Date().toISOString()};
+      const id=await addDoc("reservations",data);
+      const r=Object.assign({},data,{id});
+      await upsertCustomerFromBooking(r);
+      wiz.sent=await sendNotifications(r,"conferma");
+      wiz.last=r; wiz.step=4; wiz.error=""; renderWizard(true);
+    }catch(err){
+      console.error(err); wiz.error="Non siamo riusciti a salvare la prenotazione. Riprova tra qualche secondo."; renderWizard(true);
+    }
+  }
+});
+
+/* ================= STAFF: SALA ================= */
+const sala={date:todayStr(), service:defaultService(), search:"", view:"plan"};
+const edit={active:false, draft:null, sel:null, error:"", dragging:false};
+$("sala-date").value=sala.date;
+
+function renderServiceSeg(){
+  $("sala-service").innerHTML=Object.keys(SERVICES).map(k=>'<button class="'+(sala.service===k?"active":"")+'" data-act="sala-svc" data-svc="'+k+'">'+SERVICES[k].label+'</button>').join("");
+}
+function currentTables(){ return edit.active ? edit.draft : state.floor; }
+
+function renderSala(){
+  renderServiceSeg();
+  $("sala-date-label").textContent=fmtLong(sala.date)+", "+SERVICES[sala.service].label.toLowerCase();
+  const res=state.reservations.filter(r=>r.date===sala.date && r.service===sala.service && r.status!=="annullata");
+  const active=res.filter(isActive);
+  $("st-covers").textContent=active.reduce((a,r)=>a+Number(r.party||0),0);
+  $("st-count").textContent=active.length;
+  const occ=occupancy(sala.date,sala.service);
+  $("st-free").innerHTML=(state.floor.length-Object.keys(occ).length)+' <small>/ '+state.floor.length+'</small>';
+  const next=res.filter(r=>r.status==="confermata").sort((a,b)=>a.time.localeCompare(b.time))[0];
+  $("st-next").textContent=next ? next.time+" · "+next.name : "—";
+
+  document.querySelectorAll("#table-view-seg button").forEach(b=>b.classList.toggle("active",b.dataset.v===sala.view));
+  $("edit-bar").hidden=!edit.active;
+  $("btn-edit").hidden=edit.active;
+  $("legend").hidden=edit.active;
+  $("floor").hidden=sala.view!=="plan";
+  $("tlist").hidden=sala.view!=="list";
+  $("edit-hint").textContent= sala.view==="plan" ? "Trascina i tavoli per spostarli, cliccali per modificarli." : "Modifica nome, posti, zona e forma direttamente nella tabella.";
+  renderFloor(); renderTableList(); renderInspector(); renderResList(res);
+}
+
+function renderFloor(){
+  if(edit.dragging) return;
+  const fl=$("floor"), tables=currentTables(), occ=occupancy(sala.date,sala.service);
+  fl.classList.toggle("editing",edit.active);
+  if(!tables.length){ fl.innerHTML='<div class="floor-empty">'+(edit.active?"Nessun tavolo. Usa «Aggiungi tavolo» per iniziare.":"La sala non ha ancora tavoli. Clicca «Modifica sala» per crearli.")+'</div>'; return; }
+  fl.innerHTML=tables.map(t=>{
+    const r=occ[t.id];
+    const cls=edit.active ? "s-edit" : (!r ? "s-free" : (r.status==="arrivato" ? "s-seat" : "s-res"));
+    const who=(!edit.active && r) ? '<span class="who">'+esc(r.time+" "+(r.name||"").split(" ").slice(-1)[0])+'</span>' : '<small>'+t.cap+' posti</small>';
+    return '<div class="tbl '+t.shape+' '+cls+(edit.active&&edit.sel===t.id?" sel":"")+'" data-id="'+t.id+'" style="left:'+t.x+'%;top:'+t.y+'%" tabindex="0" role="button" aria-label="Tavolo '+esc(t.name)+', '+t.cap+' posti">'+esc(t.name)+who+'</div>';
+  }).join("");
+}
+
+function renderTableList(){
+  const el=$("tlist"), tables=currentTables(), occ=occupancy(sala.date,sala.service);
+  if(sala.view!=="list"){ return; }
+  if(!tables.length){ safeHTML(el,'<div class="empty">'+(edit.active?"Nessun tavolo. Usa «Aggiungi tavolo».":"Nessun tavolo configurato.")+'</div>'); return; }
+  let h;
+  if(edit.active){
+    h='<table class="tlist"><thead><tr><th>Nome</th><th>Posti</th><th>Zona</th><th>Forma</th><th></th></tr></thead><tbody>'+
+      tables.map(t=>'<tr><td><input class="inp" data-tf="name" data-id="'+t.id+'" value="'+esc(t.name)+'"></td>'+
+        '<td><input class="inp" type="number" min="1" max="20" data-tf="cap" data-id="'+t.id+'" value="'+t.cap+'" style="width:70px"></td>'+
+        '<td><input class="inp" data-tf="area" data-id="'+t.id+'" value="'+esc(t.area||"")+'"></td>'+
+        '<td><select class="inp" data-tf="shape" data-id="'+t.id+'">'+Object.keys(SHAPES).map(s=>'<option value="'+s+'" '+(t.shape===s?"selected":"")+'>'+SHAPES[s]+'</option>').join("")+'</select></td>'+
+        '<td><button class="btn btn-danger btn-sm" data-act="table-del" data-id="'+t.id+'">Elimina</button></td></tr>').join("")+
+      '</tbody></table>'+(edit.error?'<div class="err" style="margin-top:10px">'+esc(edit.error)+'</div>':"");
+  } else {
+    const sorted=tables.slice().sort((a,b)=>(a.area||"").localeCompare(b.area||"") || a.name.localeCompare(b.name,undefined,{numeric:true}));
+    h='<table class="tlist"><thead><tr><th>Tavolo</th><th>Posti</th><th>Zona</th><th>Stato</th><th>Prenotazione</th></tr></thead><tbody>'+
+      sorted.map(t=>{
+        const r=occ[t.id];
+        const st=!r?'<span class="badge b-arrivato" style="background:var(--sage-soft)">Libero</span>':'<span class="badge b-'+r.status+'">'+STATUS_LABEL[r.status]+'</span>';
+        const info=r?'<button class="btn btn-ghost btn-sm" data-act="res-open" data-id="'+r.id+'">'+esc(r.time+" · "+r.name+" ("+r.party+")")+'</button>':'<button class="btn btn-line btn-sm" data-act="new-res" data-table="'+t.id+'">Assegna</button>';
+        return '<tr><td><b>'+esc(t.name)+'</b></td><td>'+t.cap+'</td><td>'+esc(t.area||"—")+'</td><td>'+st+'</td><td>'+info+'</td></tr>';
+      }).join("")+'</tbody></table>';
+  }
+  safeHTML(el,h);
+}
+
+function renderInspector(){
+  const el=$("inspector");
+  if(!edit.active || sala.view!=="plan"){ safeHTML(el,"",true); return; }
+  const t=edit.draft.find(x=>x.id===edit.sel);
+  if(!t){ safeHTML(el,'<div class="inspector muted small">Seleziona un tavolo per modificarne nome, posti, zona e forma.'+(edit.error?'<div class="err" style="margin:10px 0 0">'+esc(edit.error)+'</div>':"")+'</div>'); return; }
+  safeHTML(el,'<div class="inspector">'+
+    (edit.error?'<div class="err">'+esc(edit.error)+'</div>':"")+
+    '<div class="row">'+
+      '<div class="field"><label class="lbl">Nome</label><input class="inp" data-tf="name" data-id="'+t.id+'" value="'+esc(t.name)+'"></div>'+
+      '<div class="field"><label class="lbl">Posti</label><input class="inp" type="number" min="1" max="20" data-tf="cap" data-id="'+t.id+'" value="'+t.cap+'"></div>'+
+      '<div class="field"><label class="lbl">Zona</label><input class="inp" data-tf="area" data-id="'+t.id+'" value="'+esc(t.area||"")+'" placeholder="Sala, Veranda…"></div>'+
+      '<div class="field"><label class="lbl">Forma</label><select class="inp" data-tf="shape" data-id="'+t.id+'">'+Object.keys(SHAPES).map(s=>'<option value="'+s+'" '+(t.shape===s?"selected":"")+'>'+SHAPES[s]+'</option>').join("")+'</select></div>'+
+    '</div>'+
+    '<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><button class="btn btn-danger btn-sm" data-act="table-del" data-id="'+t.id+'">Elimina tavolo</button><button class="btn btn-ghost btn-sm" data-act="table-desel">Fatto</button></div>'+
+  '</div>', true);
+}
+
+function renderResList(res){
+  const el=$("res-list"), q=sala.search.toLowerCase().trim(), cust=buildCustomers();
+  const list=res.filter(r=>!q || (r.name||"").toLowerCase().includes(q) || (r.phone||"").includes(q)).sort((a,b)=>a.time.localeCompare(b.time));
+  if(!list.length){ el.innerHTML='<div class="empty">'+(q?"Nessuna prenotazione trovata.":"Ancora nessuna prenotazione per questo servizio.")+'</div>'; return; }
+  el.innerHTML=list.map(r=>{
+    const c=cust[phoneKey(r.phone)];
+    let tags="";
+    if(c){
+      if(c.visits>0) tags+='<span class="tag">'+c.visits+(c.visits===1?" visita":" visite")+'</span>';
+      else tags+='<span class="tag">Prima volta</span>';
+      (c.tags||[]).forEach(t=>tags+='<span class="tag t-'+esc(t)+'">'+esc(t)+'</span>');
+      if(c.noShows) tags+='<span class="tag t-Attenzione">'+c.noShows+' no-show</span>';
+    }
+    let acts="";
+    if(r.status==="confermata") acts='<button class="btn btn-line btn-sm" data-act="res-status" data-s="arrivato" data-id="'+r.id+'">Arrivati</button><button class="btn btn-line btn-sm" data-act="res-remind" data-id="'+r.id+'">Promemoria</button><button class="btn btn-ghost btn-sm" data-act="res-status" data-s="no-show" data-id="'+r.id+'">No-show</button><button class="btn btn-ghost btn-sm" data-act="res-status" data-s="annullata" data-id="'+r.id+'">Annulla</button>';
+    else acts='<button class="btn btn-ghost btn-sm" data-act="res-status" data-s="confermata" data-id="'+r.id+'">Riporta a confermata</button>';
+    return '<div class="res"><div class="res-top"><span class="res-time">'+r.time+' · '+esc(tableName(r.tableId))+'</span><span class="badge b-'+r.status+'">'+STATUS_LABEL[r.status]+'</span></div>'+
+      '<div class="res-main" data-act="res-open" data-id="'+r.id+'"><span class="res-name">'+esc(r.name)+'</span> <span class="muted">· '+r.party+' persone'+(r.source==="staff"?" · inserita dallo staff":"")+'</span></div>'+
+      (tags?'<div class="res-tags">'+tags+'</div>':"")+
+      (r.notes?'<div class="res-note">📝 '+esc(r.notes)+'</div>':"")+
+      '<div class="res-actions">'+acts+'</div></div>';
+  }).join("");
+}
+
+/* floor dragging (edit mode) */
+(function(){
+  const fl=$("floor"); let drag=null;
+  fl.addEventListener("pointerdown", e=>{
+    if(!edit.active) return;
+    const el=e.target.closest(".tbl"); if(!el) return;
+    e.preventDefault();
+    drag={id:el.dataset.id, el, sx:e.clientX, sy:e.clientY, moved:false};
+    el.setPointerCapture(e.pointerId);
+  });
+  fl.addEventListener("pointermove", e=>{
+    if(!drag) return;
+    if(!drag.moved && Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)<4) return;
+    drag.moved=true; edit.dragging=true; drag.el.classList.add("dragging");
+    const rect=fl.getBoundingClientRect();
+    const x=Math.round(Math.min(95,Math.max(5,(e.clientX-rect.left)/rect.width*100)));
+    const y=Math.round(Math.min(92,Math.max(8,(e.clientY-rect.top)/rect.height*100)));
+    const t=edit.draft.find(x2=>x2.id===drag.id); if(!t) return;
+    t.x=x; t.y=y; drag.el.style.left=x+"%"; drag.el.style.top=y+"%";
+  });
+  function end(){
+    if(!drag) return;
+    const d=drag; drag=null; edit.dragging=false;
+    edit.sel=d.id; edit.error="";
+    renderFloor(); renderInspector();
+  }
+  fl.addEventListener("pointerup", end);
+  fl.addEventListener("pointercancel", end);
+  fl.addEventListener("keydown", e=>{
+    const el=e.target.closest(".tbl"); if(!el) return;
+    if(e.key==="Enter"||e.key===" "){ e.preventDefault(); el.click(); }
+  });
+})();
+
+/* ================= STAFF: CRM ================= */
+const crm={search:"", filter:"all", sel:null, notesDraft:null, notesFor:null};
+function renderCrm(){
+  const all=Object.values(buildCustomers());
+  const regulars=all.filter(c=>c.visits>=2).length, withNs=all.filter(c=>c.noShows>0).length;
+  $("crm-summary").textContent=all.length+" clienti · "+regulars+" abituali · "+withNs+" con almeno un no-show";
+  document.querySelectorAll("#crm-filter button").forEach(b=>b.classList.toggle("active",b.dataset.f===crm.filter));
+  const q=crm.search.toLowerCase().trim();
+  let list=all.filter(c=>(!q || (c.name||"").toLowerCase().includes(q) || (c.phone||"").includes(q) || (c.email||"").toLowerCase().includes(q)));
+  if(crm.filter==="regular") list=list.filter(c=>c.visits>=2);
+  if(crm.filter==="noshow") list=list.filter(c=>c.noShows>0);
+  list.sort((a,b)=>(b.lastActivity||"").localeCompare(a.lastActivity||"") || (a.name||"").localeCompare(b.name||""));
+  $("cust-list").innerHTML = list.length ? list.map(c=>
+    '<button class="cust '+(crm.sel===c.id?"sel":"")+'" data-act="crm-open" data-id="'+c.id+'">'+
+      '<div class="cust-top"><span class="cust-name">'+esc(c.name||"Senza nome")+'</span><span class="muted small">'+(c.visits||0)+(c.visits===1?" visita":" visite")+'</span></div>'+
+      '<div class="muted small">'+esc(c.phone||"")+(c.lastVisit?" · ultima "+esc(fmtShort(c.lastVisit)):"")+'</div>'+
+      ((c.tags&&c.tags.length)||c.noShows ? '<div class="res-tags">'+(c.tags||[]).map(t=>'<span class="tag t-'+esc(t)+'">'+esc(t)+'</span>').join("")+(c.noShows?'<span class="tag t-Attenzione">'+c.noShows+' no-show</span>':"")+'</div>':"")+
+    '</button>').join("")
+    : '<div class="empty">'+(all.length?"Nessun cliente corrisponde alla ricerca.":"I clienti compaiono qui automaticamente dopo la prima prenotazione.")+'</div>';
+
+  const det=$("cust-detail");
+  const c=all.find(x=>x.id===crm.sel);
+  if(!c){ safeHTML(det,'<div class="empty">Seleziona un cliente per vedere storico, note e preferenze.</div>'); return; }
+  if(crm.notesFor!==c.id){ crm.notesFor=c.id; crm.notesDraft=c.notes||""; }
+  const hist=c.res.length ? c.res.map(r=>'<div class="hist"><span class="hist-date">'+esc(fmtShort(r.date))+'</span><span>'+SERVICES[r.service].label+' ore '+r.time+' · '+r.party+' pers. · '+esc(tableName(r.tableId))+(r.notes?'<br><span class="muted small">'+esc(r.notes)+'</span>':"")+'</span><span class="badge b-'+r.status+'">'+STATUS_LABEL[r.status]+'</span></div>').join("") : '<div class="muted small">Nessuna prenotazione registrata.</div>';
+  safeHTML(det,
+    '<div class="detail-head"><div><h3 class="detail-name">'+esc(c.name||"Senza nome")+'</h3><div class="muted small" style="margin-top:4px">'+esc(c.phone||"")+(c.email?" · "+esc(c.email):"")+'</div></div>'+
+    '<button class="btn btn-line btn-sm" data-act="new-res" data-cust="'+c.id+'">Nuova prenotazione</button></div>'+
+    '<div class="mini-stats"><div><div class="muted small">Visite</div><div class="v">'+c.visits+'</div></div><div><div class="muted small">Coperti totali</div><div class="v">'+c.covers+'</div></div><div><div class="muted small">No-show</div><div class="v">'+c.noShows+'</div></div><div><div class="muted small">Prossima</div><div class="v" style="font-size:15px;margin-top:4px">'+(c.upcoming?esc(fmtShort(c.upcoming.date)+" "+c.upcoming.time):"—")+'</div></div></div>'+
+    '<div class="section-label">Etichette</div><div class="tag-toggles">'+TAGS.map(t=>{const on=(c.tags||[]).includes(t);return '<button class="tag-toggle '+(on?"on tag t-"+esc(t):"")+'" data-act="crm-tag" data-tag="'+esc(t)+'" aria-pressed="'+on+'">'+(on?"✓ ":"+ ")+esc(t)+'</button>';}).join("")+'</div>'+
+    '<div class="section-label">Note interne (preferenze, allergie, tavolo preferito)</div><textarea class="inp" id="crm-notes" placeholder="Es. preferisce il tavolo in veranda, intollerante al lattosio">'+esc(crm.notesDraft)+'</textarea>'+
+    '<div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btn-primary btn-sm" data-act="crm-save-notes">Salva note</button></div>'+
+    '<div class="section-label">Storico prenotazioni</div><div class="history">'+hist+'</div>'
+  , false);
+}
+
+/* ================= STAFF: NOTIFICHE ================= */
+let tplDraft=Object.assign({},DEFAULT_TEMPLATES), tplDirty=false;
+const SAMPLE={id:"SAMPLEAB12C",name:"Giulia Bianchi",date:addDays(3),time:"20:00",party:4};
+function renderTemplates(force){
+  const el=$("tpl-panel");
+  const h='<div class="panel-head"><div class="panel-title">Modelli dei messaggi</div></div>'+
+    '<div class="muted small" style="margin-bottom:8px">Segnaposto disponibili, sostituiti automaticamente:</div>'+
+    '<div class="ph-list">'+["{nome}","{data}","{ora}","{persone}","{codice}","{ristorante}"].map(p=>'<span class="ph">'+p+'</span>').join("")+'</div>'+
+    TPL_FIELDS.map(f=>'<div class="field"><label class="lbl" for="tpl-'+f.k+'">'+f.label+'</label>'+
+      (f.rows===1?'<input class="inp" id="tpl-'+f.k+'" data-tpl="'+f.k+'" value="'+esc(tplDraft[f.k])+'">':'<textarea class="inp" id="tpl-'+f.k+'" data-tpl="'+f.k+'" rows="'+f.rows+'">'+esc(tplDraft[f.k])+'</textarea>')+'</div>').join("")+
+    '<div class="section-label" style="margin-top:4px">Anteprima conferma SMS</div><div class="preview" id="tpl-preview">'+esc(fill(tplDraft.confirmSms,SAMPLE))+'</div>'+
+    '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="btn btn-ghost btn-sm" data-act="tpl-reset">Ripristina predefiniti</button><button class="btn btn-primary btn-sm" data-act="tpl-save" '+(tplDirty?"":"disabled")+'>Salva modelli</button></div>';
+  safeHTML(el,h,force);
+}
+function renderNotifLog(){
+  const el=$("notif-log"), list=state.notifications.slice().sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||"")).slice(0,60);
+  el.innerHTML = list.length ? list.map(n=>
+    '<div class="notif"><div class="notif-top"><span><b>'+(n.channel==="sms"?"💬 SMS":"✉️ Email")+'</b> · '+esc(n.kind)+' · '+esc(n.customer||"")+'</span><span class="muted small">'+esc(fmtStamp(n.createdAt))+'</span></div>'+
+    '<div class="muted small">A: '+esc(n.to)+(n.subject?' · Oggetto: '+esc(n.subject):"")+' · <i>simulato</i></div>'+
+    '<div class="notif-body">'+esc(n.body)+'</div></div>').join("")
+    : '<div class="empty">Qui compariranno conferme, promemoria e annullamenti inviati ai clienti.</div>';
+}
+
+/* ================= STAFF EVENTS ================= */
+const staff=$("view-staff");
+staff.addEventListener("click", async e=>{
+  const tEl=e.target.closest(".tbl");
+  if(tEl && !edit.active){
+    const r=occupancy(sala.date,sala.service)[tEl.dataset.id];
+    if(r) openResModal(r.id); else openNewResModal({tableId:tEl.dataset.id});
+    return;
+  }
+  const b=e.target.closest("[data-act]"); if(!b || b.disabled) return;
+  const a=b.dataset.act, id=b.dataset.id;
+  switch(a){
+    case "staff-tab":
+      document.querySelectorAll(".staff-nav button").forEach(x=>x.classList.toggle("active",x.dataset.tab===b.dataset.tab));
+      document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("active",p.id==="pane-"+b.dataset.tab));
+      if(b.dataset.tab==="notif") renderTemplates(true);
+      break;
+    case "sala-svc": sala.service=b.dataset.svc; renderSala(); break;
+    case "table-view": sala.view=b.dataset.v; edit.error=""; renderSala(); break;
+    case "new-res": {
+      const preset={}; if(b.dataset.table) preset.tableId=b.dataset.table;
+      if(b.dataset.cust){ const c=buildCustomers()[b.dataset.cust]; if(c) Object.assign(preset,{name:c.name,phone:c.phone,email:c.email}); }
+      openNewResModal(preset); break;
+    }
+    case "edit-start": edit.active=true; edit.draft=clone(state.floor); edit.sel=null; edit.error=""; renderSala(); break;
+    case "edit-cancel": edit.active=false; edit.draft=null; edit.sel=null; edit.error=""; renderSala(); break;
+    case "table-add": {
+      const names=new Set(edit.draft.map(t=>t.name)); let n=edit.draft.length+1; while(names.has("T"+n)) n++;
+      const t={id:newId("t"),name:"T"+n,cap:4,area:"Sala",shape:"square",x:50,y:50};
+      edit.draft.push(t); edit.sel=t.id; edit.error=""; renderSala();
+      if(sala.view==="plan") toast("Tavolo "+t.name+" aggiunto al centro: trascinalo dove serve");
+      break;
+    }
+    case "table-desel": edit.sel=null; edit.error=""; renderFloor(); renderInspector(); break;
+    case "table-del": {
+      const future=state.reservations.filter(r=>r.tableId===id && isActive(r) && r.date>=todayStr());
+      if(future.length){ edit.error="Questo tavolo ha "+future.length+(future.length===1?" prenotazione futura":" prenotazioni future")+": spostale su un altro tavolo prima di eliminarlo."; edit.sel=id; renderSala(); break; }
+      edit.draft=edit.draft.filter(t=>t.id!==id); if(edit.sel===id) edit.sel=null; edit.error=""; renderSala(); break;
+    }
+    case "edit-save": {
+      const names=edit.draft.map(t=>(t.name||"").trim());
+      if(names.some(n=>!n)){ edit.error="Ogni tavolo deve avere un nome."; renderSala(); break; }
+      if(new Set(names).size!==names.length){ edit.error="Due tavoli hanno lo stesso nome: rendili diversi."; renderSala(); break; }
+      if(edit.draft.some(t=>!(t.cap>=1 && t.cap<=20))){ edit.error="I posti devono essere tra 1 e 20."; renderSala(); break; }
+      b.disabled=true;
+      try{
+        const tables=edit.draft.map(t=>Object.assign({},t,{name:t.name.trim(),area:(t.area||"").trim()}));
+        await saveFloor(tables); state.floor=clone(tables);
+        edit.active=false; edit.draft=null; edit.sel=null; edit.error=""; renderSala(); toast("Sala salvata");
+      }catch(err){ console.error(err); edit.error="Salvataggio non riuscito. Riprova."; b.disabled=false; renderSala(); }
+      break;
+    }
+    case "res-open": openResModal(id); break;
+    case "res-status": await changeStatus(id,b.dataset.s); break;
+    case "res-remind": await remind(id); break;
+    case "crm-filter": crm.filter=b.dataset.f; renderCrm(); break;
+    case "crm-open": crm.sel=id; renderCrm(); if(window.innerWidth<960) $("cust-detail").scrollIntoView({behavior:"smooth",block:"start"}); break;
+    case "crm-tag": {
+      const c=buildCustomers()[crm.sel]; if(!c) break;
+      const t=b.dataset.tag, tags=(c.tags||[]).slice(); const i=tags.indexOf(t); if(i>-1) tags.splice(i,1); else tags.push(t);
+      try{ await writeCustomer(c.id,{tags},c); }catch(err){ console.error(err); toast("Etichetta non salvata, riprova"); }
+      break;
+    }
+    case "crm-save-notes": {
+      const c=buildCustomers()[crm.sel]; if(!c) break;
+      const notes=$("crm-notes").value; crm.notesDraft=notes;
+      try{ await writeCustomer(c.id,{notes},c); $("crm-notes").blur(); toast("Note salvate"); renderCrm(); }catch(err){ console.error(err); toast("Note non salvate, riprova"); }
+      break;
+    }
+    case "tpl-save":
+      try{ await saveTemplates(tplDraft); tplDirty=false; renderTemplates(true); toast("Modelli salvati"); }catch(err){ console.error(err); toast("Modelli non salvati, riprova"); }
+      break;
+    case "tpl-reset": tplDraft=Object.assign({},DEFAULT_TEMPLATES); tplDirty=true; renderTemplates(true); break;
+  }
+});
+staff.addEventListener("input", e=>{
+  const t=e.target;
+  if(t.id==="sala-search"){ sala.search=t.value; renderSala(); return; }
+  if(t.id==="crm-search"){ crm.search=t.value; renderCrm(); return; }
+  if(t.id==="crm-notes"){ crm.notesDraft=t.value; return; }
+  if(t.dataset.tpl){ tplDraft[t.dataset.tpl]=t.value; tplDirty=true; $("tpl-preview").textContent=fill(tplDraft.confirmSms,SAMPLE); const sb=staff.querySelector('[data-act="tpl-save"]'); if(sb) sb.disabled=false; return; }
+  if(t.dataset.tf && edit.active){
+    const tb=edit.draft.find(x=>x.id===t.dataset.id); if(!tb) return;
+    const f=t.dataset.tf; tb[f]= f==="cap" ? Math.max(0,parseInt(t.value,10)||0) : t.value;
+    renderFloor();
+  }
+});
+staff.addEventListener("change", e=>{
+  if(e.target.id==="sala-date"){ sala.date=e.target.value||todayStr(); renderSala(); }
+});
+
+async function changeStatus(id, s){
+  const r=state.reservations.find(x=>x.id===id); if(!r) return;
+  if(s==="confermata" && !isActive(r)){
+    const occ=occupancy(r.date,r.service)[r.tableId];
+    if(occ && occ.id!==r.id){ const t=findTable(r.date,r.service,r.party); if(!t){ toast("Nessun tavolo libero per ripristinarla"); return; } await patchReservation(id,{status:s,tableId:t.id}); toast("Ripristinata sul tavolo "+t.name); return; }
+  }
+  try{
+    await patchReservation(id,{status:s});
+    if(s==="annullata"){ const sent=await sendNotifications(r,"annullamento"); toast(sent.length?"Annullata, cliente avvisato":"Prenotazione annullata"); }
+    else toast(STATUS_LABEL[s]);
+  }catch(err){ console.error(err); toast("Operazione non riuscita, riprova"); }
+}
+async function remind(id){
+  const r=state.reservations.find(x=>x.id===id); if(!r) return;
+  try{ const sent=await sendNotifications(r,"promemoria"); toast(sent.length?"Promemoria inviato a "+sent[0].to:"Nessun contatto per il promemoria"); }catch(err){ console.error(err); toast("Promemoria non inviato"); }
+}
+
+/* ================= MODALS ================= */
+const modalRoot=$("modal-root");
+let modal=null;
+function closeModal(){ modalRoot.innerHTML=""; modal=null; }
+modalRoot.addEventListener("click", async e=>{
+  if(e.target.classList.contains("backdrop")){ closeModal(); return; }
+  const b=e.target.closest("[data-act]"); if(!b || b.disabled) return;
+  const a=b.dataset.act;
+  if(a==="m-close") closeModal();
+  else if(a==="m-status"){ await changeStatus(modal.id,b.dataset.s); closeModal(); }
+  else if(a==="m-remind"){ await remind(modal.id); }
+  else if(a==="m-save-new") await saveNewRes(b);
+});
+modalRoot.addEventListener("change", async e=>{
+  const t=e.target;
+  if(t.id==="m-table" && modal && modal.type==="res"){
+    try{ await patchReservation(modal.id,{tableId:t.value}); toast("Spostata al tavolo "+tableName(t.value)); }catch(err){ toast("Spostamento non riuscito"); }
+  }
+  if(modal && modal.type==="new" && (t.id==="n-service"||t.id==="n-party")) refreshNewResSelects();
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && modal) closeModal(); });
+
+function openResModal(id){
+  const r=state.reservations.find(x=>x.id===id); if(!r) return;
+  modal={type:"res",id};
+  const c=buildCustomers()[phoneKey(r.phone)];
+  const opts=freeTables(r.date,r.service,1,r.id).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
+  let acts='';
+  if(r.status==="confermata") acts='<button class="btn btn-ghost btn-sm" data-act="m-status" data-s="annullata">Annulla prenotazione</button><button class="btn btn-ghost btn-sm" data-act="m-status" data-s="no-show">No-show</button><button class="btn btn-line btn-sm" data-act="m-remind">Invia promemoria</button><button class="btn btn-primary btn-sm" data-act="m-status" data-s="arrivato">Segna arrivati</button>';
+  else acts='<button class="btn btn-line btn-sm" data-act="m-status" data-s="confermata">Riporta a confermata</button>';
+  modalRoot.innerHTML='<div class="backdrop"><div class="card modal" role="dialog" aria-modal="true" aria-label="Dettaglio prenotazione">'+
+    '<div class="step-head"><div class="step-title">'+esc(r.name)+'</div><span class="badge b-'+r.status+'">'+STATUS_LABEL[r.status]+'</span></div>'+
+    '<ul class="kv" style="margin-top:0"><li><span>Quando</span><b>'+esc(fmtShort(r.date))+", "+SERVICES[r.service].label.toLowerCase()+" ore "+r.time+'</b></li><li><span>Persone</span><b>'+r.party+'</b></li><li><span>Telefono</span><b>'+esc(r.phone||"—")+'</b></li><li><span>Email</span><b>'+esc(r.email||"—")+'</b></li><li><span>Codice</span><b>'+code(r.id)+'</b></li>'+(r.notes?'<li><span>Note</span><b>'+esc(r.notes)+'</b></li>':"")+
+    (c?'<li><span>Cliente</span><b>'+(c.visits?c.visits+(c.visits===1?" visita":" visite"):"Prima volta")+(c.noShows?", "+c.noShows+" no-show":"")+'</b></li>'+(c.notes?'<li><span>Note CRM</span><b>'+esc(c.notes)+'</b></li>':""):"")+'</ul>'+
+    (isActive(r)?'<div class="field" style="margin-top:14px"><label class="lbl" for="m-table">Tavolo</label><select class="inp" id="m-table">'+opts.map(t=>'<option value="'+t.id+'" '+(t.id===r.tableId?"selected":"")+'>'+esc(t.name)+" · "+t.cap+" posti"+(t.cap<r.party?" (piccolo)":"")+(t.area?" · "+esc(t.area):"")+'</option>').join("")+'</select></div>':"")+
+    '<div class="modal-actions">'+acts+'</div>'+
+    '<div class="modal-actions" style="margin-top:6px"><button class="btn btn-ghost btn-sm" data-act="m-close">Chiudi</button></div>'+
+  '</div></div>';
+}
+
+function openNewResModal(preset){
+  preset=preset||{};
+  modal={type:"new", preset};
+  modalRoot.innerHTML='<div class="backdrop"><div class="card modal" role="dialog" aria-modal="true" aria-label="Nuova prenotazione">'+
+    '<div class="step-title" style="margin-bottom:16px">Nuova prenotazione</div>'+
+    '<div id="n-err"></div>'+
+    '<div class="field"><label class="lbl" for="n-name">Nome e cognome</label><input class="inp" id="n-name" value="'+esc(preset.name||"")+'"></div>'+
+    '<div class="row"><div class="field"><label class="lbl" for="n-phone">Cellulare</label><input class="inp" type="tel" id="n-phone" value="'+esc(preset.phone||"")+'"></div><div class="field"><label class="lbl" for="n-email">Email</label><input class="inp" type="email" id="n-email" value="'+esc(preset.email||"")+'"></div></div>'+
+    '<div class="row"><div class="field"><label class="lbl" for="n-date">Data</label><input class="inp" type="date" id="n-date" value="'+sala.date+'"></div><div class="field"><label class="lbl" for="n-party">Persone</label><input class="inp" type="number" min="1" max="20" id="n-party" value="2"></div></div>'+
+    '<div class="row"><div class="field"><label class="lbl" for="n-service">Servizio</label><select class="inp" id="n-service">'+Object.keys(SERVICES).map(k=>'<option value="'+k+'" '+(k===sala.service?"selected":"")+'>'+SERVICES[k].label+'</option>').join("")+'</select></div><div class="field"><label class="lbl" for="n-time">Arrivo</label><select class="inp" id="n-time"></select></div></div>'+
+    '<div class="field"><label class="lbl" for="n-table">Tavolo</label><select class="inp" id="n-table"></select></div>'+
+    '<div class="field"><label class="lbl" for="n-notes">Note</label><textarea class="inp" id="n-notes"></textarea></div>'+
+    '<label class="check"><input type="checkbox" id="n-notify" checked> Invia conferma al cliente (SMS e/o email)</label>'+
+    '<div class="modal-actions"><button class="btn btn-ghost" data-act="m-close">Annulla</button><button class="btn btn-primary" data-act="m-save-new">Salva prenotazione</button></div>'+
+  '</div></div>';
+  $("n-date").addEventListener("change", refreshNewResSelects);
+  refreshNewResSelects();
+  setTimeout(()=>{ const n=$("n-name"); if(n && !n.value) n.focus(); },30);
+}
+function refreshNewResSelects(){
+  const svc=$("n-service").value, date=$("n-date").value||sala.date, party=parseInt($("n-party").value,10)||1;
+  const tSel=$("n-time"), prevT=tSel.value;
+  tSel.innerHTML=SERVICES[svc].slots.map(t=>'<option '+(t===prevT?"selected":"")+'>'+t+'</option>').join("");
+  const tbl=$("n-table"), prev=tbl.value || (modal.preset.tableId||"");
+  const free=freeTables(date,svc,1).sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
+  tbl.innerHTML='<option value="">Assegna automaticamente</option>'+free.map(t=>'<option value="'+t.id+'" '+(t.id===prev?"selected":"")+'>'+esc(t.name)+" · "+t.cap+" posti"+(t.cap<party?" (piccolo)":"")+(t.area?" · "+esc(t.area):"")+'</option>').join("");
+}
+async function saveNewRes(btn){
+  const err=m=>{ $("n-err").innerHTML='<div class="err">'+esc(m)+'</div>'; };
+  const name=$("n-name").value.trim(), phone=$("n-phone").value.trim(), email=$("n-email").value.trim();
+  const date=$("n-date").value, party=parseInt($("n-party").value,10)||0, service=$("n-service").value, time=$("n-time").value;
+  const notes=$("n-notes").value.trim(), notify=$("n-notify").checked;
+  if(!name) return err("Inserisci il nome del cliente.");
+  if(!date) return err("Scegli una data.");
+  if(party<1) return err("Inserisci un numero di persone valido.");
+  let tableId=$("n-table").value;
+  if(tableId){ const occ=occupancy(date,service)[tableId]; if(occ) return err("Quel tavolo è appena stato occupato: scegline un altro."); }
+  else { const t=findTable(date,service,party); if(!t) return err("Nessun tavolo libero abbastanza grande per questo servizio."); tableId=t.id; }
+  btn.disabled=true;
+  try{
+    const data={date,service,time,party,name,phone,email,notes,reminder:!!phone,tableId,customerId:phoneKey(phone),status:"confermata",source:"staff",createdAt:new Date().toISOString()};
+    const id=await addDoc("reservations",data); const r=Object.assign({},data,{id});
+    await upsertCustomerFromBooking(r);
+    let sent=[]; if(notify) sent=await sendNotifications(r,"conferma");
+    closeModal(); toast("Prenotazione salvata"+(sent.length?", conferma inviata":""));
+  }catch(e){ console.error(e); btn.disabled=false; err("Salvataggio non riuscito. Riprova."); }
+}
+
+/* ================= INIT ================= */
+function waitForClaude(ms){
+  return new Promise(res=>{
+    const start=Date.now();
+    (function check(){
+      if(window.claude && typeof window.claude.use==="function") return res(true);
+      if(Date.now()-start>ms) return res(false);
+      setTimeout(check,100);
+    })();
+  });
+}
+async function initData(){
+  const ok=await waitForClaude(3000);
+  let h=null;
+  if(ok){ try{ h=await window.claude.use("db"); }catch(e){ h=null; } }
+  if(!h){ state.mode="local"; renderSync(); renderData(); return; }
+  db=h; state.mode="live"; renderSync();
+  const onErr=err=>{ console.error("db",err); };
+  db.collection("reservations").onSnapshot(s=>{ state.reservations=s.docs.map(d=>Object.assign({},d.data(),{id:d.id})); renderData(); }, onErr);
+  db.collection("customers").onSnapshot(s=>{ const m={}; s.docs.forEach(d=>{ m[d.id]=d.data(); }); state.customerDocs=m; renderData(); }, onErr);
+  db.doc("config/floor").onSnapshot(s=>{ if(s.exists){ const d=s.data(); if(Array.isArray(d.tables)) state.floor=clone(d.tables); } renderData(); }, onErr);
+  db.doc("config/templates").onSnapshot(s=>{ if(s.exists){ state.templates=Object.assign({},DEFAULT_TEMPLATES,s.data()); delete state.templates.updatedAt; } if(!tplDirty){ tplDraft=Object.assign({},state.templates); } renderData(); }, onErr);
+  db.collection("notifications").orderBy("createdAt","desc").limit(100).onSnapshot(s=>{ state.notifications=s.docs.map(d=>Object.assign({},d.data(),{id:d.id})); renderNotifLog(); }, onErr);
+}
+
+renderWizard(true);
+renderSala();
+renderCrm();
+renderTemplates(true);
+renderNotifLog();
+initData();
+})();
+</script>
+</body>
+</html>
