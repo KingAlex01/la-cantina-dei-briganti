@@ -1,2 +1,7 @@
+[build.environment]
+# Questi valori sono inclusi intenzionalmente nel browser da Next.js.
+# Continua a controllare RESEND_API_KEY e SUPABASE_SECRET_KEY.
+SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+
 [[plugins]]
 package = "@netlify/plugin-nextjs"
