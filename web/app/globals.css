@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --font-public-sans: "Public Sans";
+  --font-fraunces: "Fraunces";
+  --bg-page: #ede7d8;
+  --text-primary: #1b2620;
+  --text-muted: #5b6459;
+  --pine: #1f3b32;
+  --on-pine: #f1eedd;
+  --brass: #a9812f;
+}
+
+@theme inline {
+  --font-sans: var(--font-public-sans);
+  --font-serif: var(--font-fraunces);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-page: #12201b;
+    --text-primary: #f1edde;
+    --text-muted: #a9b3a5;
+  }
+}
+
+body {
+  font-family: var(--font-public-sans), Arial, sans-serif;
+}

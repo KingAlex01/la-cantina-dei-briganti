@@ -1,0 +1,14 @@
+# Local credentials and generated files
+.env
+.env.*
+!.env.example
+!**/.env.example
+node_modules/
+.next/
+out/
+.npm-cache/
+
+# Local Supabase files
+supabase/.branches/
+supabase/.profiles/
+supabase/.temp/

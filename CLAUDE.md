@@ -1,10 +1,11 @@
-# Gestionale prenotazioni — Osteria Controvento
+# Gestionale prenotazioni — La cantina dei briganti
 
 Questo file riassume tutto ciò che è stato deciso durante la fase di progettazione (fatta in chat su claude.ai). Leggilo prima di scrivere codice. Rispondi sempre in **italiano**.
 
 ## Contesto
 
-- Ristorante piccolo (circa 10 tavoli), a Milano. "Osteria Controvento" è il nome usato nel prototipo: il titolare potrebbe sostituirlo con quello reale.
+- Ristorante piccolo (circa 10 tavoli), a Mola di Bari. Il nome reale è **La cantina dei briganti**; "Osteria Controvento" resta il nome usato nel prototipo di riferimento.
+- Dominio acquistato: `lacantinadeibriganti.com`. La casella `prenotazioni@lacantinadeibriganti.com` è su OVHcloud; Resend usa il dominio verificato solo per l'invio automatico.
 - Obiettivo: un gestionale di prenotazioni online moderno. Il sito web del ristorante verrà dopo e riutilizzerà la pagina di prenotazione di questo progetto.
 - Esiste un **prototipo funzionante** in `prototipo/osteria-controvento.html`: è il riferimento per flussi, testi, stile visivo e regole. Aprilo nel browser per vederlo. Le chiamate `window.claude.use("db")` al suo interno funzionano solo su claude.ai e vanno sostituite con il backend reale (fuori da claude.ai il prototipo gira in "demo locale" con dati in memoria).
 
@@ -12,7 +13,7 @@ Questo file riassume tutto ciò che è stato deciso durante la fase di progettaz
 
 - **Next.js** (App Router, TypeScript) — un unico progetto con la pagina pubblica di prenotazione e l'area staff.
 - **Supabase** — Postgres, autenticazione staff, Realtime per aggiornare la sala in tempo reale, Row Level Security.
-- **Resend** per le email, **Twilio** per gli SMS (in futuro anche WhatsApp).
+- **Resend** per le email di conferma quando il cliente inserisce l'indirizzo. Per chi non inserisce l'email, conferma sul sito e pulsante WhatsApp manuale per lo staff. SMS e WhatsApp automatici rinviati per contenere i costi.
 - **Vercel** per il deploy, con dominio del ristorante.
 - Stile: Tailwind CSS va bene, ma mantieni l'identità visiva del prototipo (vedi sotto).
 
@@ -22,7 +23,7 @@ Questo file riassume tutto ciò che è stato deciso durante la fase di progettaz
 Wizard in 3 passi + conferma:
 1. Data (da oggi a +60 giorni) e numero persone (1–8; oltre 8 → invito a telefonare).
 2. Servizio (Pranzo / Cena) e orario di arrivo. Un servizio senza tavoli liberi per quel numero di persone appare come "completo".
-3. Nome e cognome, cellulare (obbligatori), email (facoltativa), note (allergie, occasioni, seggiolone), consenso al promemoria SMS.
+3. Nome e cognome, cellulare (obbligatori), email (facoltativa), note (allergie, occasioni, seggiolone).
 4. Schermata di conferma con data, orario, persone, tavolo, codice prenotazione e riepilogo delle notifiche inviate.
 
 ### Area staff (con login)
@@ -64,15 +65,15 @@ Nota: il prototipo non blocca ancora il pranzo del lunedì; nella versione reale
 ## Notifiche
 
 Eventi:
-- **Conferma** (alla creazione): SMS se c'è il cellulare, email se c'è l'email. Da staff solo se l'opzione è attiva.
-- **Promemoria**: SMS (o email se manca il cellulare). Manuale dalla sala; in versione reale anche automatico il giorno stesso (es. ore 10) per chi ha dato il consenso.
-- **Annullamento**: SMS e/o email quando lo staff annulla.
+- **Conferma pubblica** (alla creazione): email automatica solo se il cliente indica un indirizzo. Senza email, conferma e codice sul sito; lo staff può aprire un messaggio WhatsApp precompilato e inviarlo manualmente.
+- **Promemoria**: per ora solo testo copiabile dallo staff. Invii automatici e SMS rinviati.
+- **Annullamento**: per ora lo staff contatta il cliente manualmente.
 
 Segnaposto nei modelli: `{nome}` (solo il nome proprio), `{data}` (es. "mer 23 set"), `{ora}`, `{persone}`, `{codice}` (ultimi 6 caratteri alfanumerici dell'id, maiuscoli), `{ristorante}`.
 
 Modelli predefiniti:
 - Conferma, oggetto email: `Prenotazione confermata — {ristorante}`
-- Conferma, testo email: `Ciao {nome},\n\nti confermiamo il tavolo per {persone} persone, {data} alle {ora}. Il tavolo è tuo per tutto il servizio.\n\nCodice prenotazione: {codice}\n\nPer modificare o annullare rispondi a questa email o chiamaci.\n\nA presto,\n{ristorante}`
+- Conferma, testo email: `Ciao {nome},\n\nti confermiamo il tavolo per {persone} persone, {data} alle {ora}. Il tavolo è tuo per tutto il servizio.\n\nCodice prenotazione: {codice}\n\nPer modificare o annullare contatta il ristorante.\n\nA presto,\n{ristorante}`
 - Conferma SMS: `{ristorante}: tavolo confermato per {persone}, {data} ore {ora}. Codice {codice}.`
 - Promemoria SMS: `Ciao {nome}, ti aspettiamo oggi alle {ora} per {persone}. Se non riesci a venire avvisaci. {ristorante}`
 - Annullamento SMS: `{ristorante}: la prenotazione di {data} alle {ora} è stata annullata. Per info chiamaci.`
@@ -104,7 +105,7 @@ Sicurezza: il pubblico può solo creare prenotazioni tramite una funzione/endpoi
 1. **Base**: progetto Next.js + Supabase, schema del database con migrazioni, dati iniziali dei 10 tavoli del prototipo.
 2. **Area staff con login**: sala, planimetria modificabile + vista lista, prenotazioni, CRM, realtime.
 3. **Prenotazione pubblica** con controllo di disponibilità lato server.
-4. **Notifiche reali**: Resend + Twilio, promemoria automatici programmati.
+4. **Notifiche**: conferma email con Resend per chi inserisce l'indirizzo; in assenza di email, conferma sul sito e WhatsApp manuale dallo staff. SMS e promemoria automatici rinviati.
 5. **Messa online** su Vercel con dominio, test in parallelo al metodo attuale.
 6. **Dopo**: sito web del ristorante che integra la pagina di prenotazione; eventualmente eventi speciali.
 
