@@ -14,7 +14,7 @@ Questo file riassume tutto ciò che è stato deciso durante la fase di progettaz
 - **Next.js** (App Router, TypeScript) — un unico progetto con la pagina pubblica di prenotazione e l'area staff.
 - **Supabase** — Postgres, autenticazione staff, Realtime per aggiornare la sala in tempo reale, Row Level Security.
 - **Resend** per le email di conferma quando il cliente inserisce l'indirizzo. Per chi non inserisce l'email, conferma sul sito e pulsante WhatsApp manuale per lo staff. SMS e WhatsApp automatici rinviati per contenere i costi.
-- **Netlify** per il deploy: scelto al posto di Vercel dopo le prove di costo. Il progetto è collegato a GitHub; il dominio OVH verrà associato dopo i controlli finali.
+- **Netlify** per il deploy: scelto al posto di Vercel dopo le prove di costo. Il progetto è collegato a GitHub ed è pubblico; il dominio OVH è associato usando la zona DNS di OVH, che continua a gestire la posta.
 - Stile: Tailwind CSS va bene, ma mantieni l'identità visiva del prototipo (vedi sotto).
 
 ## Funzionalità

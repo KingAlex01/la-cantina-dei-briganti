@@ -4,9 +4,17 @@ import { createServerSupabaseClient } from "../../../../lib/supabase/server";
 import { sendBookingConfirmationEmail } from "../../../../lib/notifications/email";
 import type { BookingConfirmation } from "../../../../lib/public-booking";
 
+const bookingOrigins = new Set([
+  "https://lacantinadeibriganti.com",
+  "https://www.lacantinadeibriganti.com",
+  "https://lacantinadeibriganti.netlify.app",
+]);
+
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) {
+  const requestUrl = new URL(request.url);
+  const localRequest = ["localhost", "127.0.0.1", "[::1]"].includes(requestUrl.hostname);
+  if (origin && !bookingOrigins.has(origin) && !(localRequest && origin === requestUrl.origin)) {
     return Response.json({ error: "Richiesta non consentita." }, { status: 403 });
   }
   if (!request.headers.get("content-type")?.includes("application/json")) {

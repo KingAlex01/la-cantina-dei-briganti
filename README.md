@@ -2,8 +2,9 @@
 
 Le fasi 1–4 sono implementate: base Next.js e Supabase, area staff,
 prenotazione pubblica e conferma email facoltativa con Resend. Netlify è
-collegato al ramo `main` di GitHub e serve il sito di prova. Prima di aprirlo
-ai clienti restano da collegare il dominio OVH e completare i controlli finali.
+collegato al ramo `main` di GitHub e il sito è pubblico su
+`https://lacantinadeibriganti.netlify.app`. Il dominio OVH è associato; restano
+da verificare il certificato HTTPS e il flusso completo di prenotazione online.
 
 ## Cartelle
 
@@ -47,6 +48,11 @@ Il primo account staff è stato invitato tramite Supabase. Aprire l’email di
 invito sullo stesso computer su cui gira `npm run dev`, scegliere una password
 personale nella pagina `/staff/accept` e poi accedere da `/staff`. La password
 non deve essere comunicata o inserita nei file del progetto.
+
+Per i futuri inviti, il **Site URL** di Supabase Auth è
+`https://lacantinadeibriganti.com` e `/staff/accept` sul dominio è tra gli URL
+di reindirizzamento autorizzati. La voce locale va mantenuta per le prove di
+sviluppo.
 
 La tabella `public.staff_users` è la lista degli account autorizzati. Anche se
 un utente Supabase si autentica, senza una riga in questa tabella non può vedere
@@ -114,22 +120,23 @@ progetto o in chat. Controllare l'anteprima di `db push --dry-run` prima del
 comando finale. Le migrazioni creano schema, permessi, tavoli e funzioni di
 prenotazione; non serve incollare SQL manualmente nella Dashboard.
 
-## Prima di aprire al pubblico
+## Controlli della messa online
 
 L'informativa in `/privacy` usa i dati legali forniti dal titolare e descrive la
 conservazione per 24 mesi dall'ultima prenotazione. La cancellazione è
 programmata ogni giorno nel database con Supabase Cron. Il modulo richiede un
 consenso separato quando il cliente scrive note facoltative, che possono
-contenere allergie. Far rileggere l'informativa al titolare prima di aprire il
-sito al pubblico; per le informazioni sanitarie raccolte dallo staff per
-telefono o di persona serve un comportamento coerente anche fuori dal sito.
+contenere allergie. Il sito è stato reso pubblico: resta da far rileggere
+l'informativa al titolare. Per le informazioni sanitarie raccolte dallo staff
+per telefono o di persona serve un comportamento coerente anche fuori dal sito.
 
 Netlify ospita il sito. Una Edge Function limita a 5 al minuto gli invii del
-modulo da uno stesso IP; verificare nel log del deploy che Netlify abbia
-applicato la regola. Occorre poi verificare prenotazione e conferma email sul
-sito online, configurare il dominio in Netlify e i relativi DNS su OVH senza
-toccare i record della posta, aggiornare gli URL di Supabase Auth e rendere il
-sito pubblico. SMS e promemoria automatici non sono attivi.
+modulo da uno stesso IP; il log del deploy `30dcbf3` conferma che Netlify ha
+applicato la regola. Il dominio è configurato in Netlify e nella zona DNS OVH
+senza cambiare i record della posta; gli URL di Supabase Auth sono aggiornati e
+il progetto Netlify è pubblico. Restano da verificare l'emissione del
+certificato HTTPS sul dominio e una prenotazione con conferma email sul sito
+pubblicato. SMS e promemoria automatici non sono attivi.
 
 Per provare e ricreare il database **locale** occorre anche Docker Desktop:
 
