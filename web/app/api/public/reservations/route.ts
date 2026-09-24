@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   }
   if (input.website) return Response.json({ error: "Richiesta non consentita." }, { status: 400 });
 
-  const { date, service, time, party, name, phone, email, notes } = input;
+  const { date, service, time, party, name, phone, email, notes, notesConsent } = input;
   const cleanedName = typeof name === "string" ? name.trim().replace(/\s+/g, " ") : "";
   const cleanedPhone = typeof phone === "string" ? phone.trim() : "";
   const cleanedEmail = typeof email === "string" ? email.trim() : "";
@@ -37,16 +37,16 @@ export async function POST(request: Request) {
       !/^\S+\s+\S+/.test(cleanedName) || cleanedName.length > 120 ||
       cleanedPhone.length > 30 || !/^\d{6,15}$/.test(phoneKey) ||
       cleanedEmail.length > 254 || (cleanedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanedEmail)) ||
-      cleanedNotes.length > 1000) {
+      cleanedNotes.length > 1000 || (cleanedNotes && notesConsent !== true)) {
     return Response.json({ error: "Controlla data, orario e dati di contatto." }, { status: 400 });
   }
 
   try {
     const client = createServerSupabaseClient();
-    const { data, error } = await client.rpc("create_public_reservation", {
+    const { data, error } = await client.rpc("create_public_reservation_with_notes_consent", {
       p_date: date, p_service: service, p_arrival_time: time, p_party_size: party,
       p_name: cleanedName, p_phone: cleanedPhone, p_email: cleanedEmail || null,
-      p_notes: cleanedNotes, p_reminder_opt_in: false,
+      p_notes: cleanedNotes, p_reminder_opt_in: false, p_notes_consent: notesConsent === true,
     });
     if (error) {
       if (error.message.includes("Nessun tavolo disponibile") || error.code === "23505") {

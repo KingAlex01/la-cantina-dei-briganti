@@ -1,14 +1,15 @@
 # La cantina dei briganti — gestionale prenotazioni
 
-Le fasi 1–3 sono implementate: base Next.js e Supabase, area staff e
-prenotazione pubblica. La conferma email della fase 4 è attiva in locale con
-Resend; la messa online resta una fase successiva.
+Le fasi 1–4 sono implementate: base Next.js e Supabase, area staff,
+prenotazione pubblica e conferma email facoltativa con Resend. Netlify è
+collegato al ramo `main` di GitHub e serve il sito di prova. Prima di aprirlo
+ai clienti restano da collegare il dominio OVH e completare i controlli finali.
 
 ## Cartelle
 
 - `web/`: nuova applicazione Next.js con App Router e TypeScript.
 - `supabase/migrations/`: struttura del database e dieci tavoli iniziali.
-- `osteria-controvento.html`: prototipo di riferimento.
+- `prototipo/osteria-controvento.html`: prototipo di riferimento.
 - `frontend/`, `backend/`, `docker-compose.yml`: esperimenti precedenti,
   conservati senza modifiche.
 
@@ -86,7 +87,7 @@ Per attivare l'invio:
 Le chiavi restano solo in `.env.local`, escluso da Git. Le prove locali hanno
 confermato sia l'invio con email sia l'assenza di invio senza email; le
 prenotazioni tecniche sono state eliminate. Per il deploy, aggiungere le
-variabili Resend anche alle impostazioni server di Vercel. WhatsApp resta
+variabili Resend anche alle impostazioni server di Netlify. WhatsApp resta
 manuale e non richiede un provider a pagamento.
 
 I contatori **Coperti**, **Prenotazioni**, **Tavoli liberi** e **Prossimo arrivo**
@@ -115,13 +116,20 @@ prenotazione; non serve incollare SQL manualmente nella Dashboard.
 
 ## Prima di aprire al pubblico
 
-Questa versione è pensata per le prove locali. Va completata l’informativa
-privacy con i dati legali e i recapiti del ristorante, il periodo di
-conservazione e le altre informazioni richieste. Le email funzionano in locale;
-per la pubblicazione occorrerà configurare le stesse variabili sul server.
-SMS e promemoria automatici non sono attivi.
-Occorre inoltre preparare protezioni anti-spam e la pubblicazione su Vercel
-prima di condividere il link con i clienti.
+L'informativa in `/privacy` usa i dati legali forniti dal titolare e descrive la
+conservazione per 24 mesi dall'ultima prenotazione. La cancellazione è
+programmata ogni giorno nel database con Supabase Cron. Il modulo richiede un
+consenso separato quando il cliente scrive note facoltative, che possono
+contenere allergie. Far rileggere l'informativa al titolare prima di aprire il
+sito al pubblico; per le informazioni sanitarie raccolte dallo staff per
+telefono o di persona serve un comportamento coerente anche fuori dal sito.
+
+Netlify ospita il sito. Una Edge Function limita a 5 al minuto gli invii del
+modulo da uno stesso IP; verificare nel log del deploy che Netlify abbia
+applicato la regola. Occorre poi verificare prenotazione e conferma email sul
+sito online, configurare il dominio in Netlify e i relativi DNS su OVH senza
+toccare i record della posta, aggiornare gli URL di Supabase Auth e rendere il
+sito pubblico. SMS e promemoria automatici non sono attivi.
 
 Per provare e ricreare il database **locale** occorre anche Docker Desktop:
 

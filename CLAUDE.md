@@ -14,7 +14,7 @@ Questo file riassume tutto ciò che è stato deciso durante la fase di progettaz
 - **Next.js** (App Router, TypeScript) — un unico progetto con la pagina pubblica di prenotazione e l'area staff.
 - **Supabase** — Postgres, autenticazione staff, Realtime per aggiornare la sala in tempo reale, Row Level Security.
 - **Resend** per le email di conferma quando il cliente inserisce l'indirizzo. Per chi non inserisce l'email, conferma sul sito e pulsante WhatsApp manuale per lo staff. SMS e WhatsApp automatici rinviati per contenere i costi.
-- **Vercel** per il deploy, con dominio del ristorante.
+- **Netlify** per il deploy: scelto al posto di Vercel dopo le prove di costo. Il progetto è collegato a GitHub; il dominio OVH verrà associato dopo i controlli finali.
 - Stile: Tailwind CSS va bene, ma mantieni l'identità visiva del prototipo (vedi sotto).
 
 ## Funzionalità
@@ -92,6 +92,8 @@ Ogni invio va registrato (canale, tipo, destinatario, oggetto, testo, esito, dat
 
 Sicurezza: il pubblico può solo creare prenotazioni tramite una funzione/endpoint server che verifica la disponibilità; non può leggere dati di altri clienti. Lo staff autenticato legge e scrive tutto. Attenzione al GDPR: informativa privacy nel form e dati clienti accessibili solo allo staff.
 
+Privacy: titolare **PARENTE SNC di Francesco e Vito Parente**, Via Nazario Sauro n. 32, 70042 Mola di Bari (BA), P. IVA 08788760729, contatto `prenotazioni@lacantinadeibriganti.com`. Il titolare ha scelto 24 mesi dall'ultima prenotazione per la conservazione della scheda cliente e delle prenotazioni collegate; una funzione SQL programmata le elimina. Le note facoltative del modulo pubblico richiedono consenso separato, registrato con la prenotazione. L'informativa in `/privacy` va riletta dal titolare prima dell'apertura al pubblico, in particolare per le note sanitarie raccolte dallo staff fuori dal sito e gli accordi con i fornitori.
+
 ## Identità visiva (dal prototipo)
 
 - Colori: verde pino `#1F3B32` / `#2B4E42`, ottone `#A9812F`, argilla `#A0503C`, salvia `#6C8A6F`, fondo carta `#EDE7D8` / `#F8F5EC`. Supporto al tema scuro.
@@ -106,7 +108,7 @@ Sicurezza: il pubblico può solo creare prenotazioni tramite una funzione/endpoi
 2. **Area staff con login**: sala, planimetria modificabile + vista lista, prenotazioni, CRM, realtime.
 3. **Prenotazione pubblica** con controllo di disponibilità lato server.
 4. **Notifiche**: conferma email con Resend per chi inserisce l'indirizzo; in assenza di email, conferma sul sito e WhatsApp manuale dallo staff. SMS e promemoria automatici rinviati.
-5. **Messa online** su Vercel con dominio, test in parallelo al metodo attuale.
+5. **Messa online** su Netlify con dominio OVH, test in parallelo al metodo attuale.
 6. **Dopo**: sito web del ristorante che integra la pagina di prenotazione; eventualmente eventi speciali.
 
 ## Modo di lavorare

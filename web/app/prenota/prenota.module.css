@@ -58,6 +58,7 @@
 .hint, .privacy { color: #667168; font-size: .8rem; line-height: 1.65; }
 .hint { margin: 20px 0 0; }
 .privacy { margin: 20px 0 0; }
+.privacy a { color: #79581e; text-decoration: underline; }
 .services { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
 .services button { min-height: 85px; padding: 14px; border: 1px solid #d7d1c4; border-radius: 11px; color: #2b3930; background: #fff; cursor: pointer; text-align: left; }
 .services strong, .services small { display: block; }

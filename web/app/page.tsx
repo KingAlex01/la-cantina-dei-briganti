@@ -42,7 +42,10 @@ export default function Home() {
 
       <footer className={styles.footer}>
         <span>Una sala, tante storie da raccontare.</span>
-        <Link href="/staff" className={styles.staffLink}>Accesso staff <span aria-hidden="true">↗</span></Link>
+        <div className={styles.footerLinks}>
+          <Link href="/privacy" className={styles.staffLink}>Privacy</Link>
+          <Link href="/staff" className={styles.staffLink}>Accesso staff <span aria-hidden="true">↗</span></Link>
+        </div>
       </footer>
     </main>
   );
