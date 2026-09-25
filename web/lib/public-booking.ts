@@ -14,7 +14,6 @@ export type BookingConfirmation = {
   name: string;
   table_name: string;
   code: string;
-  email_status: "non_richiesta" | "inviata" | "non_configurata" | "fallita";
 };
 
 export function todayInRome() {

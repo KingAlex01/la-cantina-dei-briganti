@@ -221,30 +221,26 @@ export default function BookingPage() {
             <input type="checkbox" checked={notesConsent} required onChange={(event) => setNotesConsent(event.target.checked)} />
             <span>Acconsento all’uso delle note facoltative, comprese eventuali informazioni su allergie o intolleranze, solo per preparare la mia visita. Posso prenotare anche senza note.</span>
           </label>}
-          <p className={styles.privacy}>Useremo i tuoi dati per gestire la prenotazione. Saranno visibili allo staff del ristorante. Se inserisci l’email, proveremo a inviarti una conferma: nella prossima schermata vedrai se è partita. Senza email, trovi la conferma e il codice qui sul sito. <Link href="/privacy">Leggi l’informativa privacy.</Link></p>
+          <p className={styles.privacy}>Useremo i tuoi dati per gestire la richiesta, che sarà visibile allo staff del ristorante. Il tavolo sarà confermato solo dopo l’approvazione dello staff. Se inserisci l’email, riceverai la conferma quando la richiesta sarà accettata. <Link href="/privacy">Leggi l’informativa privacy.</Link></p>
           <div className={styles.actions}>
             <button className={styles.secondary} type="button" onClick={() => { setStep(2); setError(""); }}>Indietro</button>
-            <button className={styles.primary} type="submit" disabled={busy}>{busy ? "Salvataggio…" : "Conferma prenotazione"}</button>
+            <button className={styles.primary} type="submit" disabled={busy}>{busy ? "Invio…" : "Invia richiesta"}</button>
           </div>
         </form>}
 
         {step === 4 && confirmation && <div className={styles.confirmed}>
           <span className={styles.check} aria-hidden="true">✓</span>
-          <span className={styles.kicker}>Prenotazione confermata</span>
-          <h2>Il tavolo è vostro.</h2>
-          <p>Vi aspettiamo, {confirmation.name.split(" ")[0]}.</p>
+          <span className={styles.kicker}>Richiesta inviata</span>
+          <h2>In attesa di approvazione.</h2>
+          <p>Grazie, {confirmation.name.split(" ")[0]}. Lo staff esaminerà la tua richiesta.</p>
           <dl className={styles.details}>
             <div><dt>Data</dt><dd>{dateLabel(confirmation.date)}</dd></div>
             <div><dt>Arrivo</dt><dd>{confirmation.service} alle {confirmation.arrival_time.slice(0, 5)}</dd></div>
             <div><dt>Persone</dt><dd>{confirmation.party_size}</dd></div>
             <div><dt>Tavolo</dt><dd>{confirmation.table_name}</dd></div>
           </dl>
-          <div className={styles.code}>Codice prenotazione <strong>{confirmation.code}</strong></div>
-          <p className={styles.privacy} role="status">{confirmation.email_status === "inviata"
-            ? `Conserva questo codice. Abbiamo inviato la conferma a ${email.trim()}.`
-            : confirmation.email_status === "non_richiesta"
-              ? "Conserva questo codice. Non hai inserito un’email: la conferma è qui sul sito. Nessun messaggio è stato inviato."
-              : "Conserva questo codice. La prenotazione è confermata, ma l’email non è stata inviata. Mostra questo codice al ristorante se serve."}</p>
+          <div className={styles.code}>Codice richiesta <strong>{confirmation.code}</strong></div>
+          <p className={styles.privacy} role="status">Conserva questo codice. Il tavolo non è ancora confermato.{email.trim() ? ` Se la richiesta sarà accettata, proveremo a inviarti un'email a ${email.trim()}.` : " Non hai indicato un'email: contatta il ristorante per conoscere l'esito."}</p>
           <button className={styles.secondary} type="button" onClick={restart}>Nuova prenotazione</button>
         </div>}
       </section>

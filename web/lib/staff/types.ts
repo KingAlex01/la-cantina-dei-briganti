@@ -1,5 +1,5 @@
 export type Service = "pranzo" | "cena";
-export type ReservationStatus = "confermata" | "arrivato" | "no-show" | "annullata";
+export type ReservationStatus = "in_attesa" | "confermata" | "arrivato" | "no-show" | "annullata";
 export type TableShape = "round" | "square" | "rect";
 
 export type DiningTable = {
@@ -27,6 +27,7 @@ export type Reservation = {
   table_id: string;
   customer_id: string | null;
   status: ReservationStatus;
+  approved_at: string | null;
   source: "online" | "staff";
   code: string;
   created_at: string;
@@ -58,6 +59,7 @@ export const SERVICE_TIMES: Record<Service, string[]> = {
 };
 
 export const STATUS_LABEL: Record<ReservationStatus, string> = {
+  in_attesa: "In attesa",
   confermata: "Confermata",
   arrivato: "Arrivati",
   "no-show": "No-show",

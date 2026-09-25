@@ -6,6 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, PointerEvent } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseClient } from "../../lib/supabase/client";
+import { MESSAGE_TEMPLATES, renderMessageTemplate } from "../../lib/notifications/templates";
+import NotificationsPanel from "./notifications-panel";
 import {
   CUSTOMER_TAGS, SERVICE_TIMES, STATUS_LABEL, dateLabel, defaultServiceInRome, readableError,
   timeLabel, todayInRome,
@@ -18,6 +20,7 @@ import styles from "./staff.module.css";
 type Access = "loading" | "login" | "denied" | "granted";
 type BookingSeed = { tableId?: string; customer?: Customer };
 type FloorDraft = Pick<DiningTable, "id" | "name" | "capacity" | "area" | "shape" | "pos_x" | "pos_y">;
+type TableDrag = { id: string; pointerId: number; startX: number; startY: number; posX: number; posY: number; moved: boolean };
 
 const field = styles.field;
 
@@ -31,7 +34,7 @@ export default function StaffPage() {
   const [realtimeReady, setRealtimeReady] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [tab, setTab] = useState<"sala" | "clienti">("sala");
+  const [tab, setTab] = useState<"sala" | "clienti" | "notifiche">("sala");
   const [date, setDate] = useState(todayInRome);
   const [service, setService] = useState<Service>(defaultServiceInRome);
   const [tables, setTables] = useState<DiningTable[]>([]);
@@ -54,7 +57,7 @@ export default function StaffPage() {
   const [historyCount, setHistoryCount] = useState(0);
   const [historyVersion, setHistoryVersion] = useState(0);
   const [notesDraft, setNotesDraft] = useState("");
-  const dragId = useRef<string | null>(null);
+  const tableDrag = useRef<TableDrag | null>(null);
   const loadSequence = useRef(0);
   const monday = new Date(`${date}T12:00:00Z`).getUTCDay() === 1;
   const customerId = selectedCustomer?.id;
@@ -88,8 +91,8 @@ export default function StaffPage() {
       fetchAllRows<Customer>(client, "customers"),
       fetchAllRows<CustomerStats>(client, "customer_stats"),
       client.from("reservations").select("*").eq("source", "online")
-        .gte("date", todayInRome()).in("status", ["confermata", "arrivato"])
-        .order("created_at", { ascending: false }).limit(3),
+        .gte("date", todayInRome()).eq("status", "in_attesa")
+        .order("created_at", { ascending: false }).limit(10),
     ]);
     if (sequence !== loadSequence.current) return;
     const queryError = tableResult.error ?? reservationResult.error ?? customerResult.error ?? statsResult.error ?? onlineResult.error;
@@ -102,7 +105,7 @@ export default function StaffPage() {
       setStats(statsResult.data);
       setSelectedReservation((current) => current ? ((reservationResult.data ?? []) as Reservation[]).find((item) => item.id === current.id) ?? null : null);
       setSelectedCustomer((current) => current ? customerResult.data.find((item) => item.id === current.id) ?? null : null);
-      setError("");
+      if (!quiet) setError("");
     }
     setLoading(false);
   }, [client, date, service]);
@@ -138,7 +141,7 @@ export default function StaffPage() {
   }, [client, customerId, historyCount, historyVersion, access]);
 
   const occupied = useMemo(() => new Map(
-    reservations.filter((r) => r.status === "confermata" || r.status === "arrivato")
+    reservations.filter((r) => r.status === "in_attesa" || r.status === "confermata" || r.status === "arrivato")
       .map((r) => [r.table_id, r]),
   ), [reservations]);
   const activeReservations = useMemo(() => reservations.filter((r) => r.status === "confermata" || r.status === "arrivato"), [reservations]);
@@ -149,6 +152,9 @@ export default function StaffPage() {
     `${r.name} ${r.phone ?? ""} ${r.code}`.toLowerCase().includes(search.toLowerCase().trim()),
   );
   const statsByCustomer = useMemo(() => new Map(stats.map((item) => [item.customer_id, item])), [stats]);
+  const statusLabel = (reservation: Reservation) =>
+    reservation.status === "annullata" && reservation.source === "online" && !reservation.approved_at
+      ? "Rifiutata" : STATUS_LABEL[reservation.status];
   const filteredCustomers = customers.filter((customer) => {
     const detail = statsByCustomer.get(customer.id);
     const matchesSearch = `${customer.name} ${customer.phone} ${customer.email ?? ""}`
@@ -215,23 +221,80 @@ export default function StaffPage() {
     await loadData(true);
   }
 
+  function startTableDrag(event: PointerEvent<HTMLButtonElement>, table: FloorDraft) {
+    if (!editing || !event.isPrimary || event.button !== 0) return;
+    tableDrag.current = {
+      id: table.id, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY,
+      posX: table.pos_x, posY: table.pos_y, moved: false,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
   function movePointer(event: PointerEvent<HTMLButtonElement>, id: string) {
-    if (!editing || dragId.current !== id) return;
+    const drag = tableDrag.current;
+    if (!editing || drag?.id !== id || drag.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - drag.startX;
+    const deltaY = event.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(deltaX, deltaY) < 4) return;
+    drag.moved = true;
     const rect = event.currentTarget.parentElement?.getBoundingClientRect();
     if (!rect) return;
     patchDraft(id, {
-      pos_x: Math.round(Math.max(6, Math.min(94, (event.clientX - rect.left) / rect.width * 100))),
-      pos_y: Math.round(Math.max(9, Math.min(91, (event.clientY - rect.top) / rect.height * 100))),
+      pos_x: Math.round(Math.max(6, Math.min(94, drag.posX + deltaX / rect.width * 100)) * 10) / 10,
+      pos_y: Math.round(Math.max(9, Math.min(91, drag.posY + deltaY / rect.height * 100)) * 10) / 10,
     });
   }
 
+  function stopTableDrag(event: PointerEvent<HTMLButtonElement>) {
+    if (tableDrag.current?.pointerId === event.pointerId) tableDrag.current = null;
+  }
+
   async function changeStatus(reservation: Reservation, status: ReservationStatus) {
-    if (!client) return;
+    if (!client || reservation.status === "in_attesa") return;
+    const patch: { status: ReservationStatus; table_id?: string } = { status };
+    if (status === "confermata" && reservation.status !== "arrivato" && occupied.has(reservation.table_id)) {
+      const replacement = freeTables.filter((table) => table.capacity >= reservation.party_size)
+        .sort((a, b) => a.capacity - b.capacity || a.name.localeCompare(b.name))[0];
+      if (!replacement) {
+        setError("Nessun tavolo libero abbastanza grande: sposta prima un'altra prenotazione.");
+        return;
+      }
+      patch.table_id = replacement.id;
+    }
     setBusy(true); setError("");
-    const { error: updateError } = await client.from("reservations").update({ status }).eq("id", reservation.id);
+    const { error: updateError } = await client.from("reservations").update(patch).eq("id", reservation.id);
     setBusy(false);
     if (updateError) setError(readableError(updateError.message));
-    else { setSelectedReservation(null); setNotice(`Prenotazione ${STATUS_LABEL[status].toLowerCase()}.`); await loadData(true); }
+    else { setSelectedReservation(null); setNotice(patch.table_id ? "Prenotazione ripristinata e assegnata a un tavolo libero." : `Prenotazione ${STATUS_LABEL[status].toLowerCase()}.`); await loadData(true); }
+  }
+
+  async function decideReservation(reservation: Reservation, action: "accept" | "reject") {
+    if (busy || reservation.status !== "in_attesa") return;
+    setBusy(true); setError(""); setNotice("");
+    try {
+      const { data: sessionData, error: sessionError } = await client.auth.getSession();
+      if (sessionError || !sessionData.session) throw new Error("Sessione scaduta. Accedi di nuovo.");
+      const response = await fetch("/api/staff/reservations/decision", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${sessionData.session.access_token}`,
+        },
+        body: JSON.stringify({ reservationId: reservation.id, action }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(result?.error ?? "Errore del server durante la decisione. Aggiorna la Sala e riprova.");
+      setSelectedReservation(null);
+      if (action === "reject") setNotice("Richiesta rifiutata. Contatta il cliente se necessario.");
+      else if (result?.email_status === "inviata") setNotice("Prenotazione confermata. Email di conferma inviata al cliente.");
+      else if (result?.email_status === "non_richiesta") setNotice("Prenotazione confermata. Il cliente non ha indicato un'email: avvisalo manualmente.");
+      else setError("Prenotazione confermata, ma l'invio dell'email non è confermato. Controlla le Notifiche e avvisa il cliente manualmente.");
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Non riesco a gestire la richiesta.");
+    } finally {
+      setBusy(false);
+      await loadData(true);
+    }
   }
 
   async function moveReservation(reservation: Reservation, tableId: string) {
@@ -244,9 +307,11 @@ export default function StaffPage() {
   }
 
   async function copyReminder(reservation: Reservation) {
-    const firstName = reservation.name.trim().split(/\s+/)[0];
-    const message = `Ciao ${firstName}, ti aspettiamo ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)} per ${reservation.party_size} ${reservation.party_size === 1 ? "persona" : "persone"}. Se non riesci a venire avvisaci. La cantina dei briganti`;
     try {
+      const { data, error: templateError } = await client.from("message_templates")
+        .select("content").eq("key", "reminderText").maybeSingle();
+      if (templateError) throw templateError;
+      const message = renderMessageTemplate(data?.content || MESSAGE_TEMPLATES.reminderText, reservation);
       await navigator.clipboard.writeText(message);
       setNotice("Testo del promemoria copiato. Nessun SMS è stato inviato.");
     } catch {
@@ -315,6 +380,7 @@ export default function StaffPage() {
         <nav className={styles.nav} aria-label="Area staff">
           <button className={tab === "sala" ? styles.activeNav : ""} onClick={() => setTab("sala")}>Sala e prenotazioni</button>
           <button className={tab === "clienti" ? styles.activeNav : ""} onClick={() => setTab("clienti")}>Clienti</button>
+          <button className={tab === "notifiche" ? styles.activeNav : ""} onClick={() => setTab("notifiche")}>Notifiche</button>
         </nav>
         {error && <div className={styles.errorBanner} role="alert">{error}<button onClick={() => setError("")} aria-label="Chiudi errore">×</button></div>}
         {notice && <div className={styles.noticeBanner} role="status">{notice}<button onClick={() => setNotice("")} aria-label="Chiudi avviso">×</button></div>}
@@ -333,11 +399,11 @@ export default function StaffPage() {
           </div>
 
           {recentOnline.length > 0 && <section className={styles.onlinePanel} aria-label="Prenotazioni online recenti">
-            <div className={styles.onlinePanelHead}><strong>Prenotazioni online recenti</strong><span>Seleziona una prenotazione per vedere il suo servizio in Sala.</span></div>
+            <div className={styles.onlinePanelHead}><strong>Richieste online in attesa</strong><span>Seleziona una richiesta per accettarla o rifiutarla nella Sala.</span></div>
             <div className={styles.onlineItems}>{recentOnline.map((item) => <button key={item.id} type="button"
               className={date === item.date && service === item.service ? styles.onlineCurrent : ""}
               onClick={() => { setDate(item.date); setService(item.service); setSearch(""); setTab("sala"); }}>
-              <strong>{item.name}</strong><span>{dateLabel(item.date)} · {item.service} {timeLabel(item.arrival_time)} · {item.party_size} {item.party_size === 1 ? "persona" : "persone"}</span>
+              <strong>{item.name} · In attesa</strong><span>{dateLabel(item.date)} · {item.service} {timeLabel(item.arrival_time)} · {item.party_size} {item.party_size === 1 ? "persona" : "persone"}</span>
               <span className={styles.onlineAction}>{date === item.date && service === item.service ? "Servizio mostrato" : "Apri servizio →"}</span>
             </button>)}</div>
           </section>}
@@ -371,9 +437,9 @@ export default function StaffPage() {
                   const state = editing ? "editing" : !res ? "free" : res.status === "arrivato" ? "arrived" : "booked";
                   return <button key={table.id} type="button" className={`${styles.tableMarker} ${styles[table.shape]} ${styles[state]} ${selectedTable === table.id ? styles.chosen : ""}`}
                     style={{ left: `${table.pos_x}%`, top: `${table.pos_y}%` }}
-                    onPointerDown={(e) => { if (editing) { dragId.current = table.id; e.currentTarget.setPointerCapture(e.pointerId); } }}
-                    onPointerMove={(e) => movePointer(e, table.id)} onPointerUp={() => { dragId.current = null; }}
-                    onPointerCancel={() => { dragId.current = null; }}
+                    onPointerDown={(e) => startTableDrag(e, table)}
+                    onPointerMove={(e) => movePointer(e, table.id)} onPointerUp={stopTableDrag}
+                    onPointerCancel={stopTableDrag} onLostPointerCapture={stopTableDrag}
                     onClick={() => editing ? setSelectedTable(table.id) : res ? setSelectedReservation(res) : setBooking({ tableId: table.id })}
                     aria-label={`Tavolo ${table.name}, ${table.capacity} posti, ${state === "free" ? "libero" : state === "editing" ? "in modifica" : state === "arrived" ? "cliente arrivato" : "prenotato"}`}>
                     <strong>{table.name}</strong><small>{res && !editing ? timeLabel(res.arrival_time) : `${table.capacity} posti`}</small>
@@ -411,18 +477,19 @@ export default function StaffPage() {
                 {filteredReservations.length ? filteredReservations.map((res) => {
                   const table = tables.find((item) => item.id === res.table_id);
                   const customer = res.customer_id ? statsByCustomer.get(res.customer_id) : undefined;
-                  return <article key={res.id} className={styles.reservationCard}>
-                    <div className={styles.reservationTop}><strong>{timeLabel(res.arrival_time)} <span>· {table?.name ?? "Tavolo"}</span></strong><span className={`${styles.status} ${styles[`status_${res.status.replace("-", "_")}`]}`}>{STATUS_LABEL[res.status]}</span></div>
+                  const customerRecord = res.customer_id ? customers.find((item) => item.id === res.customer_id) : undefined;
+                  return <article key={res.id} className={`${styles.reservationCard} ${res.status === "in_attesa" ? styles.pendingReservation : ""}`}>
+                    <div className={styles.reservationTop}><strong>{timeLabel(res.arrival_time)} <span>· {table?.name ?? "Tavolo"}</span></strong><span className={`${styles.status} ${styles[`status_${res.status.replace("-", "_")}`]}`}>{statusLabel(res)}</span></div>
                     <button className={styles.reservationName} onClick={() => setSelectedReservation(res)}>{res.name}</button>
-                    <p>{res.party_size} {res.party_size === 1 ? "persona" : "persone"}{res.source === "staff" ? " · staff" : ""}{customer ? ` · ${customer.visits ? `${customer.visits} visite` : "Prima volta"}` : ""}</p>
+                    <p>{res.party_size} {res.party_size === 1 ? "persona" : "persone"}{res.source === "staff" ? " · staff" : ""}{customer ? ` · ${customer.visits ? `${customer.visits} visite` : "Prima volta"}` : ""}{customer?.no_shows ? ` · ${customer.no_shows} no-show` : ""}{customerRecord?.tags.length ? ` · ${customerRecord.tags.join(", ")}` : ""}</p>
                     {res.notes && <p className={styles.reservationNote}>{res.notes}</p>}
-                    <div className={styles.cardActions}>{res.status === "confermata" ? <><button onClick={() => changeStatus(res, "arrivato")}>Arrivati</button><button onClick={() => copyReminder(res)}>Copia promemoria</button><button onClick={() => changeStatus(res, "no-show")}>No-show</button><button onClick={() => changeStatus(res, "annullata")}>Annulla</button></> : <button onClick={() => changeStatus(res, "confermata")}>Riporta a confermata</button>}</div>
+                    <div className={styles.cardActions}>{res.status === "in_attesa" ? <><button disabled={busy} onClick={() => decideReservation(res, "accept")}>Accetta</button><button disabled={busy} onClick={() => decideReservation(res, "reject")}>Rifiuta</button></> : res.status === "confermata" ? <><button onClick={() => changeStatus(res, "arrivato")}>Arrivati</button><button onClick={() => copyReminder(res)}>Copia promemoria</button><button onClick={() => changeStatus(res, "no-show")}>No-show</button><button onClick={() => changeStatus(res, "annullata")}>Annulla</button></> : (res.source !== "online" || res.approved_at) ? <button onClick={() => changeStatus(res, "confermata")}>Riporta a confermata</button> : null}</div>
                   </article>;
                 }) : <p className={styles.empty}>{search ? "Nessuna prenotazione trovata." : "Ancora nessuna prenotazione per questo servizio."}</p>}
               </div>
             </section>
           </div>
-        </> : <>
+        </> : tab === "clienti" ? <>
           <div className={styles.pageHead}><div><span className={styles.kicker}>Relazioni che durano</span><h1>Clienti</h1><p>{customers.length} schede clienti</p></div></div>
           <div className={styles.crmGrid}>
             <section className={styles.panel} aria-label="Elenco clienti">
@@ -446,26 +513,26 @@ export default function StaffPage() {
                 <textarea className={styles.notes} rows={4} value={notesDraft} onChange={(e) => setNotesDraft(e.target.value)} placeholder="Preferenze, allergie, tavolo preferito…" />
                 <div className={styles.alignRight}><button className={styles.primaryButton} disabled={busy} onClick={() => saveCustomer({ notes: notesDraft })}>Salva note</button></div>
                 <h3 className={styles.sectionTitle}>Storico prenotazioni</h3>
-                {customerHistory.length ? <div className={styles.history}>{customerHistory.map((res) => <div key={res.id}><strong>{res.date}</strong><span>{res.service} · {timeLabel(res.arrival_time)} · {res.party_size} pers.</span><span>{STATUS_LABEL[res.status]}</span></div>)}</div> : <p className={styles.empty}>Nessuna prenotazione registrata.</p>}
+                {customerHistory.length ? <div className={styles.history}>{customerHistory.map((res) => <div key={res.id}><strong>{res.date}</strong><span>{res.service} · {timeLabel(res.arrival_time)} · {res.party_size} pers.</span><span>{statusLabel(res)}</span></div>)}</div> : <p className={styles.empty}>Nessuna prenotazione registrata.</p>}
                 {customerHistory.length >= historyCount + 20 && <button className={styles.textButton} onClick={() => setHistoryCount((count) => count + 20)}>Mostra altre</button>}
               </> : <p className={styles.empty}>Seleziona un cliente per vedere storico, note e preferenze.</p>}
             </section>
           </div>
-        </>}
+        </> : <NotificationsPanel client={client} />}
       </div>
 
-      {booking && client && <BookingModal client={client} date={date} service={service} tables={tables} occupied={occupied} customers={customers} seed={booking} onClose={() => setBooking(null)} onSaved={async () => { setBooking(null); setNotice("Prenotazione salvata."); await loadData(true); }} />}
+      {booking && client && <BookingModal client={client} date={date} service={service} tables={tables} occupied={occupied} customers={customers} seed={booking} onClose={() => setBooking(null)} onSaved={async (message) => { setBooking(null); setNotice(message); await loadData(true); }} />}
       {selectedReservation && <div className={styles.modalBackdrop} onMouseDown={(e) => { if (e.target === e.currentTarget) setSelectedReservation(null); }}><section className={styles.modal} role="dialog" aria-modal="true" aria-label="Dettaglio prenotazione">
         <div className={styles.modalHead}><div><span className={styles.kicker}>Codice {selectedReservation.code}</span><h2>{selectedReservation.name}</h2></div><button className={styles.close} onClick={() => setSelectedReservation(null)} aria-label="Chiudi">×</button></div>
         <p>{dateLabel(selectedReservation.date)} · {selectedReservation.service} ore {timeLabel(selectedReservation.arrival_time)} · {selectedReservation.party_size} persone</p>
         <p>{selectedReservation.phone || "Cellulare non indicato"}{selectedReservation.email ? ` · ${selectedReservation.email}` : ""}</p>
         {selectedReservation.notes && <p className={styles.detailNote}>{selectedReservation.notes}</p>}
         <label className={field}>Tavolo<select value={selectedReservation.table_id} onChange={(e) => moveReservation(selectedReservation, e.target.value)} disabled={busy}>{tables.map((table) => <option key={table.id} value={table.id} disabled={occupied.has(table.id) && table.id !== selectedReservation.table_id}>{table.name} · {table.capacity} posti{table.capacity < selectedReservation.party_size ? " (piccolo)" : ""}</option>)}</select></label>
-        <p className={styles.muted}>Le modifiche non inviano ancora messaggi automatici al cliente.</p>
+        <p className={styles.muted}>{selectedReservation.status === "in_attesa" ? "L'accettazione invia l'email di conferma se il cliente ha indicato un indirizzo." : "Le altre modifiche non inviano messaggi automatici al cliente."}</p>
         <div className={styles.modalActions}>
           {selectedReservation.status === "confermata" && whatsappConfirmationUrl(selectedReservation) &&
             <a className={styles.secondaryButton} href={whatsappConfirmationUrl(selectedReservation)!} target="_blank" rel="noopener noreferrer">Apri conferma su WhatsApp ↗</a>}
-          {selectedReservation.status === "confermata" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "arrivato")}>Segna arrivati</button><button className={styles.secondaryButton} onClick={() => copyReminder(selectedReservation)}>Copia promemoria</button><button className={styles.secondaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "no-show")}>No-show</button><button className={styles.dangerText} disabled={busy} onClick={() => changeStatus(selectedReservation, "annullata")}>Annulla prenotazione</button></> : <button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "confermata")}>Riporta a confermata</button>}
+          {selectedReservation.status === "in_attesa" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => decideReservation(selectedReservation, "accept")}>Accetta</button><button className={styles.dangerText} disabled={busy} onClick={() => decideReservation(selectedReservation, "reject")}>Rifiuta</button></> : selectedReservation.status === "confermata" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "arrivato")}>Segna arrivati</button><button className={styles.secondaryButton} onClick={() => copyReminder(selectedReservation)}>Copia promemoria</button><button className={styles.secondaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "no-show")}>No-show</button><button className={styles.dangerText} disabled={busy} onClick={() => changeStatus(selectedReservation, "annullata")}>Annulla prenotazione</button></> : (selectedReservation.source !== "online" || selectedReservation.approved_at) ? <button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "confermata")}>Riporta a confermata</button> : null}
         </div>
         {selectedReservation.status === "confermata" && whatsappConfirmationUrl(selectedReservation) && <p className={styles.muted}>WhatsApp apre il messaggio già pronto. Controllalo e premi Invia nell’app.</p>}
       </section></div>}
@@ -491,7 +558,7 @@ async function fetchAllRows<T>(client: SupabaseClient, table: "customers" | "cus
 function BookingModal({ client, date, service, tables, occupied, customers, seed, onClose, onSaved }: {
   client: SupabaseClient; date: string; service: Service; tables: DiningTable[];
   occupied: Map<string, Reservation>; customers: Customer[]; seed: BookingSeed;
-  onClose: () => void; onSaved: () => Promise<void>;
+  onClose: () => void; onSaved: (message: string) => Promise<void>;
 }) {
   const [name, setName] = useState(seed.customer?.name ?? "");
   const [phone, setPhone] = useState(seed.customer?.phone ?? "");
@@ -500,6 +567,7 @@ function BookingModal({ client, date, service, tables, occupied, customers, seed
   const [party, setParty] = useState(2);
   const [time, setTime] = useState(SERVICE_TIMES[service][0]);
   const [tableId, setTableId] = useState(seed.tableId ?? "");
+  const [sendEmail, setSendEmail] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const eligible = tables.filter((table) => !occupied.has(table.id));
@@ -508,15 +576,40 @@ function BookingModal({ client, date, service, tables, occupied, customers, seed
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError("");
-    const { error: saveError } = await client.rpc("create_staff_reservation", {
+    const { data, error: saveError } = await client.rpc("create_staff_reservation", {
       p_date: date, p_service: service, p_arrival_time: time,
       p_party_size: party, p_name: name.trim(), p_phone: phone.trim() || null,
       p_email: email.trim() || null, p_notes: notes.trim(), p_table_id: tableId || null,
       p_reminder_opt_in: false,
     });
+    if (saveError) {
+      setBusy(false);
+      setError(readableError(saveError.message));
+      return;
+    }
+    let message = "Prenotazione salvata. Nessuna email inviata.";
+    if (sendEmail && email.trim() && data?.id) {
+      try {
+        const { data: sessionData } = await client.auth.getSession();
+        if (!sessionData.session) throw new Error("sessione scaduta");
+        const response = await fetch("/api/staff/confirmation", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionData.session.access_token}`,
+          },
+          body: JSON.stringify({ reservationId: data.id }),
+        });
+        const result = await response.json();
+        message = response.ok && result.status === "inviata"
+          ? "Prenotazione salvata. Il servizio email ha accettato la conferma."
+          : "Prenotazione salvata, ma la conferma email non è stata inviata. Contatta il cliente manualmente.";
+      } catch {
+        message = "Prenotazione salvata, ma la conferma email non è stata inviata. Contatta il cliente manualmente.";
+      }
+    }
     setBusy(false);
-    if (saveError) setError(readableError(saveError.message));
-    else await onSaved();
+    await onSaved(message);
   }
 
   return <div className={styles.modalBackdrop} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}><section className={styles.modal} role="dialog" aria-modal="true" aria-label="Nuova prenotazione">
@@ -534,6 +627,8 @@ function BookingModal({ client, date, service, tables, occupied, customers, seed
       {chosen && chosen.capacity < party && <p className={styles.warning}>Questo tavolo ha meno posti delle persone indicate.</p>}
       {matches.length > 0 && <p className={styles.muted}>Cliente già presente: {matches[0].name}</p>}
       <label className={field}>Note della prenotazione<textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Allergie, occasione speciale, seggiolone…" /></label>
+      <label className={styles.checkbox}><input type="checkbox" checked={sendEmail} disabled={!email.trim()} onChange={(e) => setSendEmail(e.target.checked)} />
+        Invia conferma email al cliente {email.trim() ? "" : "(inserisci un’email per attivare)"}</label>
       {error && <p className={styles.error} role="alert">{error}</p>}
       <div className={styles.modalActions}><button type="button" className={styles.secondaryButton} onClick={onClose}>Annulla</button><button className={styles.primaryButton} type="submit" disabled={busy}>{busy ? "Salvataggio…" : "Salva prenotazione"}</button></div>
     </form>

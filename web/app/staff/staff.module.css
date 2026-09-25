@@ -71,8 +71,9 @@
 .floor { position: relative; min-width: 620px; height: clamp(390px, 39vw, 510px); overflow: hidden; border: 1px solid #d8d6c9; border-radius: 12px; background: radial-gradient(circle at 70% 25%, #fdfbf4, #eee9dc); }
 .floor::before { position: absolute; inset: 18px; border: 1px dashed #d9d2c3; border-radius: 7px; content: ""; pointer-events: none; }
 .floor::after { position: absolute; top: 0; bottom: 0; left: 71%; width: 1px; background: #ded8ca; content: ""; pointer-events: none; }
-.floorEditing { touch-action: none; }
-.tableMarker { position: absolute; z-index: 1; display: flex; width: 66px; height: 66px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; transform: translate(-50%, -50%); border: 1.5px solid; color: var(--ink); cursor: pointer; box-shadow: 0 5px 12px #18251b17; touch-action: none; }
+.tableMarker { position: absolute; z-index: 1; display: flex; width: 66px; height: 66px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; transform: translate(-50%, -50%); border: 1.5px solid; color: var(--ink); cursor: pointer; box-shadow: 0 5px 12px #18251b17; }
+.floorEditing .tableMarker { touch-action: none; user-select: none; cursor: grab; }
+.floorEditing .tableMarker:active { cursor: grabbing; }
 .tableMarker strong { font-size: .85rem; }
 .tableMarker small { font-size: .6rem; }
 .round { border-radius: 50%; }
@@ -103,10 +104,11 @@
 .search { margin-bottom: 14px; }
 .reservationList { display: flex; max-height: 650px; flex-direction: column; gap: 10px; overflow-y: auto; }
 .reservationCard { padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: #fffdf8; }
+.pendingReservation { border-color: #b98336; border-left-width: 4px; background: #fff8e8; }
 .reservationTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .reservationTop strong { color: #997128; font-size: .8rem; }.reservationTop strong span { color: #7c806f; }
 .status { width: max-content; padding: 4px 8px; border-radius: 999px; font-size: .69rem; font-weight: 700; white-space: nowrap; }
-.freeStatus { color: #32613e; background: #dfeddd; }.bookedStatus, .status_confermata { color: #8c621c; background: #f8eac9; }.arrivedStatus, .status_arrivato { color: #9b4e35; background: #f3dcd1; }.status_no_show, .status_annullata { color: #6d716e; background: #e9e9e4; }
+.freeStatus { color: #32613e; background: #dfeddd; }.bookedStatus, .status_confermata { color: #8c621c; background: #f8eac9; }.status_in_attesa { color: #753e10; background: #ffe4b5; }.arrivedStatus, .status_arrivato { color: #9b4e35; background: #f3dcd1; }.status_no_show, .status_annullata { color: #6d716e; background: #e9e9e4; }
 .reservationName { display: block; margin: 12px 0 3px; padding: 0; border: 0; color: var(--pine); background: none; cursor: pointer; font-family: var(--font-fraunces), Georgia, serif; font-size: 1.27rem; text-align: left; }
 .reservationName:hover { text-decoration: underline; }
 .reservationCard p { margin: 4px 0; color: var(--muted); font-size: .79rem; }
@@ -114,6 +116,7 @@
 .cardActions { gap: 13px; margin-top: 12px; }
 .cardActions button { padding: 4px 0; border: 0; color: var(--pine); background: none; cursor: pointer; font-size: .75rem; font-weight: 700; }
 .cardActions button:hover { text-decoration: underline; }
+.cardActions button:disabled { opacity: .5; cursor: wait; }
 .empty { padding: 32px 10px; color: var(--muted); font-size: .88rem; text-align: center; }
 .customerList { display: flex; max-height: 700px; flex-direction: column; gap: 8px; overflow-y: auto; margin-top: 15px; }
 .customerRow { display: flex; flex-direction: column; gap: 2px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: #fffdf8; cursor: pointer; text-align: left; }
@@ -180,6 +183,8 @@
   .nav { border-color: #3a5342; }.nav button { color: #b4bfaf; }.nav .activeNav { color: #f5efe1; }
   .panel, .stat, .authCard, .modal { background: var(--surface); }.panel, .stat { box-shadow: none; }
   .controls input, .field input, .field select, .field textarea, .tableRow input, .tableRow select, .search, .notes, .secondaryButton, .customerRow, .reservationCard, .tableRow, .inspector { color: var(--ink); background: #223a2e; }
+  .pendingReservation { border-color: #b98336; background: #3b3326; }
+  .status_in_attesa { color: #ffe4b5; background: #71502c; }
   .segmented { background: #16271e; }.segmented .selected { color: #f5efe1; background: #345344; }
   .secondaryButton, .textButton, .cardActions button, .reservationName { color: #d7be82; }.reservationCard p, .customerRow span, .customerRow small, .authCard p { color: var(--muted); }
   .floor { border-color: #395344; background: radial-gradient(circle at 70% 25%, #263d30, #1a3024); }.floor::before, .floor::after { border-color: #435847; background-color: transparent; }

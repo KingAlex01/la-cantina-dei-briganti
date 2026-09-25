@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import InviteRedirect from "./invite-redirect";
+import WhatsAppFloatingButton from "./WhatsAppFloatingButton";
 import styles from "./page.module.css";
 
 export default function Home() {
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${styles.withWhatsApp}`}>
       <InviteRedirect />
       <div className={styles.grain} aria-hidden="true" />
       <header className={styles.header}>
@@ -47,6 +48,7 @@ export default function Home() {
           <Link href="/staff" className={styles.staffLink}>Accesso staff <span aria-hidden="true">↗</span></Link>
         </div>
       </footer>
+      <WhatsAppFloatingButton phoneNumber="+39 345 168 0145" />
     </main>
   );
 }

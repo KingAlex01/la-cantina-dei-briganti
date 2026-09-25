@@ -1,0 +1,38 @@
+.button {
+  position: fixed;
+  z-index: 10;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid #e8d4a4;
+  border-radius: 50%;
+  color: #f8f5ec;
+  background: #2b4e42;
+  box-shadow: 0 5px 18px #0c2018a6, inset 0 0 0 2px #a9812f;
+  text-decoration: none;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.button svg { width: 31px; height: 31px; }
+.right { right: calc(20px + env(safe-area-inset-right, 0px)); }
+.left { left: calc(20px + env(safe-area-inset-left, 0px)); }
+
+.button:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: #1f3b32;
+  box-shadow: 0 9px 24px #0c2018ba, inset 0 0 0 2px #a9812f;
+}
+
+.button:focus-visible { outline: 3px solid #f8f5ec; outline-offset: 4px; }
+
+@media (max-width: 600px) {
+  .button { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+  .right { right: calc(18px + env(safe-area-inset-right, 0px)); }
+  .left { left: calc(18px + env(safe-area-inset-left, 0px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+}

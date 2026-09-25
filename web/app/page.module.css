@@ -186,6 +186,8 @@
   font-size: .84rem;
 }
 
+.withWhatsApp .footer { padding-bottom: calc(106px + env(safe-area-inset-bottom, 0px)); }
+
 .footerLinks { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px 24px; }
 
 .staffLink {
