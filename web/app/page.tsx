@@ -48,7 +48,7 @@ export default function Home() {
           <Link href="/staff" className={styles.staffLink}>Accesso staff <span aria-hidden="true">↗</span></Link>
         </div>
       </footer>
-      <WhatsAppFloatingButton phoneNumber="+39 345 168 0145" />
+      <WhatsAppFloatingButton phoneNumber="+39 345 168 0145" side="left" />
     </main>
   );
 }
