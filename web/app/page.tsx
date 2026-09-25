@@ -39,6 +39,7 @@ export default function Home() {
           numero di persone: al resto pensiamo noi.
         </p>
         <Link href="/prenota" className={styles.bookingLink}>Prenota un tavolo <span aria-hidden="true">↗</span></Link>
+        <Link href="/menu" className={styles.menuLink}>Scopri il menù <span aria-hidden="true">↗</span></Link>
       </section>
 
       <footer className={styles.footer}>
