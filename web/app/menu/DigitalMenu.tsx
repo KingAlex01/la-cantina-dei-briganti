@@ -70,7 +70,7 @@ export default function DigitalMenu({ categories, items, sourceLanguage, preview
     </div>
 
     <div className={styles.content}>
-      {preview && <p className={styles.previewNotice} role="status">Anteprima locale dai PDF di maggio 2026. Il database Supabase non è ancora aggiornato.</p>}
+      {preview && <p className={styles.previewNotice} role="status">Anteprima locale dai dati del progetto. Supabase non è stato aggiornato.</p>}
       <div className={styles.intro}><span>Mola di Bari · La cantina dei briganti</span><h1>{copy.menu}</h1><div className={styles.ornament} aria-hidden="true">✦</div>
         {items.length > 0 && language !== sourceLanguage && !items.some((item) => item.name[language]) && <p className={styles.translationNotice}>{copy.untranslated}</p>}
       </div>

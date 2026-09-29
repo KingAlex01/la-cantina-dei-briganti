@@ -6,8 +6,8 @@ import "@fontsource/public-sans/latin-700.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "La cantina dei briganti",
-  description: "Prenotazioni online della Cantina dei Briganti",
+  title: "La Cantina dei Briganti | Ristorante a Mola di Bari",
+  description: "La cucina dei fratelli Parente nel cuore di Mola di Bari: prodotti di famiglia, menù stagionale e un tavolo senza fretta. Scopri il menù e prenota online.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

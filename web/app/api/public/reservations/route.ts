@@ -1,4 +1,4 @@
-import { SERVICE_TIMES, validDate, validPartySize } from "../../../../lib/public-booking";
+import { SERVICE_TIMES, isServiceOpenOnDate, validDate, validPartySize } from "../../../../lib/public-booking";
 import type { Service } from "../../../../lib/public-booking";
 import { createServerSupabaseClient } from "../../../../lib/supabase/server";
 import { sendStaffNewRequestEmail } from "../../../../lib/notifications/email";
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   if (!validDate(date) || !validPartySize(party) ||
       (service !== "pranzo" && service !== "cena") ||
       typeof time !== "string" || !SERVICE_TIMES[service as Service].includes(time) ||
-      (service === "pranzo" && new Date(`${date}T12:00:00Z`).getUTCDay() === 1) ||
+      !isServiceOpenOnDate(date as string, service as Service) ||
       !/^\S+\s+\S+/.test(cleanedName) || cleanedName.length > 120 ||
       cleanedPhone.length > 30 || !/^\d{6,15}$/.test(phoneKey) ||
       cleanedEmail.length > 254 || (cleanedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanedEmail)) ||

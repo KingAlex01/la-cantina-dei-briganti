@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  SERVICE_TIMES, addDays, currentTimeInRome, dateLabel, todayInRome, validDate,
+  SERVICE_TIMES, addDays, currentTimeInRome, dateLabel, isServiceOpenOnDate, todayInRome, validDate,
 } from "../../lib/public-booking";
 import type { Availability, BookingConfirmation, Service } from "../../lib/public-booking";
 import styles from "./prenota.module.css";
@@ -34,8 +34,8 @@ export default function BookingPage() {
 
   function serviceStatus(item: Service) {
     if (checking) return "Verifica…";
+    if (!isServiceOpenOnDate(date, item)) return "Chiuso";
     if (availability[item]) return "Disponibile";
-    if (item === "pranzo" && new Date(`${date}T12:00:00Z`).getUTCDay() === 1) return "Chiuso il lunedì";
     if (date === today && SERVICE_TIMES[item].every((slot) => slot <= now)) return "Orari terminati";
     return "Completo";
   }

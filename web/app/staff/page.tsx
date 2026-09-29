@@ -8,6 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseClient } from "../../lib/supabase/client";
 import { MESSAGE_TEMPLATES, renderMessageTemplate } from "../../lib/notifications/templates";
 import NotificationsPanel from "./notifications-panel";
+import { isServiceOpenOnDate } from "../../lib/public-booking";
 import {
   CUSTOMER_TAGS, SERVICE_TIMES, STATUS_LABEL, dateLabel, defaultServiceInRome, readableError,
   timeLabel, todayInRome,
@@ -59,7 +60,7 @@ export default function StaffPage() {
   const [notesDraft, setNotesDraft] = useState("");
   const tableDrag = useRef<TableDrag | null>(null);
   const loadSequence = useRef(0);
-  const monday = new Date(`${date}T12:00:00Z`).getUTCDay() === 1;
+  const closedService = !isServiceOpenOnDate(date, service);
   const customerId = selectedCustomer?.id;
 
   useEffect(() => {
@@ -390,11 +391,19 @@ export default function StaffPage() {
             <div><span className={styles.kicker}>Gestione del servizio</span><h1>Sala</h1><p>{dateLabel(date)}</p></div>
             <div className={styles.controls}>
               <label className={styles.srOnly} htmlFor="staff-date">Data del servizio</label>
-              <input id="staff-date" type="date" value={date} onChange={(e) => { if (!e.target.value) return; setDate(e.target.value); if (new Date(`${e.target.value}T12:00:00Z`).getUTCDay() === 1) setService("cena"); }} />
+              <input id="staff-date" type="date" value={date} onChange={(e) => {
+                if (!e.target.value) return;
+                const nextDate = e.target.value;
+                setDate(nextDate);
+                if (!isServiceOpenOnDate(nextDate, service)) {
+                  if (isServiceOpenOnDate(nextDate, "pranzo")) setService("pranzo");
+                  else if (isServiceOpenOnDate(nextDate, "cena")) setService("cena");
+                }
+              }} />
               <div className={styles.segmented} aria-label="Servizio">
-                {(["pranzo", "cena"] as Service[]).map((item) => <button key={item} disabled={item === "pranzo" && monday} title={item === "pranzo" && monday ? "Il pranzo del lunedì è chiuso" : undefined} className={service === item ? styles.selected : ""} onClick={() => setService(item)}>{item === "pranzo" ? "Pranzo" : "Cena"}</button>)}
+                {(["pranzo", "cena"] as Service[]).map((item) => <button key={item} title={!isServiceOpenOnDate(date, item) ? "Servizio normalmente chiuso" : undefined} className={service === item ? styles.selected : ""} onClick={() => setService(item)}>{item === "pranzo" ? "Pranzo" : "Cena"}</button>)}
               </div>
-              <button className={styles.primaryButton} onClick={() => setBooking({})}>+ Nuova prenotazione</button>
+              <button className={styles.primaryButton} disabled={closedService} onClick={() => setBooking({})}>+ Nuova prenotazione</button>
             </div>
           </div>
 
@@ -408,7 +417,7 @@ export default function StaffPage() {
             </button>)}</div>
           </section>}
 
-          <p className={styles.serviceContext}>I dati qui sotto riguardano {service === "pranzo" ? "il pranzo" : "la cena"} di {dateLabel(date)}.</p>
+          <p className={styles.serviceContext}>I dati qui sotto riguardano {service === "pranzo" ? "il pranzo" : "la cena"} di {dateLabel(date)}.{closedService ? " Il ristorante è normalmente chiuso per questo servizio." : ""}</p>
 
           <div className={styles.statGrid}>
             <Stat label="Coperti" value={activeReservations.reduce((sum, r) => sum + r.party_size, 0)} />
@@ -440,7 +449,7 @@ export default function StaffPage() {
                     onPointerDown={(e) => startTableDrag(e, table)}
                     onPointerMove={(e) => movePointer(e, table.id)} onPointerUp={stopTableDrag}
                     onPointerCancel={stopTableDrag} onLostPointerCapture={stopTableDrag}
-                    onClick={() => editing ? setSelectedTable(table.id) : res ? setSelectedReservation(res) : setBooking({ tableId: table.id })}
+                    onClick={() => editing ? setSelectedTable(table.id) : res ? setSelectedReservation(res) : !closedService && setBooking({ tableId: table.id })}
                     aria-label={`Tavolo ${table.name}, ${table.capacity} posti, ${state === "free" ? "libero" : state === "editing" ? "in modifica" : state === "arrived" ? "cliente arrivato" : "prenotato"}`}>
                     <strong>{table.name}</strong><small>{res && !editing ? timeLabel(res.arrival_time) : `${table.capacity} posti`}</small>
                   </button>;
@@ -449,7 +458,7 @@ export default function StaffPage() {
                 {(editing ? draft : tables).map((table) => {
                   const res = occupied.get(table.id);
                   return <div key={table.id} className={styles.tableRow}>
-                    {editing ? <><input aria-label="Nome tavolo" value={table.name} onChange={(e) => patchDraft(table.id, { name: e.target.value })} /><input aria-label="Posti" type="number" min="1" max="20" value={table.capacity} onChange={(e) => patchDraft(table.id, { capacity: Number(e.target.value) })} /><input aria-label="Zona" value={table.area} onChange={(e) => patchDraft(table.id, { area: e.target.value })} /><select aria-label="Forma" value={table.shape} onChange={(e) => patchDraft(table.id, { shape: e.target.value as DiningTable["shape"] })}><option value="round">Rotondo</option><option value="square">Quadrato</option><option value="rect">Rettangolare</option></select><button className={styles.dangerText} onClick={() => setDraft((current) => current.filter((item) => item.id !== table.id))}>Elimina</button></> : <><strong>{table.name}</strong><span>{table.capacity} posti · {table.area}</span><span className={`${styles.status} ${res ? res.status === "arrivato" ? styles.arrivedStatus : styles.bookedStatus : styles.freeStatus}`}>{res ? STATUS_LABEL[res.status] : "Libero"}</span><button className={styles.textButton} onClick={() => res ? setSelectedReservation(res) : setBooking({ tableId: table.id })}>{res ? "Dettaglio" : "Assegna"}</button></>}
+                    {editing ? <><input aria-label="Nome tavolo" value={table.name} onChange={(e) => patchDraft(table.id, { name: e.target.value })} /><input aria-label="Posti" type="number" min="1" max="20" value={table.capacity} onChange={(e) => patchDraft(table.id, { capacity: Number(e.target.value) })} /><input aria-label="Zona" value={table.area} onChange={(e) => patchDraft(table.id, { area: e.target.value })} /><select aria-label="Forma" value={table.shape} onChange={(e) => patchDraft(table.id, { shape: e.target.value as DiningTable["shape"] })}><option value="round">Rotondo</option><option value="square">Quadrato</option><option value="rect">Rettangolare</option></select><button className={styles.dangerText} onClick={() => setDraft((current) => current.filter((item) => item.id !== table.id))}>Elimina</button></> : <><strong>{table.name}</strong><span>{table.capacity} posti · {table.area}</span><span className={`${styles.status} ${res ? res.status === "arrivato" ? styles.arrivedStatus : styles.bookedStatus : styles.freeStatus}`}>{res ? STATUS_LABEL[res.status] : "Libero"}</span><button className={styles.textButton} disabled={!res && closedService} onClick={() => res ? setSelectedReservation(res) : setBooking({ tableId: table.id })}>{res ? "Dettaglio" : "Assegna"}</button></>}
                   </div>;
                 })}
               </div>}
@@ -504,7 +513,7 @@ export default function StaffPage() {
             </section>
             <section className={styles.panel} aria-label="Scheda cliente">
               {selectedCustomer ? <>
-                <div className={styles.panelHead}><div><h2>{selectedCustomer.name}</h2><p className={styles.muted}>{selectedCustomer.phone}{selectedCustomer.email ? ` · ${selectedCustomer.email}` : ""}</p></div><button className={styles.secondaryButton} onClick={() => { setTab("sala"); setBooking({ customer: selectedCustomer }); }}>Nuova prenotazione</button></div>
+                <div className={styles.panelHead}><div><h2>{selectedCustomer.name}</h2><p className={styles.muted}>{selectedCustomer.phone}{selectedCustomer.email ? ` · ${selectedCustomer.email}` : ""}</p></div><button className={styles.secondaryButton} disabled={closedService} onClick={() => { setTab("sala"); setBooking({ customer: selectedCustomer }); }}>Nuova prenotazione</button></div>
                 <div className={styles.miniStats}><Stat label="Visite" value={selectedCustomerStats?.visits ?? 0} /><Stat label="Coperti accolti" value={selectedCustomerStats?.covers ?? 0} /><Stat label="No-show" value={selectedCustomerStats?.no_shows ?? 0} /><Stat label="Prossima" value={selectedCustomerStats?.next_date ?? "—"} small /></div>
                 <p className={styles.customerStatsHint}>Visite e coperti accolti si aggiornano dopo “Segna arrivati”.</p>
                 <h3 className={styles.sectionTitle}>Etichette</h3>

@@ -1,11 +1,26 @@
 export type Service = "pranzo" | "cena";
 
+export const OPENING_HOURS: ReadonlyArray<{ day: string; hours: string; pranzo: boolean; cena: boolean }> = [
+  { day: "Domenica", hours: "12:30–15:00", pranzo: true, cena: false },
+  { day: "Lunedì", hours: "12:30–14:30 · 19:00–22:30", pranzo: true, cena: true },
+  { day: "Martedì", hours: "12:30–14:30 · 19:00–22:30", pranzo: true, cena: true },
+  { day: "Mercoledì", hours: "12:30–14:30 · 19:00–22:30", pranzo: true, cena: true },
+  { day: "Giovedì", hours: "Chiuso", pranzo: false, cena: false },
+  { day: "Venerdì", hours: "12:30–14:30 · 19:00–22:30", pranzo: true, cena: true },
+  { day: "Sabato", hours: "12:30–14:30 · 19:00–22:30", pranzo: true, cena: true },
+];
+
 export const SERVICE_TIMES: Record<Service, string[]> = {
   pranzo: ["12:30", "13:00", "13:30", "14:00"],
   cena: ["19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"],
 };
 
 export type Availability = Record<Service, boolean>;
+
+export function isServiceOpenOnDate(date: string, service: Service) {
+  const day = new Date(`${date}T12:00:00Z`).getUTCDay();
+  return Number.isInteger(day) && (OPENING_HOURS[day]?.[service] ?? false);
+}
 export type BookingConfirmation = {
   date: string;
   service: Service;

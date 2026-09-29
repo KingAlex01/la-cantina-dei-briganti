@@ -10,7 +10,24 @@ export const metadata: Metadata = {
   description: "Scopri il menù della Cantina dei Briganti a Mola di Bari.",
 };
 
+function localPreview() {
+  const categories: MenuCategory[] = currentMenu.map((category) => ({
+    id: `preview-category-${category.position}`, position: category.position, name: category.name,
+  }));
+  const items: MenuItem[] = currentMenu.flatMap((category) => category.items.map((item) => ({
+    id: `preview-item-${category.position}-${item.position}`,
+    category_id: `preview-category-${category.position}`,
+    position: item.position,
+    name: item.name,
+    description: "description" in item ? item.description : {},
+    price: item.price,
+    allergen_codes: item.allergens,
+  }))) as MenuItem[];
+  return <DigitalMenu sourceLanguage="it" categories={categories} items={items} preview />;
+}
+
 export default async function MenuPage() {
+  if (process.env.NODE_ENV === "development") return localPreview();
   await connection();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -25,22 +42,6 @@ export default async function MenuPage() {
       .order("position").limit(500),
   ]);
   const error = catalogResult.error ?? categoryResult.error ?? itemResult.error;
-  if (process.env.NODE_ENV === "development" &&
-      (error?.code === "PGRST205" || (!error && !catalogResult.data))) {
-    const categories: MenuCategory[] = currentMenu.map((category) => ({
-      id: `preview-category-${category.position}`, position: category.position, name: category.name,
-    }));
-    const items: MenuItem[] = currentMenu.flatMap((category) => category.items.map((item) => ({
-      id: `preview-item-${category.position}-${item.position}`,
-      category_id: `preview-category-${category.position}`,
-      position: item.position,
-      name: item.name,
-      description: "description" in item ? item.description : {},
-      price: item.price,
-      allergen_codes: item.allergens,
-    }))) as MenuItem[];
-    return <DigitalMenu sourceLanguage="it" categories={categories} items={items} preview />;
-  }
   if (error?.code === "PGRST205") {
     return <DigitalMenu sourceLanguage="it" categories={[]} items={[]} />;
   }

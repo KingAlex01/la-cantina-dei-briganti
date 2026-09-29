@@ -26,7 +26,9 @@
       {"position":2,"price":16,"allergens":[1],"name":{"it":"Filetto di ombrina con guazzetto e crostini","en":"Shiadrum fillet with seafood broth and croutons","es":"Filete de corvina con guazzetto y costrones de pan","fr":"Filet d'ombrine avec guazzetto et croûtons"}},
       {"position":3,"price":16,"allergens":[1,5],"name":{"it":"Tataki di tonno con maionese EVO al pomodoro e chips di patate","en":"Tuna tataki with tomato EVO oil mayonnaise and potato chips","es":"Tataki de atún con mayonesa de aceite de oliva EVO al tomate y chips de patata","fr":"Tataki de thon avec mayonnaise à l'huile d'olive EVO au tomate et chips"}},
       {"position":4,"price":16,"allergens":[],"name":{"it":"Stracotto di guancia di maialino al Primitivo con bietolina","en":"Suckling pig cheek braised in Primitivo wine with swiss chard","es":"Carrillera de cochinillo estofada al vino Primitivo con acelgas","fr":"Joue de porcelet braisée au vin Primitivo et blettes"}},
-      {"position":5,"price":18,"allergens":[2],"name":{"it":"Tagliata di manzo con rucola e scaglie di pecorino","en":"Sliced beef steak with rocket and pecorino cheese flakes","es":"Tagliata de ternera con rúcula y lascas de queso pecorino","fr":"Tagliata de bœuf avec roquette et copeaux de fromage pecorino"}},
-      {"position":6,"price":6,"allergens":[],"name":{"it":"Dessert dello chef","en":"Chef's dessert","es":"Postres del chef","fr":"Desserts du chef"}}
+      {"position":5,"price":18,"allergens":[2],"name":{"it":"Tagliata di manzo con rucola e scaglie di pecorino","en":"Sliced beef steak with rocket and pecorino cheese flakes","es":"Tagliata de ternera con rúcula y lascas de queso pecorino","fr":"Tagliata de bœuf avec roquette et copeaux de fromage pecorino"}}
+    ]},
+    {"position":4,"name":{"it":"Dessert","en":"Desserts","es":"Postres","fr":"Desserts"},"items":[
+      {"position":1,"price":6,"allergens":[],"name":{"it":"Dessert dello chef","en":"Chef's dessert","es":"Postres del chef","fr":"Desserts du chef"}}
     ]}
   ]
