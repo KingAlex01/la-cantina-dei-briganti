@@ -292,11 +292,19 @@
   .visitInner { grid-template-columns: 1fr; gap: 55px; }
 }
 
+@media (max-width: 1100px) {
+  .header { padding-top: clamp(16px, 4svh, 36px); }
+  .logo { width: clamp(175px, min(55vw, 28svh), 230px); }
+  .hero {
+    justify-content: flex-start;
+    padding-top: clamp(16px, 3.5svh, 32px);
+    padding-bottom: clamp(32px, 6svh, 66px);
+  }
+}
+
 @media (max-width: 600px) {
-  .header { gap: 16px; padding-top: clamp(10px, 2svh, 18px); }
+  .header { gap: 16px; }
   .headerLine { width: 13vw; }
-  .logo { width: clamp(135px, 36vw, 175px); }
-  .hero { padding-top: clamp(8px, 2svh, 20px); padding-bottom: clamp(20px, 4svh, 40px); }
   .eyebrow { gap: 9px; letter-spacing: .13em; }
   .title { font-size: clamp(2.8rem, 10vw, 4rem); }
   .divider { margin: 20px 0 16px; }
