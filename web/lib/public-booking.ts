@@ -21,6 +21,18 @@ export function isServiceOpenOnDate(date: string, service: Service) {
   const day = new Date(`${date}T12:00:00Z`).getUTCDay();
   return Number.isInteger(day) && (OPENING_HOURS[day]?.[service] ?? false);
 }
+
+export function availableArrivalTimes(date: string, service: Service, today = todayInRome(), now = currentTimeInRome()) {
+  if (date < today || !isServiceOpenOnDate(date, service)) return [];
+  return SERVICE_TIMES[service].filter((slot) => date !== today || slot > now);
+}
+
+export function bookableServices(date: string, availability: Availability, today = todayInRome(), now = currentTimeInRome()): Availability {
+  return {
+    pranzo: availability.pranzo === true && availableArrivalTimes(date, "pranzo", today, now).length > 0,
+    cena: availability.cena === true && availableArrivalTimes(date, "cena", today, now).length > 0,
+  };
+}
 export type BookingConfirmation = {
   date: string;
   service: Service;

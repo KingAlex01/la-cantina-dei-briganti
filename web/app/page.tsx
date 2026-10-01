@@ -3,11 +3,17 @@ import Link from "next/link";
 import InviteRedirect from "./invite-redirect";
 import WhatsAppFloatingButton from "./WhatsAppFloatingButton";
 import { OPENING_HOURS } from "../lib/public-booking";
+import { BOOKING_RESPONSE_NOTE, RESTAURANT, restaurantStructuredData } from "../lib/restaurant";
+import { pageMetadata } from "../lib/site-metadata";
 import styles from "./page.module.css";
+
+export const metadata = pageMetadata("/", "La Cantina dei Briganti | Ristorante a Mola di Bari",
+  "La cucina dei fratelli Parente nel cuore di Mola di Bari: prodotti di famiglia, menù stagionale e un tavolo senza fretta. Scopri il menù e prenota online.");
 
 export default function Home() {
   return (
     <main className={styles.page}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantStructuredData).replace(/</g, "\\u003c") }} />
       <InviteRedirect />
       <div className={styles.grain} aria-hidden="true" />
       <div className={styles.introScreen}>
@@ -41,7 +47,7 @@ export default function Home() {
           il tavolo resta vostro per tutto il servizio.
         </p>
         <Link href="/prenota" className={styles.bookingLink}>Prenota un tavolo <span aria-hidden="true">↗</span></Link>
-        <p className={styles.bookingNote}>La richiesta sarà confermata dopo l’approvazione dello staff.</p>
+        <p className={styles.bookingNote}>La richiesta sarà confermata dopo l’approvazione dello staff. {BOOKING_RESPONSE_NOTE}</p>
         <Link href="/menu" className={styles.menuLink}>Scopri il menù <span aria-hidden="true">↗</span></Link>
       </section>
       </div>
@@ -71,12 +77,12 @@ export default function Home() {
           <div className={styles.visitDetails}>
             <span className={styles.sectionKicker}>Vieni a trovarci</span>
             <h2 id="visit-title">Ci trovi a Mola.<br /><em>Ti aspettiamo.</em></h2>
-            <address>Vico Morgese 1<br />70042 Mola di Bari (BA)</address>
+            <address>{RESTAURANT.address.streetAddress}<br />{RESTAURANT.address.postalCode} {RESTAURANT.address.addressLocality} ({RESTAURANT.address.addressRegion})</address>
             <a className={styles.directionsLink} href="https://www.google.com/maps/search/?api=1&query=Vico%20Morgese%201%2C%2070042%20Mola%20di%20Bari" target="_blank" rel="noopener noreferrer">Come arrivare <span aria-hidden="true">↗</span></a>
-            <a className={styles.phoneLink} href="tel:+393451680145">+39 345 168 0145</a>
+            <a className={styles.phoneLink} href={RESTAURANT.phoneHref}>{RESTAURANT.phone}</a>
             <div className={styles.socialLinks} aria-label="Profili social">
-              <a href="https://www.instagram.com/la.cantinadeibriganti/" target="_blank" rel="noopener noreferrer">Instagram ↗</a>
-              <a href="https://www.facebook.com/lacantinadeibriganti2017" target="_blank" rel="noopener noreferrer">Facebook ↗</a>
+              <a href={RESTAURANT.socials[0]} target="_blank" rel="noopener noreferrer">Instagram ↗</a>
+              <a href={RESTAURANT.socials[1]} target="_blank" rel="noopener noreferrer">Facebook ↗</a>
             </div>
           </div>
           <div className={styles.hours}>
@@ -98,7 +104,7 @@ export default function Home() {
           <Link href="/staff" className={styles.footerLink}>Accesso staff <span aria-hidden="true">↗</span></Link>
         </div>
       </footer>
-      <WhatsAppFloatingButton phoneNumber="+39 345 168 0145" side="right" />
+      <WhatsAppFloatingButton phoneNumber={RESTAURANT.phone} side="right" />
     </main>
   );
 }

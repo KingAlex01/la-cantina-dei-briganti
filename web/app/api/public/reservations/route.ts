@@ -1,4 +1,4 @@
-import { SERVICE_TIMES, isServiceOpenOnDate, validDate, validPartySize } from "../../../../lib/public-booking";
+import { SERVICE_TIMES, availableArrivalTimes, isServiceOpenOnDate, validDate, validPartySize } from "../../../../lib/public-booking";
 import type { Service } from "../../../../lib/public-booking";
 import { createServerSupabaseClient } from "../../../../lib/supabase/server";
 import { sendStaffNewRequestEmail } from "../../../../lib/notifications/email";
@@ -51,6 +51,10 @@ export async function POST(request: Request) {
       cleanedEmail.length > 254 || (cleanedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanedEmail)) ||
       cleanedNotes.length > 1000 || (cleanedNotes && notesConsent !== true)) {
     return Response.json({ error: "Controlla data, orario e dati di contatto." }, { status: 400 });
+  }
+
+  if (!availableArrivalTimes(date as string, service as Service).includes(time as string)) {
+    return Response.json({ error: "L’orario scelto è già passato. Scegline un altro." }, { status: 409 });
   }
 
   try {

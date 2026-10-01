@@ -4,7 +4,7 @@
 import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 
-const supportedLanguages = ["it", "en", "es", "fr", "de"];
+const supportedLanguages = ["it", "en", "es", "fr"];
 const categories = JSON.parse(await readFile(new URL("../lib/menu/current-menu.json", import.meta.url), "utf8"));
 if (!Array.isArray(categories) || categories.length === 0) throw new Error("Nessuna categoria nel menù.");
 

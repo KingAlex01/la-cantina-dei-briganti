@@ -285,8 +285,8 @@ export default function StaffPage() {
       });
       const result = await response.json().catch(() => null);
       if (!response.ok) throw new Error(result?.error ?? "Errore del server durante la decisione. Aggiorna la Sala e riprova.");
-      setSelectedReservation(null);
-      if (action === "reject") setNotice("Richiesta rifiutata. Contatta il cliente se necessario.");
+      setSelectedReservation(action === "reject" ? { ...reservation, status: "annullata" } : null);
+      if (action === "reject") setNotice("Richiesta rifiutata. Comunica l’esito al cliente per telefono o WhatsApp: il rifiuto non invia un’email automatica.");
       else if (result?.email_status === "inviata") setNotice("Prenotazione confermata. Email di conferma inviata al cliente.");
       else if (result?.email_status === "non_richiesta") setNotice("Prenotazione confermata. Il cliente non ha indicato un'email: avvisalo manualmente.");
       else setError("Prenotazione confermata, ma l'invio dell'email non è confermato. Controlla le Notifiche e avvisa il cliente manualmente.");
@@ -320,13 +320,17 @@ export default function StaffPage() {
     }
   }
 
-  function whatsappConfirmationUrl(reservation: Reservation) {
+  function whatsappDecisionUrl(reservation: Reservation) {
+    const rejected = reservation.source === "online" && reservation.status === "annullata" && !reservation.approved_at;
+    if (reservation.status !== "confermata" && !rejected) return null;
     const digits = (reservation.phone ?? "").replace(/\D/g, "").replace(/^00/, "");
     const number = /^3\d{9}$/.test(digits) ? `39${digits}` : /^393\d{9}$/.test(digits) ? digits : "";
     if (!number) return null;
     const firstName = reservation.name.trim().split(/\s+/)[0];
     const people = `${reservation.party_size} ${reservation.party_size === 1 ? "persona" : "persone"}`;
-    const message = `Ciao ${firstName}, la tua prenotazione da La cantina dei briganti è confermata per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Ti aspettiamo!`;
+    const message = rejected
+      ? `Ciao ${firstName}, purtroppo non possiamo accettare la tua richiesta da La cantina dei briganti per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Contattaci per valutare insieme un’altra data o un altro orario.`
+      : `Ciao ${firstName}, la tua prenotazione da La cantina dei briganti è confermata per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Ti aspettiamo!`;
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   }
 
@@ -539,11 +543,12 @@ export default function StaffPage() {
         <label className={field}>Tavolo<select value={selectedReservation.table_id} onChange={(e) => moveReservation(selectedReservation, e.target.value)} disabled={busy}>{tables.map((table) => <option key={table.id} value={table.id} disabled={occupied.has(table.id) && table.id !== selectedReservation.table_id}>{table.name} · {table.capacity} posti{table.capacity < selectedReservation.party_size ? " (piccolo)" : ""}</option>)}</select></label>
         <p className={styles.muted}>{selectedReservation.status === "in_attesa" ? "L'accettazione invia l'email di conferma se il cliente ha indicato un indirizzo." : "Le altre modifiche non inviano messaggi automatici al cliente."}</p>
         <div className={styles.modalActions}>
-          {selectedReservation.status === "confermata" && whatsappConfirmationUrl(selectedReservation) &&
-            <a className={styles.secondaryButton} href={whatsappConfirmationUrl(selectedReservation)!} target="_blank" rel="noopener noreferrer">Apri conferma su WhatsApp ↗</a>}
+          {selectedReservation.phone && <a className={styles.secondaryButton} href={`tel:${selectedReservation.phone.replace(/[^\d+]/g, "")}`}>Chiama il cliente</a>}
+          {whatsappDecisionUrl(selectedReservation) &&
+            <a className={styles.secondaryButton} href={whatsappDecisionUrl(selectedReservation)!} target="_blank" rel="noopener noreferrer">{selectedReservation.status === "confermata" ? "Apri conferma su WhatsApp" : "Apri esito su WhatsApp"} ↗</a>}
           {selectedReservation.status === "in_attesa" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => decideReservation(selectedReservation, "accept")}>Accetta</button><button className={styles.dangerText} disabled={busy} onClick={() => decideReservation(selectedReservation, "reject")}>Rifiuta</button></> : selectedReservation.status === "confermata" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "arrivato")}>Segna arrivati</button><button className={styles.secondaryButton} onClick={() => copyReminder(selectedReservation)}>Copia promemoria</button><button className={styles.secondaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "no-show")}>No-show</button><button className={styles.dangerText} disabled={busy} onClick={() => changeStatus(selectedReservation, "annullata")}>Annulla prenotazione</button></> : (selectedReservation.source !== "online" || selectedReservation.approved_at) ? <button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "confermata")}>Riporta a confermata</button> : null}
         </div>
-        {selectedReservation.status === "confermata" && whatsappConfirmationUrl(selectedReservation) && <p className={styles.muted}>WhatsApp apre il messaggio già pronto. Controllalo e premi Invia nell’app.</p>}
+        {whatsappDecisionUrl(selectedReservation) && <p className={styles.muted}>WhatsApp apre il messaggio già pronto. Controllalo e premi Invia nell’app.</p>}
       </section></div>}
     </main>
   );

@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from "../../../../lib/supabase/server";
-import { validDate, validPartySize } from "../../../../lib/public-booking";
+import { bookableServices, validDate, validPartySize } from "../../../../lib/public-booking";
 
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
@@ -8,12 +8,19 @@ export async function GET(request: Request) {
   if (!validDate(date) || !validPartySize(party)) {
     return Response.json({ error: "Scegli una data e un numero di persone validi." }, { status: 400 });
   }
+  const selectedDate = date as string;
+  const scheduled = bookableServices(selectedDate, { pranzo: true, cena: true });
+  if (!scheduled.pranzo && !scheduled.cena) {
+    return Response.json(scheduled, { headers: { "Cache-Control": "no-store" } });
+  }
   try {
     const { data, error } = await createServerSupabaseClient().rpc("public_available_services", {
       p_date: date, p_party_size: party,
     });
     if (error) throw error;
-    return Response.json(data, { headers: { "Cache-Control": "no-store" } });
+    return Response.json(bookableServices(selectedDate, data ?? { pranzo: false, cena: false }), {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (error) {
     console.error("Controllo disponibilità fallito:", error);
     return Response.json({ error: "Non riusciamo a controllare i tavoli. Riprova tra poco." }, { status: 503 });

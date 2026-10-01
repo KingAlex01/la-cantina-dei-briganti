@@ -1,11 +1,9 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "../../lib/site-metadata";
 import Link from "next/link";
 import styles from "./privacy.module.css";
 
-export const metadata: Metadata = {
-  title: "Privacy prenotazioni | La cantina dei briganti",
-  description: "Come trattiamo i dati inseriti per prenotare un tavolo.",
-};
+export const metadata = pageMetadata("/privacy", "Privacy prenotazioni | La cantina dei briganti",
+  "Come trattiamo i dati inseriti per prenotare un tavolo.");
 
 export default function PrivacyPage() {
   return <main className={styles.page}>

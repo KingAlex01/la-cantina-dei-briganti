@@ -1,14 +1,13 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "../../lib/site-metadata";
 import { connection } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import DigitalMenu from "./DigitalMenu";
 import type { MenuCategory, MenuItem, MenuLanguage } from "../../lib/menu/types";
 import currentMenu from "../../lib/menu/current-menu.json";
+import { MENU_LANGUAGES } from "../../lib/menu/types";
 
-export const metadata: Metadata = {
-  title: "Menù | La cantina dei briganti",
-  description: "Scopri il menù della Cantina dei Briganti a Mola di Bari.",
-};
+export const metadata = pageMetadata("/menu", "Menù | La cantina dei briganti",
+  "Scopri il menù della Cantina dei Briganti a Mola di Bari.");
 
 function localPreview() {
   const categories: MenuCategory[] = currentMenu.map((category) => ({
@@ -46,8 +45,9 @@ export default async function MenuPage() {
     return <DigitalMenu sourceLanguage="it" categories={[]} items={[]} />;
   }
   if (error) throw new Error(`Lettura menù fallita: ${error.message}`);
+  const sourceLanguage = catalogResult.data?.source_language as MenuLanguage;
   return <DigitalMenu
-    sourceLanguage={(catalogResult.data?.source_language ?? "it") as MenuLanguage}
+    sourceLanguage={MENU_LANGUAGES.includes(sourceLanguage) ? sourceLanguage : "it"}
     categories={(categoryResult.data ?? []) as MenuCategory[]}
     items={(itemResult.data ?? []) as MenuItem[]}
   />;
