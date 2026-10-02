@@ -43,6 +43,7 @@
 .controls, .panelActions, .segmented, .editBar > div, .modalActions, .cardActions, .tags { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .controls input, .field input, .field select, .field textarea, .tableRow input, .tableRow select, .search, .notes { min-height: 41px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; outline-color: #a9812f; color: var(--ink); background: #fffef9; font: inherit; }
 .controls input { min-height: 40px; }
+.controls input[type="date"] { min-width: 0; font-size: 1rem; }
 .segmented { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: #e8e5da; }
 .segmented button { min-height: 34px; padding: 5px 11px; border: 0; border-radius: 6px; background: transparent; color: #626d63; cursor: pointer; font-size: .8rem; font-weight: 700; white-space: nowrap; }
 .segmented .selected { color: var(--pine); background: #fffdf8; box-shadow: 0 1px 4px #00000016; }
