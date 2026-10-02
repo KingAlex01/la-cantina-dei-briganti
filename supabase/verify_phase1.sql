@@ -22,7 +22,7 @@ begin
   insert into public.reservations
     (date, service, arrival_time, party_size, name, phone, table_id, status, source, code)
   values
-    (v_date, 'cena', time '19:00', 2, 'Test fase 1', '3330000000',
+    (v_date, 'cena', time '19:30', 2, 'Test fase 1', '3330000000',
      v_table_id, 'confermata', 'staff', 'ZZZ001');
 
   begin

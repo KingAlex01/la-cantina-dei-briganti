@@ -53,10 +53,7 @@ export type CustomerStats = {
   next_date: string | null;
 };
 
-export const SERVICE_TIMES: Record<Service, string[]> = {
-  pranzo: ["12:30", "13:00", "13:30", "14:00"],
-  cena: ["19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"],
-};
+export { SERVICE_TIMES } from "../public-booking";
 
 export const STATUS_LABEL: Record<ReservationStatus, string> = {
   in_attesa: "In attesa",

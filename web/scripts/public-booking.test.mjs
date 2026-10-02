@@ -24,7 +24,15 @@ test("orari trascorsi: si può scegliere solo un arrivo successivo all’ora att
 
 test("le date future aperte restano prenotabili anche quando oggi è chiuso", () => {
   assert.deepEqual(bookableServices("2026-10-02", freeTables, "2026-10-01", "23:59"), freeTables);
-  assert.ok(availableArrivalTimes("2026-10-02", "cena", "2026-10-01", "23:59").includes("19:00"));
+  assert.equal(availableArrivalTimes("2026-10-02", "cena", "2026-10-01", "23:59")[0], "19:30");
+});
+
+test("la cena parte dalle 19:30, anche quando si prenota prima dell’apertura", () => {
+  const times = availableArrivalTimes("2026-10-02", "cena", "2026-10-02", "18:00");
+  assert.equal(times[0], "19:30");
+  assert.ok(!times.includes("19:00"));
+  assert.equal(availableArrivalTimes("2026-10-02", "cena", "2026-10-02", "19:00")[0], "19:30");
+  assert.equal(availableArrivalTimes("2026-10-02", "cena", "2026-10-02", "19:30")[0], "20:00");
 });
 
 test("il controllo degli orari non rende disponibili servizi pieni o date passate", () => {

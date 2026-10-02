@@ -91,10 +91,10 @@ Wizard in 3 passi + riepilogo della richiesta:
 - Stati prenotazione: `in_attesa`, `confermata`, `arrivato`, `no-show`, `annullata`. Le nuove richieste online iniziano in `in_attesa`; le prenotazioni create dallo staff iniziano in `confermata`.
 
 ### Orari servizi (configurabili in futuro)
-- Pranzo: 12:30, 13:00, 13:30, 14:00 (martedì–domenica)
-- Cena: 19:00, 19:30, 20:00, 20:30, 21:00, 21:30, 22:00 (tutti i giorni)
+- Pranzo: 12:30, 13:00, 13:30, 14:00 (lunedì, martedì, mercoledì, venerdì, sabato e domenica)
+- Cena: 19:30, 20:00, 20:30, 21:00, 21:30, 22:00 (lunedì, martedì, mercoledì, venerdì e sabato; apertura alle 19:30)
 
-Nota: il prototipo non blocca il pranzo del lunedì. La prenotazione pubblica reale lo blocca nel database e la Sala staff lo disabilita nell'interfaccia; la funzione SQL staff non applica ancora quel divieto a una chiamata diretta. Giorni di chiusura e orari non sono ancora impostazioni modificabili.
+Giovedì chiuso tutto il giorno; domenica sera chiuso. Gli orari di clienti e staff condividono `web/lib/public-booking.ts`. La migrazione `20261002000100_dinner_1930.sql` aggiorna le funzioni di prenotazione e blocca i nuovi arrivi serali prima delle 19:30, senza spostare le prenotazioni esistenti. Giorni di chiusura e orari non sono ancora impostazioni modificabili.
 
 ## Notifiche
 

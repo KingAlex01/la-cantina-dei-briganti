@@ -47,7 +47,7 @@ try {
   if (!date) throw new Error("Nessuna data di prova libera per 8 persone");
 
   const input = {
-    date, service: "cena", time: "19:00", party: 8,
+    date, service: "cena", time: "19:30", party: 8,
     name: "Verifica Automatica", phone, email: "", notes: "Test fase 3", reminder: false,
   };
   stage = "creazione prenotazione";

@@ -78,7 +78,7 @@ try {
   const table = tables.data.find((item) => item.name === "T1");
   if (!table) throw new Error("T1 mancante");
   const booking = {
-    p_date: "2099-01-05", p_service: "cena", p_arrival_time: "19:00",
+    p_date: "2099-01-05", p_service: "cena", p_arrival_time: "19:30",
     p_party_size: 2, p_name: "Verifica automatica", p_table_id: table.id,
     p_phone: `888${String(Date.now()).slice(-9)}`,
   };
