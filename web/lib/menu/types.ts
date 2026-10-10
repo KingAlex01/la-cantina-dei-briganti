@@ -1,5 +1,7 @@
-export const MENU_LANGUAGES = ["it", "en", "es", "fr"] as const;
-export type MenuLanguage = (typeof MENU_LANGUAGES)[number];
+import { SUPPORTED_LANGUAGES, type SiteLanguage } from "../i18n/languages";
+
+export const MENU_LANGUAGES = SUPPORTED_LANGUAGES;
+export type MenuLanguage = SiteLanguage;
 export type LocalizedText = Partial<Record<MenuLanguage, string>>;
 
 export type MenuCategory = {

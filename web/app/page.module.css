@@ -41,6 +41,14 @@
   flex-direction: column;
 }
 
+.languageBar {
+  display: flex;
+  width: min(100% - 40px, 1140px);
+  justify-content: flex-end;
+  margin: 0 auto;
+  padding-top: 16px;
+}
+
 .header {
   display: flex;
   width: min(100% - 40px, 1140px);

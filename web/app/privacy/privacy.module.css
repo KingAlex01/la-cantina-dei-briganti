@@ -2,12 +2,13 @@
 .wrap { width: min(100%, 850px); margin: 0 auto; }
 .back, .footer a { color: #ead3a2; text-decoration: none; }
 .back:hover, .footer a:hover { text-decoration: underline; }
-.back { display: inline-block; margin-bottom: 32px; font-size: .88rem; }
+.navigation { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
+.back { display: inline-block; font-size: .88rem; }
 .header { margin-bottom: 26px; }
 .kicker { color: #d3b77b; font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .header h1 { margin: 12px 0 8px; font-family: var(--font-fraunces), Georgia, serif; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 500; letter-spacing: -.05em; }
 .header p { margin: 0 0 12px; color: #d7e1d6; }
-.header small { color: #b7c4b7; }
+.header small { color: #b7c4b7; line-height: 1.7; }
 .content { padding: clamp(24px, 5vw, 48px); border: 1px solid #e2d7c1; border-radius: 18px; color: #1b2b24; background: #fffdf8; box-shadow: 0 20px 60px #07170c38; }
 .content section + section { margin-top: 30px; padding-top: 30px; border-top: 1px solid #e7e0d3; }
 .content h2 { margin: 0 0 12px; font-family: var(--font-fraunces), Georgia, serif; font-size: 1.65rem; font-weight: 550; }
@@ -15,4 +16,4 @@
 .content p + p { margin-top: 14px; }
 .content a { color: #79581e; overflow-wrap: anywhere; text-decoration: underline; }
 .footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; padding-top: 28px; font-size: .86rem; }
-@media (max-width: 520px) { .page { padding: 24px 16px 42px; } .back { margin-bottom: 24px; } .content { padding: 24px 20px; } }
+@media (max-width: 520px) { .page { padding: 24px 16px 42px; } .navigation { margin-bottom: 24px; } .content { padding: 24px 20px; } }

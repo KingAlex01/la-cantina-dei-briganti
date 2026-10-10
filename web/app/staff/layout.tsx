@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function StaffLayout({ children }: LayoutProps<"/staff">) {
-  return children;
+  return <div lang="it">{children}</div>;
 }

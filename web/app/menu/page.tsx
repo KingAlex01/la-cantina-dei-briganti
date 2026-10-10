@@ -5,9 +5,19 @@ import DigitalMenu from "./DigitalMenu";
 import type { MenuCategory, MenuItem, MenuLanguage } from "../../lib/menu/types";
 import currentMenu from "../../lib/menu/current-menu.json";
 import { MENU_LANGUAGES } from "../../lib/menu/types";
+import { getRequestLanguage } from "../../lib/i18n/server";
 
-export const metadata = pageMetadata("/menu", "Menù | La cantina dei briganti",
-  "Scopri il menù della Cantina dei Briganti a Mola di Bari.");
+const META = {
+  it: { title: "Menù", description: "Scopri il menù della Cantina dei Briganti a Mola di Bari." },
+  en: { title: "Menu", description: "Explore the menu at La Cantina dei Briganti in Mola di Bari." },
+  es: { title: "Menú", description: "Descubre el menú de La Cantina dei Briganti en Mola di Bari." },
+  fr: { title: "Carte", description: "Découvrez la carte de La Cantina dei Briganti à Mola di Bari." },
+};
+
+export async function generateMetadata() {
+  const language = await getRequestLanguage();
+  return pageMetadata("/menu", `${META[language].title} | La cantina dei briganti`, META[language].description, language);
+}
 
 function localPreview() {
   const categories: MenuCategory[] = currentMenu.map((category) => ({

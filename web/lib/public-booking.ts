@@ -75,8 +75,8 @@ export function validPartySize(size: unknown): size is number {
   return typeof size === "number" && Number.isInteger(size) && size >= 1 && size <= 8;
 }
 
-export function dateLabel(date: string) {
-  return new Intl.DateTimeFormat("it-IT", {
+export function dateLabel(date: string, locale = "it-IT") {
+  return new Intl.DateTimeFormat(locale, {
     weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   }).format(new Date(`${date}T12:00:00Z`));
 }

@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ALLERGENS } from "../../lib/menu/types";
+import LanguageSelector from "../LanguageSelector";
+import { useLanguage } from "../LanguageProvider";
 import type { MenuCategory, MenuItem, MenuLanguage, LocalizedText } from "../../lib/menu/types";
 import styles from "./menu.module.css";
 
@@ -23,6 +25,13 @@ const NOTES: Record<MenuLanguage, { allergy: string; frozen: string; cover: stri
   fr: { allergy: "En cas d’allergie ou d’intolérance, demandez toujours au personnel, même pour les plats sans indication.", frozen: "* Les produits ou ingrédients marqués sont surgelés à l’origine ou congelés sur place selon les procédures HACCP.", cover: "Couvert" },
 };
 
+const PAGE_COPY = {
+  it: { home: "La cantina dei briganti, pagina iniziale", soon: "Il menù sarà disponibile a breve.", preview: "Anteprima locale dai dati del progetto. Supabase non è stato aggiornato." },
+  en: { home: "La cantina dei briganti, home", soon: "Our menu will be available soon.", preview: "Local preview from the project data. Supabase has not been updated." },
+  es: { home: "La cantina dei briganti, inicio", soon: "El menú estará disponible pronto.", preview: "Vista previa local de los datos del proyecto. Supabase no se ha actualizado." },
+  fr: { home: "La cantina dei briganti, accueil", soon: "La carte sera bientôt disponible.", preview: "Aperçu local des données du projet. Supabase n’a pas été mis à jour." },
+};
+
 function searchText(value: string, language: MenuLanguage) {
   return value.toLocaleLowerCase(language).normalize("NFD").replace(/\p{M}/gu, "");
 }
@@ -32,7 +41,7 @@ function localized(value: LocalizedText, language: MenuLanguage, source: MenuLan
 }
 
 export default function DigitalMenu({ categories, items, sourceLanguage, preview = false }: Props) {
-  const [language, setLanguage] = useState<MenuLanguage>(sourceLanguage);
+  const { language } = useLanguage();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -51,17 +60,11 @@ export default function DigitalMenu({ categories, items, sourceLanguage, preview
   return <main className={styles.page}>
     <div className={styles.sticky}>
       <div className={styles.header}>
-        <Link href="/" className={styles.brand} aria-label="La cantina dei briganti, home">
+        <Link href="/" className={styles.brand} aria-label={PAGE_COPY[language].home}>
           <Image src="/logo-cantina.svg" alt="" width={80} height={60} />
           <span>La cantina<br />dei briganti</span>
         </Link>
-        <label className={styles.languageLabel}>
-          <span className={styles.srOnly}>Lingua / Language</span>
-          <select value={language} onChange={(event) => setLanguage(event.target.value as MenuLanguage)} aria-label="Lingua / Language">
-            <option value="it">IT</option><option value="en">EN</option><option value="es">ES</option>
-            <option value="fr">FR</option>
-          </select>
-        </label>
+        <LanguageSelector />
       </div>
       <div className={styles.controls}>
         <label className={styles.searchLabel}>
@@ -81,9 +84,9 @@ export default function DigitalMenu({ categories, items, sourceLanguage, preview
     </div>
 
     <div className={styles.content}>
-      {preview && <p className={styles.previewNotice} role="status">Anteprima locale dai dati del progetto. Supabase non è stato aggiornato.</p>}
+      {preview && <p className={styles.previewNotice} role="status">{PAGE_COPY[language].preview}</p>}
       <div className={styles.intro}><span>Mola di Bari · La cantina dei briganti</span><h1>{copy.menu}</h1><div className={styles.ornament} aria-hidden="true">✦</div>
-        {items.length > 0 && language !== sourceLanguage && !items.some((item) => item.name[language]) && <p className={styles.translationNotice}>{copy.untranslated}</p>}
+        {items.length > 0 && language !== sourceLanguage && items.some((item) => !item.name[language]) && <p className={styles.translationNotice}>{copy.untranslated}</p>}
       </div>
       {categories.filter((category) => !activeCategory || category.id === activeCategory).map((category) => {
         const categoryItems = matches.filter((item) => item.category_id === category.id);
@@ -101,7 +104,7 @@ export default function DigitalMenu({ categories, items, sourceLanguage, preview
           </article>)}</div>
         </section>;
       })}
-      {matches.length === 0 && <p className={styles.empty}>{categories.length ? copy.empty : "Il menù sarà disponibile a breve."}</p>}
+      {matches.length === 0 && <p className={styles.empty}>{categories.length ? copy.empty : PAGE_COPY[language].soon}</p>}
       {items.length > 0 && <aside className={styles.menuNotes} aria-label={copy.allergens}>
         <div className={styles.cover}><span>{NOTES[language].cover}</span><strong>{price.format(2)}</strong></div>
         <p>{NOTES[language].allergy}</p>

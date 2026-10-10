@@ -1,4 +1,14 @@
+"use client";
+
+import { useLanguage } from "./LanguageProvider";
 import styles from "./whatsapp-button.module.css";
+
+const LABELS = {
+  it: "Scrivici su WhatsApp (si apre in una nuova scheda)",
+  en: "Message us on WhatsApp (opens in a new tab)",
+  es: "Escríbenos por WhatsApp (se abre en una pestaña nueva)",
+  fr: "Écrivez-nous sur WhatsApp (s’ouvre dans un nouvel onglet)",
+};
 
 type WhatsAppFloatingButtonProps = {
   phoneNumber: string;
@@ -9,6 +19,7 @@ export default function WhatsAppFloatingButton({
   phoneNumber,
   side = "right",
 }: WhatsAppFloatingButtonProps) {
+  const { language } = useLanguage();
   const digits = phoneNumber.replace(/\D/g, "");
   if (!/^\d{8,15}$/.test(digits)) return null;
 
@@ -18,7 +29,7 @@ export default function WhatsAppFloatingButton({
       href={`https://wa.me/${digits}`}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Scrivici su WhatsApp (si apre in una nuova scheda)"
+      aria-label={LABELS[language]}
     >
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
         <path d="M12 2.25a9.75 9.75 0 0 0-8.43 14.65L2.25 21.75l5-1.31A9.75 9.75 0 1 0 12 2.25Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />

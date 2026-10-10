@@ -1,22 +1,31 @@
 import Image from "next/image";
 import Link from "next/link";
 import InviteRedirect from "./invite-redirect";
+import LanguageSelector from "./LanguageSelector";
 import WhatsAppFloatingButton from "./WhatsAppFloatingButton";
 import { OPENING_HOURS } from "../lib/public-booking";
-import { BOOKING_RESPONSE_NOTE, RESTAURANT, restaurantStructuredData } from "../lib/restaurant";
+import { RESTAURANT, restaurantStructuredData } from "../lib/restaurant";
+import { homeContent } from "../lib/i18n/home";
+import { getRequestLanguage } from "../lib/i18n/server";
 import { pageMetadata } from "../lib/site-metadata";
 import styles from "./page.module.css";
 
-export const metadata = pageMetadata("/", "La Cantina dei Briganti | Ristorante a Mola di Bari",
-  "La cucina dei fratelli Parente nel cuore di Mola di Bari: prodotti di famiglia, menù stagionale e un tavolo senza fretta. Scopri il menù e prenota online.");
+export async function generateMetadata() {
+  const language = await getRequestLanguage();
+  const content = homeContent[language];
+  return pageMetadata("/", content.metadataTitle, content.metadataDescription, language);
+}
 
-export default function Home() {
+export default async function Home() {
+  const language = await getRequestLanguage();
+  const content = homeContent[language];
   return (
     <main className={styles.page}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantStructuredData).replace(/</g, "\\u003c") }} />
       <InviteRedirect />
       <div className={styles.grain} aria-hidden="true" />
       <div className={styles.introScreen}>
+      <div className={styles.languageBar}><LanguageSelector tone="dark" /></div>
       <header className={styles.header}>
         <span className={styles.headerLine} aria-hidden="true" />
         <Image
@@ -37,71 +46,69 @@ export default function Home() {
           <span className={styles.eyebrowMark} aria-hidden="true">✦</span>
         </div>
         <h1 id="hero-title" className={styles.title}>
-          Ci vediamo a tavola.
+          {content.title}
           <br />
-          <em>Senza fretta.</em>
+          <em>{content.titleEmphasis}</em>
         </h1>
         <div className={styles.divider} aria-hidden="true"><span /></div>
         <p className={styles.description}>
-          Scegli data, orario e numero di persone. Al resto pensiamo noi:
-          il tavolo resta vostro per tutto il servizio.
+          {content.description}
         </p>
-        <Link href="/prenota" className={styles.bookingLink}>Prenota un tavolo <span aria-hidden="true">↗</span></Link>
-        <p className={styles.bookingNote}>La richiesta sarà confermata dopo l’approvazione dello staff. {BOOKING_RESPONSE_NOTE}</p>
-        <Link href="/menu" className={styles.menuLink}>Scopri il menù <span aria-hidden="true">↗</span></Link>
+        <Link href="/prenota" className={styles.bookingLink}>{content.bookTable} <span aria-hidden="true">↗</span></Link>
+        <p className={styles.bookingNote}>{content.bookingNote}</p>
+        <Link href="/menu" className={styles.menuLink}>{content.discoverMenu} <span aria-hidden="true">↗</span></Link>
       </section>
       </div>
 
       <section className={styles.story} aria-labelledby="story-title">
         <div className={styles.storyInner}>
           <div className={styles.storyImageWrap}>
-            <Image src="/locale/sala.jpeg" alt="La sala della Cantina dei Briganti, con volte in pietra e tavoli apparecchiati" width={4032} height={3024} sizes="(max-width: 800px) 100vw, 54vw" className={styles.storyImage} />
+            <Image src="/locale/sala.jpeg" alt={content.roomAlt} width={4032} height={3024} sizes="(max-width: 800px) 100vw, 54vw" className={styles.storyImage} />
           </div>
           <div className={styles.storyCopy}>
-            <span className={styles.sectionKicker}>La nostra storia</span>
-            <h2 id="story-title">Una cucina di famiglia, nel cuore di Mola.</h2>
-            <p>Francesco e Vito Parente hanno aperto La Cantina dei Briganti nel giugno 2023, dopo anni di esperienza nelle cucine italiane e all’estero. Con loro lavora il fratello Luca.</p>
-            <p>Vengono da una famiglia di origini contadine. Portano in tavola anche i prodotti coltivati dal padre, a chilometro zero, con cura e senza trattamenti. Il menù segue le stagioni e quello che il territorio offre.</p>
-            <Link href="/menu" className={styles.storyLink}>Esplora il menù <span aria-hidden="true">↗</span></Link>
+            <span className={styles.sectionKicker}>{content.storyKicker}</span>
+            <h2 id="story-title">{content.storyTitle}</h2>
+            {content.storyParagraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            <Link href="/menu" className={styles.storyLink}>{content.exploreMenu} <span aria-hidden="true">↗</span></Link>
           </div>
         </div>
-        <div className={styles.gallery} aria-label="Altri scorci del locale">
-          <Image src="/locale/tavoli-e-vini.jpeg" alt="Tavoli apparecchiati e selezione di vini lungo la parete in pietra" width={5712} height={4284} sizes="(max-width: 700px) 100vw, 40vw" />
-          <Image src="/locale/volta-in-pietra.jpeg" alt="Volta in pietra e un angolo della sala" width={2268} height={4032} sizes="(max-width: 700px) 40vw, 22vw" />
-          <Image src="/locale/dettaglio-sala.jpeg" alt="Dettaglio dell'illuminazione e degli arredi della Cantina" width={5712} height={4284} sizes="(max-width: 700px) 60vw, 40vw" />
+        <div className={styles.gallery} aria-label={content.galleryLabel}>
+          <Image src="/locale/tavoli-e-vini.jpeg" alt={content.galleryAlts[0]} width={5712} height={4284} sizes="(max-width: 700px) 100vw, 40vw" />
+          <Image src="/locale/volta-in-pietra.jpeg" alt={content.galleryAlts[1]} width={2268} height={4032} sizes="(max-width: 700px) 40vw, 22vw" />
+          <Image src="/locale/dettaglio-sala.jpeg" alt={content.galleryAlts[2]} width={5712} height={4284} sizes="(max-width: 700px) 60vw, 40vw" />
         </div>
       </section>
 
       <section className={styles.visit} aria-labelledby="visit-title">
         <div className={styles.visitInner}>
           <div className={styles.visitDetails}>
-            <span className={styles.sectionKicker}>Vieni a trovarci</span>
-            <h2 id="visit-title">Ci trovi a Mola.<br /><em>Ti aspettiamo.</em></h2>
+            <span className={styles.sectionKicker}>{content.visitKicker}</span>
+            <h2 id="visit-title">{content.visitTitle}<br /><em>{content.visitEmphasis}</em></h2>
             <address>{RESTAURANT.address.streetAddress}<br />{RESTAURANT.address.postalCode} {RESTAURANT.address.addressLocality} ({RESTAURANT.address.addressRegion})</address>
-            <a className={styles.directionsLink} href="https://www.google.com/maps/search/?api=1&query=Vico%20Morgese%201%2C%2070042%20Mola%20di%20Bari" target="_blank" rel="noopener noreferrer">Come arrivare <span aria-hidden="true">↗</span></a>
+            <a className={styles.directionsLink} href="https://www.google.com/maps/search/?api=1&query=Vico%20Morgese%201%2C%2070042%20Mola%20di%20Bari" target="_blank" rel="noopener noreferrer">{content.directions} <span aria-hidden="true">↗</span></a>
             <a className={styles.phoneLink} href={RESTAURANT.phoneHref}>{RESTAURANT.phone}</a>
-            <div className={styles.socialLinks} aria-label="Profili social">
+            <div className={styles.socialLinks} aria-label={content.socialLabel}>
               <a href={RESTAURANT.socials[0]} target="_blank" rel="noopener noreferrer">Instagram ↗</a>
               <a href={RESTAURANT.socials[1]} target="_blank" rel="noopener noreferrer">Facebook ↗</a>
             </div>
           </div>
           <div className={styles.hours}>
-            <h3>Orari di apertura</h3>
-            <dl>{OPENING_HOURS.map(({ day, hours }) => <div key={day}><dt>{day}</dt><dd>{hours}</dd></div>)}</dl>
-            <p>Il menù cambia con le stagioni. Per gruppi di oltre 8 persone, contattaci direttamente.</p>
+            <h3>{content.openingHours}</h3>
+            <dl>{OPENING_HOURS.map(({ day, hours, pranzo, cena }, index) => <div key={day}><dt>{content.weekdays[index]}</dt><dd>{pranzo || cena ? hours : content.closed}</dd></div>)}</dl>
+            <p>{content.hoursNote}</p>
           </div>
         </div>
         <div className={styles.finalCta}>
-          <p>Una sala, tante storie da raccontare.</p>
-          <Link href="/prenota" className={styles.bookingLink}>Prenota un tavolo <span aria-hidden="true">↗</span></Link>
+          <p>{content.finalCta}</p>
+          <Link href="/prenota" className={styles.bookingLink}>{content.bookTable} <span aria-hidden="true">↗</span></Link>
         </div>
       </section>
 
       <footer className={styles.footer}>
         <span>© La cantina dei briganti · Mola di Bari</span>
         <div className={styles.footerLinks}>
-          <Link href="/privacy" className={styles.footerLink}>Privacy</Link>
-          <Link href="/staff" className={styles.footerLink}>Accesso staff <span aria-hidden="true">↗</span></Link>
+          <Link href="/privacy" className={styles.footerLink}>{content.privacy}</Link>
+          <Link href="/staff" className={styles.footerLink}>{content.staffAccess} <span aria-hidden="true">↗</span></Link>
         </div>
       </footer>
       <WhatsAppFloatingButton phoneNumber={RESTAURANT.phone} side="right" />

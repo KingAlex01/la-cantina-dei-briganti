@@ -42,6 +42,34 @@ Il cliente non deve creare un account. Sceglie data e persone, poi servizio e
 orario, infine inserisce i contatti. La conferma mostra il codice e il tavolo.
 La disponibilità viene ricontrollata nel database al salvataggio.
 
+## Lingua del sito pubblico
+
+Home, menù, prenotazione e privacy supportano italiano, inglese, spagnolo e
+francese. Il server legge `Accept-Language`, comprese le varianti regionali e
+le priorità del browser: la prima pagina arriva già nella lingua disponibile
+preferita. Per una lingua non disponibile si usa l'inglese; senza preferenze
+si usa l'italiano.
+
+Il selettore presente nelle pagine pubbliche permette di cambiare lingua.
+Solo questa scelta manuale salva il cookie tecnico `cantina_language` per un
+anno e prevale sulla preferenza del browser. Il cambio mantiene i campi della
+prenotazione e la ricerca nel menù. Date e prezzi usano la lingua selezionata;
+gli orari del ristorante restano nel fuso di Roma. L'area staff e le email
+automatiche restano in italiano.
+
+Le traduzioni dell'interfaccia sono in `web/lib/i18n/`; i testi dei piatti
+rimangono nel catalogo multilingua esistente. Non vengono chiamati servizi di
+traduzione esterni durante la visita. Per verificare la selezione della lingua
+e le regole di prenotazione:
+
+```powershell
+cd web
+node --test scripts/languages.test.mjs scripts/public-booking.test.mjs
+```
+
+Questa modifica del 9 ottobre 2026 è locale: richiede una pubblicazione
+separata per apparire sul sito online.
+
 ## Primo accesso staff
 
 Il primo account staff è stato invitato tramite Supabase. Aprire l’email di
