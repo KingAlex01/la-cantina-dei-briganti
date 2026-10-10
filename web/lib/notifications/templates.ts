@@ -11,7 +11,7 @@ export type MessageTemplateKey = keyof typeof MESSAGE_TEMPLATES;
 
 export function renderMessageTemplate(template: string, booking: Pick<BookingConfirmation, "name" | "date" | "arrival_time" | "party_size" | "code">) {
   const values: Record<string, string> = {
-    nome: booking.name.trim().split(/\s+/)[0] ?? "",
+    nome: booking.name.trim().replace(/\s+/g, " "),
     data: dateLabel(booking.date),
     ora: booking.arrival_time.slice(0, 5),
     persone: String(booking.party_size),

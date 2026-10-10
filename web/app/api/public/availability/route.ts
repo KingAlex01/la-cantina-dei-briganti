@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from "../../../../lib/supabase/server";
-import { bookableServices, validDate, validPartySize } from "../../../../lib/public-booking";
+import { bookableServices, parsePublicAvailability, validDate, validPartySize } from "../../../../lib/public-booking";
 
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
@@ -11,14 +11,17 @@ export async function GET(request: Request) {
   const selectedDate = date as string;
   const scheduled = bookableServices(selectedDate, { pranzo: true, cena: true });
   if (!scheduled.pranzo && !scheduled.cena) {
-    return Response.json(scheduled, { headers: { "Cache-Control": "no-store" } });
+    return Response.json({ ...scheduled, blocked: { pranzo: false, cena: false } }, { headers: { "Cache-Control": "no-store" } });
   }
   try {
     const { data, error } = await createServerSupabaseClient().rpc("public_available_services", {
       p_date: date, p_party_size: party,
     });
     if (error) throw error;
-    return Response.json(bookableServices(selectedDate, data ?? { pranzo: false, cena: false }), {
+    const availability = parsePublicAvailability(data);
+    // Uno schema precedente non conosce le sospensioni: non mostrare servizi prenotabili.
+    if (!availability) throw new Error("Disponibilità senza stato dei blocchi; verificare la migrazione booking_blocks.");
+    return Response.json(bookableServices(selectedDate, availability), {
       headers: { "Cache-Control": "no-store" },
     });
   } catch (error) {

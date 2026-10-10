@@ -84,7 +84,7 @@ export default function NotificationsPanel({ client }: { client: SupabaseClient 
     <div className={styles.grid}>
       <section className={styles.panel} aria-labelledby="template-title">
         <h2 id="template-title">Modelli dei messaggi</h2>
-        <p>Segnaposto: <code>{"{nome}"}</code> <code>{"{data}"}</code> <code>{"{ora}"}</code> <code>{"{persone}"}</code> <code>{"{codice}"}</code> <code>{"{ristorante}"}</code></p>
+        <p>Segnaposto: <code>{"{nome}"}</code> (nome e cognome) <code>{"{data}"}</code> <code>{"{ora}"}</code> <code>{"{persone}"}</code> <code>{"{codice}"}</code> <code>{"{ristorante}"}</code></p>
         {fields.map(({ key, label, hint, maxLength }) => <label className={styles.field} key={key}>{label}
           <small>{hint}</small>
           {key === "confirmEmailSubject"

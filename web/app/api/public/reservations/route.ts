@@ -59,12 +59,15 @@ export async function POST(request: Request) {
 
   try {
     const client = createServerSupabaseClient();
-    // Evita di creare una prenotazione già confermata se il codice è stato
-    // pubblicato prima della migrazione che introduce l'approvazione manuale.
-    const { error: schemaError } = await client.from("reservations")
-      .select("approved_at").limit(1);
+    // Le richieste restano sospese finché il database non supporta sia
+    // l'approvazione manuale sia il blocco delle nuove prenotazioni online.
+    const [approvalSchema, blocksSchema] = await Promise.all([
+      client.from("reservations").select("approved_at").limit(1),
+      client.from("booking_blocks").select("date").limit(1),
+    ]);
+    const schemaError = approvalSchema.error || blocksSchema.error;
     if (schemaError) {
-      console.error("Prenotazione pubblica: controllo dello schema fallito; verificare migrazione 20260925000100 e accesso Supabase:", {
+      console.error("Prenotazione pubblica: controllo dello schema fallito; verificare migrazioni approvazione/booking_blocks e accesso Supabase:", {
         code: schemaError.code, message: schemaError.message,
       });
       return Response.json({ error: "Le richieste online sono temporaneamente sospese. Riprova più tardi." }, { status: 503 });
@@ -78,6 +81,9 @@ export async function POST(request: Request) {
       console.error("Prenotazione pubblica: RPC Supabase fallita:", {
         code: error.code, message: error.message, details: error.details,
       });
+      if (error.message.includes("Prenotazioni online sospese per questo servizio")) {
+        return Response.json({ error: "Le prenotazioni online per questo servizio sono sospese. Scegli un’altra opzione." }, { status: 409 });
+      }
       if (error.message.includes("Nessun tavolo disponibile") || error.code === "23505") {
         return Response.json({ error: "Il servizio si è appena riempito. Scegli un'altra opzione." }, { status: 409 });
       }

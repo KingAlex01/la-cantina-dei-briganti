@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
-  addDays, availableArrivalTimes, bookableServices, currentTimeInRome, dateLabel, isServiceOpenOnDate, todayInRome, validDate,
+  addDays, availableArrivalTimes, bookableServices, currentTimeInRome, dateLabel, isServiceOpenOnDate, parsePublicAvailability, serviceAvailabilityState, todayInRome, validDate,
 } from "../../lib/public-booking";
-import type { Availability, BookingConfirmation, Service } from "../../lib/public-booking";
+import type { PublicAvailability, BookingConfirmation, Service } from "../../lib/public-booking";
 import styles from "./prenota.module.css";
 import BookingContacts from "./BookingContacts";
 import { bookingCopy, bookingErrorKey } from "../../lib/i18n/booking";
@@ -15,7 +15,7 @@ import type { BookingErrorKey } from "../../lib/i18n/booking";
 import { useLanguage } from "../LanguageProvider";
 import LanguageSelector from "../LanguageSelector";
 
-const emptyAvailability: Availability = { pranzo: false, cena: false };
+const emptyAvailability: PublicAvailability = { pranzo: false, cena: false, blocked: { pranzo: false, cena: false } };
 
 export default function BookingPage() {
   const { language } = useLanguage();
@@ -30,7 +30,7 @@ export default function BookingPage() {
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [notesConsent, setNotesConsent] = useState(false);
-  const [availability, setAvailability] = useState<Availability>(emptyAvailability);
+  const [availability, setAvailability] = useState<PublicAvailability | null>(null);
   const [checking, setChecking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<BookingErrorKey | "">("");
@@ -38,7 +38,7 @@ export default function BookingPage() {
   const [now, setNow] = useState(currentTimeInRome);
   const today = todayInRome();
   const visibleTimes = availableArrivalTimes(date, service, today, now);
-  const bookableAvailability = bookableServices(date, availability, today, now);
+  const bookableAvailability = bookableServices(date, availability ?? emptyAvailability, today, now);
   const closedDate = !isServiceOpenOnDate(date, "pranzo") && !isServiceOpenOnDate(date, "cena");
   const dateUnavailableError = !validDate(date) ? "" : closedDate
     ? "closedDate"
@@ -53,11 +53,7 @@ export default function BookingPage() {
   }, []);
 
   function serviceStatus(item: Service) {
-    if (!isServiceOpenOnDate(date, item)) return t.closed;
-    if (!availableArrivalTimes(date, item, today, now).length) return t.ended;
-    if (checking) return t.checking;
-    if (bookableAvailability[item]) return t.available;
-    return t.full;
+    return t[serviceAvailabilityState(date, item, availability, checking, today, now)];
   }
 
   useEffect(() => {
@@ -65,22 +61,24 @@ export default function BookingPage() {
     const controller = new AbortController();
     const timer = window.setTimeout(async () => {
       setChecking(true);
-      setError("");
       try {
         const params = new URLSearchParams({ date, party: String(party) });
         const response = await fetch(`/api/public/availability?${params}`, {
           cache: "no-store", signal: controller.signal,
         });
         const result = await response.json();
+        if (controller.signal.aborted) return;
         if (!response.ok) {
-          setAvailability(emptyAvailability);
+          setAvailability(null);
           setError(bookingErrorKey(result.error, "availabilityFailed"));
           return;
         }
-        setAvailability(bookableServices(date, result as Availability));
+        const checkedAvailability = parsePublicAvailability(result);
+        if (!checkedAvailability) throw new Error("Disponibilità non valida");
+        setAvailability(checkedAvailability);
       } catch {
         if (!controller.signal.aborted) {
-          setAvailability(emptyAvailability);
+          setAvailability(null);
           setError("availabilityFailed");
         }
       } finally {
@@ -97,7 +95,7 @@ export default function BookingPage() {
     if (!availableArrivalTimes(date, service).length) {
       setService(availableArrivalTimes(date, "cena").length ? "cena" : "pranzo");
     }
-    setAvailability(emptyAvailability);
+    setAvailability(null);
     setChecking(true);
     setError("");
     setStep(2);
@@ -109,7 +107,7 @@ export default function BookingPage() {
     if (!validDate(date) || !availableArrivalTimes(date, service).includes(time)) {
       setStep(1);
       setTime("");
-      setAvailability(emptyAvailability);
+      setAvailability(null);
       setError("noLongerBookable");
       return;
     }
@@ -132,6 +130,8 @@ export default function BookingPage() {
       const result = await response.json();
       if (!response.ok) {
         if (response.status === 409) {
+          setAvailability(null);
+          setChecking(true);
           setStep(2);
           setTime("");
         }
@@ -159,6 +159,7 @@ export default function BookingPage() {
     setNotes("");
     setNotesConsent(false);
     setConfirmation(null);
+    setAvailability(null);
     setError("");
   }
 
@@ -192,7 +193,7 @@ export default function BookingPage() {
           <label className={styles.field}>{t.date}
             <input type="date" value={date} min={todayInRome()} max={addDays(todayInRome(), 60)}
               aria-describedby={dateUnavailableMessage ? "date-availability" : undefined}
-              onChange={(event) => { setDate(event.target.value); setTime(""); setAvailability(emptyAvailability); setError(""); }} required />
+              onChange={(event) => { setDate(event.target.value); setTime(""); setAvailability(null); setError(""); }} required />
           </label>
           {dateUnavailableMessage && <p id="date-availability" className={styles.note} role="status">{dateUnavailableMessage}</p>}
           <div className={styles.field}><span>{t.people}</span>
@@ -221,7 +222,7 @@ export default function BookingPage() {
               </button>)}
             </div>
           </div>
-          {!checking && !bookableAvailability.pranzo && !bookableAvailability.cena && !error &&
+          {!checking && availability && !bookableAvailability.pranzo && !bookableAvailability.cena && !error &&
             <p className={styles.error}>{dateUnavailableMessage || t.noAvailability(party)}</p>}
           {!checking && bookableAvailability[service] && <div className={styles.field}><span>{t.arrivalQuestion}</span>
             <div className={styles.times}>{visibleTimes.map((slot) => <button key={slot} type="button"
@@ -273,7 +274,7 @@ export default function BookingPage() {
           </label>}
           <p className={styles.privacy}>{t.privacy} <Link href="/privacy">{t.privacyLink}</Link></p>
           <div className={styles.actions}>
-            <button className={styles.secondary} type="button" onClick={() => { setStep(2); setError(""); }}>{t.back}</button>
+            <button className={styles.secondary} type="button" onClick={() => { setAvailability(null); setChecking(true); setStep(2); setError(""); }}>{t.back}</button>
             <button className={styles.primary} type="submit" disabled={busy}>{busy ? t.sending : t.send}</button>
           </div>
         </form>}

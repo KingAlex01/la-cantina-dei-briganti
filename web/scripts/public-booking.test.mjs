@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { availableArrivalTimes, bookableServices } from "../lib/public-booking.ts";
+import { availableArrivalTimes, bookableServices, parsePublicAvailability, serviceAvailabilityState } from "../lib/public-booking.ts";
+import { bookingCopy, bookingErrorKey } from "../lib/i18n/booking.ts";
 
 const freeTables = { pranzo: true, cena: true };
 
@@ -38,4 +39,69 @@ test("la cena parte dalle 19:30, anche quando si prenota prima dell’apertura",
 test("il controllo degli orari non rende disponibili servizi pieni o date passate", () => {
   assert.deepEqual(bookableServices("2026-10-02", { pranzo: false, cena: false }, "2026-10-01", "10:00"), { pranzo: false, cena: false });
   assert.deepEqual(bookableServices("2026-10-02", freeTables, "2026-10-03", "10:00"), { pranzo: false, cena: false });
+});
+
+test("un blocco disabilita solo il servizio scelto e conserva i metadati per il cliente", () => {
+  const availability = { ...freeTables, blocked: { pranzo: true, cena: false } };
+  const result = bookableServices("2026-10-02", availability, "2026-10-01", "10:00");
+  assert.deepEqual(result, { pranzo: false, cena: true, blocked: { pranzo: true, cena: false } });
+  assert.deepEqual(bookableServices("2026-10-02", result, "2026-10-01", "10:00"), result);
+  assert.deepEqual(availability, { ...freeTables, blocked: { pranzo: true, cena: false } });
+});
+
+test("bloccare entrambi i servizi impedisce le nuove richieste anche con tavoli liberi", () => {
+  const availability = { ...freeTables, blocked: { pranzo: true, cena: true } };
+  assert.deepEqual(bookableServices("2026-10-02", availability, "2026-10-01", "10:00"), {
+    pranzo: false, cena: false, blocked: { pranzo: true, cena: true },
+  });
+});
+
+test("la riapertura ripristina solo i servizi con tavoli liberi e orari ancora prenotabili", () => {
+  const availability = { pranzo: false, cena: true, blocked: { pranzo: false, cena: false } };
+  assert.deepEqual(bookableServices("2026-10-02", availability, "2026-10-02", "22:00"), {
+    pranzo: false, cena: false, blocked: { pranzo: false, cena: false },
+  });
+  assert.deepEqual(bookableServices("2026-10-02", availability, "2026-10-01", "10:00"), availability);
+});
+
+test("la risposta di disponibilità richiede esplicitamente lo stato dei blocchi", () => {
+  const availability = { pranzo: false, cena: true, blocked: { pranzo: true, cena: false } };
+  assert.deepEqual(parsePublicAvailability(availability), availability);
+  for (const response of [null, [], freeTables, { ...availability, pranzo: "true" },
+    { ...availability, blocked: null }, { ...availability, blocked: { pranzo: true } },
+    { ...availability, blocked: { pranzo: "false", cena: false } }]) {
+    assert.equal(parsePublicAvailability(response), null);
+  }
+});
+
+test("l’interfaccia distingue sospeso, completo, controllo in corso e controllo fallito", () => {
+  const date = "2026-10-02";
+  const today = "2026-10-01";
+  const now = "10:00";
+  const availability = { pranzo: false, cena: false, blocked: { pranzo: true, cena: false } };
+  assert.equal(serviceAvailabilityState(date, "pranzo", availability, false, today, now), "paused");
+  assert.equal(serviceAvailabilityState(date, "cena", availability, false, today, now), "full");
+  assert.equal(serviceAvailabilityState(date, "pranzo", null, true, today, now), "checking");
+  assert.equal(serviceAvailabilityState(date, "pranzo", null, false, today, now), "unavailable");
+  assert.equal(serviceAvailabilityState(date, "cena", { ...availability, cena: true }, false, today, now), "available");
+  assert.equal(serviceAvailabilityState("2026-10-08", "pranzo", availability, false, today, now), "closed");
+  assert.equal(serviceAvailabilityState(date, "pranzo", availability, false, date, "14:00"), "ended");
+});
+
+test("un servizio sospeso durante la compilazione produce l’errore tradotto corretto nelle quattro lingue", () => {
+  const message = "Le prenotazioni online per questo servizio sono sospese. Scegli un’altra opzione.";
+  const key = bookingErrorKey(message, "bookingFailed");
+  assert.equal(key, "servicePaused");
+  const expected = {
+    it: "Le prenotazioni online per questo servizio sono sospese. Scegli un’altra opzione.",
+    en: "Online booking for this service is paused. Choose another option.",
+    es: "Las reservas en línea para este servicio están suspendidas. Elige otra opción.",
+    fr: "Les réservations en ligne pour ce service sont suspendues. Choisissez une autre option.",
+  };
+  for (const [language, copy] of Object.entries(bookingCopy)) {
+    assert.equal(copy.errors[key], expected[language]);
+    assert.notEqual(copy.errors[key], copy.errors.serviceFull);
+    assert.notEqual(copy.paused, copy.full);
+    assert.notEqual(copy.unavailable, copy.full);
+  }
 });

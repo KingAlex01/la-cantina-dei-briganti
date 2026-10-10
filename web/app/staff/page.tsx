@@ -8,6 +8,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseClient } from "../../lib/supabase/client";
 import { MESSAGE_TEMPLATES, renderMessageTemplate } from "../../lib/notifications/templates";
 import NotificationsPanel from "./notifications-panel";
+import BookingControls from "./booking-controls";
 import { isServiceOpenOnDate } from "../../lib/public-booking";
 import {
   CUSTOMER_TAGS, SERVICE_TIMES, STATUS_LABEL, dateLabel, defaultServiceInRome, readableError,
@@ -326,11 +327,11 @@ export default function StaffPage() {
     const digits = (reservation.phone ?? "").replace(/\D/g, "").replace(/^00/, "");
     const number = /^3\d{9}$/.test(digits) ? `39${digits}` : /^393\d{9}$/.test(digits) ? digits : "";
     if (!number) return null;
-    const firstName = reservation.name.trim().split(/\s+/)[0];
+    const customerName = reservation.name.trim().replace(/\s+/g, " ");
     const people = `${reservation.party_size} ${reservation.party_size === 1 ? "persona" : "persone"}`;
     const message = rejected
-      ? `Ciao ${firstName}, purtroppo non possiamo accettare la tua richiesta da La cantina dei briganti per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Contattaci per valutare insieme un’altra data o un altro orario.`
-      : `Ciao ${firstName}, la tua prenotazione da La cantina dei briganti è confermata per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Ti aspettiamo!`;
+      ? `Ciao ${customerName}, purtroppo non possiamo accettare la tua richiesta da La cantina dei briganti per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Contattaci per valutare insieme un’altra data o un altro orario.`
+      : `Ciao ${customerName}, la tua prenotazione da La cantina dei briganti è confermata per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Ti aspettiamo!`;
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   }
 
@@ -410,6 +411,8 @@ export default function StaffPage() {
               <button className={styles.primaryButton} disabled={closedService} onClick={() => setBooking({})}>+ Nuova prenotazione</button>
             </div>
           </div>
+
+          <BookingControls key={date} client={client} date={date} />
 
           {recentOnline.length > 0 && <section className={styles.onlinePanel} aria-label="Prenotazioni online recenti">
             <div className={styles.onlinePanelHead}><strong>Richieste online in attesa</strong><span>Seleziona una richiesta per accettarla o rifiutarla nella Sala.</span></div>

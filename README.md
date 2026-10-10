@@ -100,6 +100,50 @@ cellulare italiano, lo staff può aprire WhatsApp con la conferma precompilata:
 il messaggio va controllato e inviato manualmente. Le modifiche alle
 prenotazioni non inviano messaggi automatici.
 
+## Bloccare le prenotazioni online per una data
+
+In **Staff → Sala e prenotazioni**, scegliere la data. Il riquadro
+**Prenotazioni online** mostra lo stato di pranzo e cena e permette di:
+
+- usare **Blocca pranzo** o **Blocca cena** per sospendere un solo servizio;
+- usare **Blocca intera giornata** per sospenderli entrambi con una sola operazione;
+- usare **Riattiva pranzo**, **Riattiva cena** o **Riattiva giornata** per rimuovere i blocchi.
+
+Il blocco riguarda le nuove richieste online della sola data selezionata.
+Richieste già ricevute, approvazioni e prenotazioni manuali restano gestibili.
+Riattivare un servizio rispetta i normali giorni di apertura, gli orari e i
+tavoli disponibili. Le date passate sono consultabili ma non modificabili.
+Lo stato si aggiorna sugli altri dispositivi staff tramite Realtime e al
+ritorno nella pagina.
+
+Il cliente vede **Prenotazioni online sospese**, distinto da **Completo**,
+anche nelle altre lingue. Se ha già aperto il modulo quando lo staff blocca
+il servizio, il database rifiuta la nuova richiesta e il sito lo riporta
+alla scelta del servizio conservando i contatti inseriti. Non parte alcuna email.
+
+Questa funzione richiede la migrazione
+`supabase/migrations/20261010000100_booking_blocks.sql`, da applicare prima
+della pubblicazione del codice. Finché il database non è aggiornato, il nuovo
+codice mantiene sospese le richieste online. La migrazione aggiunge una tabella
+con una riga per data/servizio bloccato, una funzione riservata allo staff e
+un controllo transazionale comune ai percorsi di inserimento online.
+Non modifica le prenotazioni presenti e non aggiunge dipendenze all'app.
+
+Per verificare le regole pubbliche e gli endpoint con servizi simulati:
+
+```powershell
+cd web
+node --test scripts/public-booking.test.mjs scripts/public-booking-api.test.mjs
+```
+
+`supabase/verify_booking_blocks.sql` verifica permessi, blocchi, riattivazioni
+e conservazione delle prenotazioni su un database **locale** con tutte le
+migrazioni applicate. Va eseguito come `postgres`; i dati di prova vengono
+annullati dal `ROLLBACK` finale. Non invia email.
+
+La modifica del 10 ottobre 2026 è locale: migrazione remota e pubblicazione
+restano da eseguire separatamente.
+
 ## Conferma email facoltativa
 
 L'indirizzo email nel modulo pubblico è facoltativo. Se il cliente lo inserisce
