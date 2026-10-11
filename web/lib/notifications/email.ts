@@ -12,7 +12,14 @@ export async function sendStaffNewRequestEmail(
 ): Promise<"inviata" | "non_configurata" | "fallita"> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM_EMAIL;
-  const recipient = process.env.RESEND_STAFF_EMAIL || "prenotazioni@lacantinadeibriganti.com";
+  const configuredRecipients = (process.env.RESEND_STAFF_EMAIL ?? "")
+    .split(",").map((email) => email.trim().toLowerCase()).filter(Boolean);
+  // Mantiene la copia Gmail anche con la configurazione server precedente.
+  const recipients = [...new Set([
+    ...(configuredRecipients.length ? configuredRecipients : ["prenotazioni@lacantinadeibriganti.com"]),
+    "la.cantina.dei.briganti23@gmail.com",
+  ])];
+  const recipient = recipients.join(", ");
   if (!apiKey || !from) {
     console.error("Avviso staff: configurazione Resend incompleta.", {
       missingApiKey: !apiKey, missingFrom: !from,
@@ -57,7 +64,7 @@ export async function sendStaffNewRequestEmail(
         "Content-Type": "application/json",
         "Idempotency-Key": `richiesta-${reservation.id}`,
       },
-      body: JSON.stringify({ from, to: [recipient], subject, text: body }),
+      body: JSON.stringify({ from, to: recipients, subject, text: body }),
       signal: AbortSignal.timeout(10000),
     });
     const result = await response.json().catch(() => null);

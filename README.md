@@ -141,10 +141,22 @@ e conservazione delle prenotazioni su un database **locale** con tutte le
 migrazioni applicate. Va eseguito come `postgres`; i dati di prova vengono
 annullati dal `ROLLBACK` finale. Non invia email.
 
-La modifica del 10 ottobre 2026 è locale: migrazione remota e pubblicazione
-restano da eseguire separatamente.
+Il 10 ottobre 2026, dopo il push su `main` eseguito dal titolare, la migrazione
+è stata applicata al progetto Supabase collegato. Verificati permessi, RLS,
+trigger, Realtime e risposta della disponibilità sul dominio pubblico
+(HTTP 200 con il campo `blocked`). Tutte le migrazioni risultano allineate.
+I controlli online sono stati in sola lettura: nessuna prenotazione di prova,
+attivazione di blocchi o email inviata.
 
 ## Conferma email facoltativa
+
+Gli avvisi delle nuove richieste allo staff vengono inviati a
+`prenotazioni@lacantinadeibriganti.com` e `la.cantina.dei.briganti23@gmail.com`.
+`RESEND_STAFF_EMAIL` può contenere più destinatari separati da virgola; se manca
+si usa la casella prenotazioni. La copia Gmail è sempre inclusa, anche con la
+precedente configurazione a un solo destinatario, senza invii duplicati.
+Il registro Notifiche riporta entrambi i destinatari nello stesso tentativo.
+La modifica richiede la pubblicazione del codice su Netlify per essere attiva online.
 
 L'indirizzo email nel modulo pubblico è facoltativo. Se il cliente lo inserisce
 e Resend è configurato, l'app invia la conferma e registra l'esito in
