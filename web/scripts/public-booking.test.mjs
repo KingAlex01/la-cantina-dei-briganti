@@ -5,6 +5,27 @@ import { bookingCopy, bookingErrorKey } from "../lib/i18n/booking.ts";
 
 const freeTables = { pranzo: true, cena: true };
 
+test("l’apertura straordinaria abilita solo il servizio scelto e conserva i metadati", () => {
+  const availability = { ...freeTables, blocked: { pranzo: false, cena: false }, opened: { pranzo: true, cena: false } };
+  const result = bookableServices("2026-10-08", availability, "2026-10-01", "10:00");
+  assert.deepEqual(result, { ...availability, cena: false });
+  assert.deepEqual(parsePublicAvailability(result), result);
+  assert.equal(availableArrivalTimes("2026-10-08", "pranzo", "2026-10-01", "10:00", true).length, 4);
+  assert.equal(serviceAvailabilityState("2026-10-08", "pranzo", result, false, "2026-10-01", "10:00"), "available");
+  assert.equal(serviceAvailabilityState("2026-10-08", "cena", result, false, "2026-10-01", "10:00"), "closed");
+  assert.equal(serviceAvailabilityState("2026-10-08", "pranzo", null, true, "2026-10-01", "10:00"), "checking");
+});
+
+test("apertura straordinaria: tavoli pieni, orari trascorsi e blocchi restano vincolanti", () => {
+  const availability = { ...freeTables, blocked: { pranzo: false, cena: false }, opened: { pranzo: true, cena: true } };
+  assert.deepEqual(bookableServices("2026-10-08", availability, "2026-10-08", "14:00"), { ...availability, pranzo: false });
+  assert.equal(bookableServices("2026-10-08", { ...availability, pranzo: false }, "2026-10-01", "10:00").pranzo, false);
+  assert.equal(bookableServices("2026-10-08", { ...availability, blocked: { pranzo: true, cena: false } }, "2026-10-01", "10:00").pranzo, false);
+  assert.equal(bookableServices("2026-10-04", availability, "2026-10-01", "10:00").cena, true);
+  assert.equal(serviceAvailabilityState("2026-10-08", "pranzo", { ...availability, pranzo: false }, false, "2026-10-01", "10:00"), "full");
+  assert.equal(serviceAvailabilityState("2026-10-08", "pranzo", availability, false, "2026-10-08", "14:00"), "ended");
+});
+
 test("giovedì: nessun servizio o orario, anche se il database restituisce tavoli liberi", () => {
   assert.deepEqual(bookableServices("2026-10-01", freeTables, "2026-10-01", "10:00"), { pranzo: false, cena: false });
   assert.deepEqual(availableArrivalTimes("2026-10-08", "pranzo", "2026-10-01", "10:00"), []);
@@ -69,7 +90,9 @@ test("la risposta di disponibilità richiede esplicitamente lo stato dei blocchi
   assert.deepEqual(parsePublicAvailability(availability), availability);
   for (const response of [null, [], freeTables, { ...availability, pranzo: "true" },
     { ...availability, blocked: null }, { ...availability, blocked: { pranzo: true } },
-    { ...availability, blocked: { pranzo: "false", cena: false } }]) {
+    { ...availability, blocked: { pranzo: "false", cena: false } },
+    { ...availability, opened: null }, { ...availability, opened: { pranzo: true } },
+    { ...availability, opened: { pranzo: "true", cena: false } }]) {
     assert.equal(parsePublicAvailability(response), null);
   }
 });

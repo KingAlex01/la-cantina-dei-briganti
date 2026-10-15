@@ -150,6 +150,7 @@ export const bookingCopy: Record<SiteLanguage, BookingCopy> = {
 };
 
 const serverErrors: Record<string, BookingErrorKey> = {
+  "Il ristorante è chiuso nella data selezionata. Scegli un’altra data.": "closedDate",
   "Scegli una data e un numero di persone validi.": "invalidAvailability",
   "Non riusciamo a controllare i tavoli. Riprova tra poco.": "availabilityFailed",
   "Richiesta non consentita.": "forbidden",

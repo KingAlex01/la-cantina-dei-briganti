@@ -16,7 +16,7 @@ export const SERVICE_TIMES: Record<Service, string[]> = {
 };
 
 export type Availability = Record<Service, boolean>;
-export type PublicAvailability = Availability & { blocked: Availability };
+export type PublicAvailability = Availability & { blocked: Availability; opened?: Availability };
 
 export function parsePublicAvailability(value: unknown): PublicAvailability | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -25,37 +25,45 @@ export function parsePublicAvailability(value: unknown): PublicAvailability | nu
       !result.blocked || typeof result.blocked !== "object" || Array.isArray(result.blocked)) return null;
   const blocked = result.blocked as Record<string, unknown>;
   if (typeof blocked.pranzo !== "boolean" || typeof blocked.cena !== "boolean") return null;
-  return { pranzo: result.pranzo, cena: result.cena, blocked: { pranzo: blocked.pranzo, cena: blocked.cena } };
+  const availability: PublicAvailability = { pranzo: result.pranzo, cena: result.cena, blocked: { pranzo: blocked.pranzo, cena: blocked.cena } };
+  if (result.opened !== undefined) {
+    if (!result.opened || typeof result.opened !== "object" || Array.isArray(result.opened)) return null;
+    const opened = result.opened as Record<string, unknown>;
+    if (typeof opened.pranzo !== "boolean" || typeof opened.cena !== "boolean") return null;
+    availability.opened = { pranzo: opened.pranzo, cena: opened.cena };
+  }
+  return availability;
 }
 
-export function isServiceOpenOnDate(date: string, service: Service) {
+export function isServiceOpenOnDate(date: string, service: Service, opened = false) {
   const day = new Date(`${date}T12:00:00Z`).getUTCDay();
-  return Number.isInteger(day) && (OPENING_HOURS[day]?.[service] ?? false);
+  return Number.isInteger(day) && (opened || (OPENING_HOURS[day]?.[service] ?? false));
 }
 
-export function availableArrivalTimes(date: string, service: Service, today = todayInRome(), now = currentTimeInRome()) {
-  if (date < today || !isServiceOpenOnDate(date, service)) return [];
+export function availableArrivalTimes(date: string, service: Service, today = todayInRome(), now = currentTimeInRome(), opened = false) {
+  if (date < today || !isServiceOpenOnDate(date, service, opened)) return [];
   return SERVICE_TIMES[service].filter((slot) => date !== today || slot > now);
 }
 
 export function bookableServices(date: string, availability: PublicAvailability, today?: string, now?: string): PublicAvailability;
 export function bookableServices(date: string, availability: Availability, today?: string, now?: string): Availability;
-export function bookableServices(date: string, availability: Availability & { blocked?: Availability }, today = todayInRome(), now = currentTimeInRome()) {
+export function bookableServices(date: string, availability: Availability & { blocked?: Availability; opened?: Availability }, today = todayInRome(), now = currentTimeInRome()) {
   const services = {
-    pranzo: availability.pranzo === true && availability.blocked?.pranzo !== true && availableArrivalTimes(date, "pranzo", today, now).length > 0,
-    cena: availability.cena === true && availability.blocked?.cena !== true && availableArrivalTimes(date, "cena", today, now).length > 0,
+    pranzo: availability.pranzo === true && availability.blocked?.pranzo !== true && availableArrivalTimes(date, "pranzo", today, now, availability.opened?.pranzo).length > 0,
+    cena: availability.cena === true && availability.blocked?.cena !== true && availableArrivalTimes(date, "cena", today, now, availability.opened?.cena).length > 0,
   };
-  return availability.blocked ? { ...services, blocked: { ...availability.blocked } } : services;
+  return { ...services, ...(availability.blocked ? { blocked: { ...availability.blocked } } : {}),
+    ...(availability.opened ? { opened: { ...availability.opened } } : {}) };
 }
 
 export type ServiceAvailabilityState = "closed" | "ended" | "checking" | "unavailable" | "paused" | "available" | "full";
 
 export function serviceAvailabilityState(date: string, service: Service, availability: PublicAvailability | null,
   checking: boolean, today = todayInRome(), now = currentTimeInRome()): ServiceAvailabilityState {
-  if (!isServiceOpenOnDate(date, service)) return "closed";
-  if (!availableArrivalTimes(date, service, today, now).length) return "ended";
   if (checking) return "checking";
   if (!availability) return "unavailable";
+  if (!isServiceOpenOnDate(date, service, availability.opened?.[service])) return "closed";
+  if (!availableArrivalTimes(date, service, today, now, availability.opened?.[service]).length) return "ended";
   if (availability.blocked[service]) return "paused";
   return availability[service] ? "available" : "full";
 }

@@ -69,11 +69,11 @@ function availabilityRequest(selectedDate = date) {
   return new Request(`http://localhost/api/public/availability?date=${selectedDate}&party=2`);
 }
 
-function reservationRequest() {
+function reservationRequest(overrides = {}) {
   return new Request("http://localhost/api/public/reservations", {
     method: "POST", headers: { "Content-Type": "application/json", Origin: "http://localhost" },
     body: JSON.stringify({ date, service: "pranzo", time: "12:30", party: 2,
-      name: "Giulia Bianchi", phone: "+39 333 123 4567", email: "", notes: "", notesConsent: false }),
+      name: "Giulia Bianchi", phone: "+39 333 123 4567", email: "", notes: "", notesConsent: false, ...overrides }),
   });
 }
 
@@ -98,14 +98,42 @@ test("uno schema vecchio o un errore Supabase non rendono prenotabili i servizi"
   }
 });
 
-test("un giorno normalmente chiuso non richiede una lettura del database", async () => {
+test("un giorno normalmente chiuso legge le aperture straordinarie dal database", async () => {
   const closedDate = Array.from({ length: 7 }, (_, offset) => addDays(todayInRome(), offset + 1))
     .find((value) => !isServiceOpenOnDate(value, "pranzo") && !isServiceOpenOnDate(value, "cena"));
-  const state = scenario();
+  const availability = { pranzo: true, cena: false, blocked: { pranzo: false, cena: false }, opened: { pranzo: true, cena: false } };
+  const state = scenario({ availability });
   const response = await GET(availabilityRequest(closedDate));
   assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), availability);
+  assert.equal(state.availabilityCalls, 1);
+});
+
+test("il calendario chiuso senza eccezioni resta non prenotabile", async () => {
+  const closedDate = Array.from({ length: 7 }, (_, offset) => addDays(todayInRome(), offset + 1))
+    .find((value) => !isServiceOpenOnDate(value, "pranzo"));
+  scenario();
+  const response = await GET(availabilityRequest(closedDate));
   assert.deepEqual(await response.json(), { pranzo: false, cena: false, blocked: { pranzo: false, cena: false } });
-  assert.equal(state.availabilityCalls, 0);
+});
+
+test("il POST consente l’apertura straordinaria e lascia il controllo finale al database", async () => {
+  const closedDate = Array.from({ length: 7 }, (_, offset) => addDays(todayInRome(), offset + 1))
+    .find((value) => !isServiceOpenOnDate(value, "pranzo"));
+  const state = scenario();
+  const response = await POST(reservationRequest({ date: closedDate }));
+  assert.equal(response.status, 201);
+  assert.equal((await response.json()).date, closedDate);
+  assert.equal(state.reservationCalls, 1);
+});
+
+test("un’apertura rimossa durante la compilazione risponde 409 senza email", async (context) => {
+  context.mock.method(console, "error", () => {});
+  const state = scenario({ reservationError: { code: "P0001", message: "Il ristorante è chiuso per questo servizio" } });
+  const response = await POST(reservationRequest());
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).error, "Il ristorante è chiuso nella data selezionata. Scegli un’altra data.");
+  assert.equal(state.emails, 0);
 });
 
 test("una sospensione sopraggiunta durante la compilazione risponde 409 senza email", async (context) => {

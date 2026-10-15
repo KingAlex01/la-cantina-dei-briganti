@@ -10,6 +10,7 @@ import { MESSAGE_TEMPLATES, renderMessageTemplate } from "../../lib/notification
 import NotificationsPanel from "./notifications-panel";
 import BookingControls from "./booking-controls";
 import { isServiceOpenOnDate } from "../../lib/public-booking";
+import type { Availability } from "../../lib/public-booking";
 import {
   CUSTOMER_TAGS, SERVICE_TIMES, STATUS_LABEL, dateLabel, defaultServiceInRome, readableError,
   timeLabel, todayInRome,
@@ -38,6 +39,7 @@ export default function StaffPage() {
   const [notice, setNotice] = useState("");
   const [tab, setTab] = useState<"sala" | "clienti" | "notifiche">("sala");
   const [date, setDate] = useState(todayInRome);
+  const [bookingOpenings, setBookingOpenings] = useState<{ date: string; opened: Availability } | null>(null);
   const [service, setService] = useState<Service>(defaultServiceInRome);
   const [tables, setTables] = useState<DiningTable[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -61,7 +63,7 @@ export default function StaffPage() {
   const [notesDraft, setNotesDraft] = useState("");
   const tableDrag = useRef<TableDrag | null>(null);
   const loadSequence = useRef(0);
-  const closedService = !isServiceOpenOnDate(date, service);
+  const closedService = !isServiceOpenOnDate(date, service, bookingOpenings?.date === date && bookingOpenings.opened[service]);
   const customerId = selectedCustomer?.id;
 
   useEffect(() => {
@@ -412,7 +414,7 @@ export default function StaffPage() {
             </div>
           </div>
 
-          <BookingControls key={date} client={client} date={date} />
+          <BookingControls key={date} client={client} date={date} onOpeningsChange={setBookingOpenings} />
 
           {recentOnline.length > 0 && <section className={styles.onlinePanel} aria-label="Prenotazioni online recenti">
             <div className={styles.onlinePanelHead}><strong>Richieste online in attesa</strong><span>Seleziona una richiesta per accettarla o rifiutarla nella Sala.</span></div>

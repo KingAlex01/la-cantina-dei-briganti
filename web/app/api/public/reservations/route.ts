@@ -1,4 +1,4 @@
-import { SERVICE_TIMES, availableArrivalTimes, isServiceOpenOnDate, validDate, validPartySize } from "../../../../lib/public-booking";
+import { SERVICE_TIMES, availableArrivalTimes, currentTimeInRome, todayInRome, validDate, validPartySize } from "../../../../lib/public-booking";
 import type { Service } from "../../../../lib/public-booking";
 import { createServerSupabaseClient } from "../../../../lib/supabase/server";
 import { sendStaffNewRequestEmail } from "../../../../lib/notifications/email";
@@ -45,7 +45,6 @@ export async function POST(request: Request) {
   if (!validDate(date) || !validPartySize(party) ||
       (service !== "pranzo" && service !== "cena") ||
       typeof time !== "string" || !SERVICE_TIMES[service as Service].includes(time) ||
-      !isServiceOpenOnDate(date as string, service as Service) ||
       !/^\S+\s+\S+/.test(cleanedName) || cleanedName.length > 120 ||
       cleanedPhone.length > 30 || !/^\d{6,15}$/.test(phoneKey) ||
       cleanedEmail.length > 254 || (cleanedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanedEmail)) ||
@@ -53,7 +52,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "Controlla data, orario e dati di contatto." }, { status: 400 });
   }
 
-  if (!availableArrivalTimes(date as string, service as Service).includes(time as string)) {
+  // Il calendario e le aperture straordinarie sono verificati nel database,
+  // sotto lo stesso lock usato dallo staff per cambiare lo stato del servizio.
+  if (!availableArrivalTimes(date as string, service as Service, todayInRome(), currentTimeInRome(), true).includes(time as string)) {
     return Response.json({ error: "L’orario scelto è già passato. Scegline un altro." }, { status: 409 });
   }
 
@@ -83,6 +84,9 @@ export async function POST(request: Request) {
       });
       if (error.message.includes("Prenotazioni online sospese per questo servizio")) {
         return Response.json({ error: "Le prenotazioni online per questo servizio sono sospese. Scegli un’altra opzione." }, { status: 409 });
+      }
+      if (error.message.includes("Il ristorante è chiuso per questo servizio")) {
+        return Response.json({ error: "Il ristorante è chiuso nella data selezionata. Scegli un’altra data." }, { status: 409 });
       }
       if (error.message.includes("Nessun tavolo disponibile") || error.code === "23505") {
         return Response.json({ error: "Il servizio si è appena riempito. Scegli un'altra opzione." }, { status: 409 });

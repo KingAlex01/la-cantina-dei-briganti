@@ -9,10 +9,6 @@ export async function GET(request: Request) {
     return Response.json({ error: "Scegli una data e un numero di persone validi." }, { status: 400 });
   }
   const selectedDate = date as string;
-  const scheduled = bookableServices(selectedDate, { pranzo: true, cena: true });
-  if (!scheduled.pranzo && !scheduled.cena) {
-    return Response.json({ ...scheduled, blocked: { pranzo: false, cena: false } }, { headers: { "Cache-Control": "no-store" } });
-  }
   try {
     const { data, error } = await createServerSupabaseClient().rpc("public_available_services", {
       p_date: date, p_party_size: party,

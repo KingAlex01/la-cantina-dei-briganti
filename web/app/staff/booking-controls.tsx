@@ -3,15 +3,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { isServiceOpenOnDate } from "../../lib/public-booking";
+import type { Availability } from "../../lib/public-booking";
 import { dateLabel, todayInRome } from "../../lib/staff/types";
 import type { Service } from "../../lib/staff/types";
 import styles from "./booking-controls.module.css";
 
 type Blocks = Record<Service, boolean>;
+type Action = "open" | "block" | "reset";
 const services: Service[] = ["pranzo", "cena"];
 
-export default function BookingControls({ client, date }: { client: SupabaseClient; date: string }) {
+export default function BookingControls({ client, date, onOpeningsChange }: {
+  client: SupabaseClient; date: string; onOpeningsChange: (value: { date: string; opened: Availability } | null) => void;
+}) {
   const [blocked, setBlocked] = useState<Blocks | null>(null);
+  const [opened, setOpened] = useState<Availability>({ pranzo: false, cena: false });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -24,20 +29,27 @@ export default function BookingControls({ client, date }: { client: SupabaseClie
     const request = ++sequence.current;
     try {
       const { data, error: loadError } = await client.from("booking_blocks")
-        .select("service").eq("date", date);
+        .select("service, blocked").eq("date", date);
       if (!mounted.current || request !== sequence.current) return;
-      if (loadError || !Array.isArray(data)) throw new Error("Controllo non disponibile");
+      if (loadError || !Array.isArray(data) || data.some((row) => typeof row.blocked !== "boolean")) throw new Error("Controllo non disponibile");
       setBlocked({
-        pranzo: data.some((row) => row.service === "pranzo"),
-        cena: data.some((row) => row.service === "cena"),
+        pranzo: data.some((row) => row.service === "pranzo" && row.blocked),
+        cena: data.some((row) => row.service === "cena" && row.blocked),
       });
+      const nextOpened = {
+        pranzo: data.some((row) => row.service === "pranzo" && !row.blocked),
+        cena: data.some((row) => row.service === "cena" && !row.blocked),
+      };
+      setOpened(nextOpened);
+      onOpeningsChange({ date, opened: nextOpened });
       setError("");
     } catch {
       if (!mounted.current || request !== sequence.current) return;
       setBlocked(null);
-      setError("Non riusciamo a controllare i blocchi delle prenotazioni online. Riprova.");
+      onOpeningsChange(null);
+      setError("Non riusciamo a controllare lo stato delle prenotazioni online. Riprova.");
     }
-  }, [client, date]);
+  }, [client, date, onOpeningsChange]);
 
   useEffect(() => {
     mounted.current = true;
@@ -59,7 +71,7 @@ export default function BookingControls({ client, date }: { client: SupabaseClie
     };
   }, [client, date, load]);
 
-  async function save(selected: Service[], value: boolean) {
+  async function save(selected: Service[], action: Action) {
     if (savingRef.current || blocked === null || pastDate) return;
     savingRef.current = true;
     sequence.current += 1;
@@ -68,17 +80,21 @@ export default function BookingControls({ client, date }: { client: SupabaseClie
     setNotice("");
     let failed = false;
     try {
-      const { data, error: saveError } = await client.rpc("set_booking_block", {
-        p_date: date, p_services: selected, p_blocked: value,
+      const { data, error: saveError } = await client.rpc("set_booking_override", {
+        p_date: date, p_services: selected, p_action: action,
       });
       if (saveError || data?.date !== date ||
-          typeof data?.blocked?.pranzo !== "boolean" || typeof data?.blocked?.cena !== "boolean") {
+          typeof data?.blocked?.pranzo !== "boolean" || typeof data?.blocked?.cena !== "boolean" ||
+          typeof data?.opened?.pranzo !== "boolean" || typeof data?.opened?.cena !== "boolean") {
         throw new Error("Salvataggio non confermato");
       }
       if (!mounted.current) return;
       setBlocked(data.blocked as Blocks);
+      setOpened(data.opened as Availability);
+      onOpeningsChange({ date, opened: data.opened as Availability });
       const scope = selected.length === 2 ? "pranzo e cena" : selected[0];
-      setNotice(`Prenotazioni online ${value ? "bloccate" : "riattivate"} per ${scope} di ${dateLabel(date)}.`);
+      setNotice(action === "reset" ? `Calendario normale ripristinato per ${scope} di ${dateLabel(date)}.` :
+        `Prenotazioni online ${action === "block" ? "bloccate" : "aperte"} per ${scope} di ${dateLabel(date)}.`);
     } catch {
       failed = true;
     } finally {
@@ -95,38 +111,48 @@ export default function BookingControls({ client, date }: { client: SupabaseClie
   }
 
   const disabled = blocked === null || saving || pastDate;
+  const isOpen = (service: Service) => !blocked?.[service] && isServiceOpenOnDate(date, service, opened[service]);
+  const hasOverrides = services.some((service) => blocked?.[service] || opened[service]);
   return <section className={styles.panel} aria-labelledby="booking-controls-title" aria-busy={saving}>
     <div className={styles.heading}>
       <div><h2 id="booking-controls-title">Prenotazioni online</h2>
-        <p>Blocca le nuove richieste per {dateLabel(date)}.</p></div>
+        <p>Apri o blocca le nuove richieste per {dateLabel(date)}.</p></div>
       <div className={styles.dayActions}>
         <button type="button" className={styles.blockButton}
           disabled={disabled || (blocked?.pranzo && blocked?.cena)}
-          onClick={() => void save(services, true)}>Blocca intera giornata</button>
-        {(blocked?.pranzo || blocked?.cena) && <button type="button" className={styles.button}
-          disabled={disabled} onClick={() => void save(services, false)}>Riattiva giornata</button>}
+          onClick={() => void save(services, "block")}>Blocca intera giornata</button>
+        <button type="button" className={styles.button}
+          disabled={disabled || services.every(isOpen)} onClick={() => void save(services, "open")}>Apri intera giornata</button>
+        {hasOverrides && <button type="button" className={styles.button}
+          disabled={disabled} onClick={() => void save(services, "reset")}>Ripristina calendario</button>}
       </div>
     </div>
     <div className={styles.services}>
       {services.map((service) => {
         const isBlocked = blocked?.[service] === true;
-        const scheduled = isServiceOpenOnDate(date, service);
+        const active = isOpen(service);
+        const exceptional = opened[service] && !isServiceOpenOnDate(date, service);
         const label = service === "pranzo" ? "Pranzo" : "Cena";
-        return <div key={service} className={`${styles.service} ${isBlocked ? styles.blocked : ""}`}>
+        return <div key={service} className={`${styles.service} ${!active ? styles.blocked : ""}`}>
           <div><strong>{label}</strong><span role="status">
             {blocked === null ? "Stato non disponibile" : isBlocked ? "Prenotazioni bloccate" :
-              !scheduled ? "Chiuso da calendario" : "Prenotazioni attive"}
+              !active ? "Chiuso da calendario" : exceptional ? "Apertura straordinaria" : "Prenotazioni attive"}
           </span></div>
-          <button type="button" className={isBlocked ? styles.button : styles.blockButton}
-            disabled={disabled || (!scheduled && !isBlocked)} aria-pressed={isBlocked}
-            onClick={() => void save([service], !isBlocked)}>
-            {isBlocked ? `Riattiva ${service}` : `Blocca ${service}`}
-          </button>
+          <div className={styles.serviceActions}>
+            <button type="button" className={active ? styles.blockButton : styles.button}
+              disabled={disabled} onClick={() => void save([service], active ? "block" : "open")}>
+              {active ? `Blocca ${service}` : `Apri ${service}`}
+            </button>
+            {(isBlocked || opened[service]) && <button type="button" className={styles.button}
+              disabled={disabled} onClick={() => void save([service], "reset")} aria-label={`Ripristina calendario per ${service}`}>
+              Usa calendario
+            </button>}
+          </div>
         </div>;
       })}
     </div>
-    <p className={styles.hint}>Le richieste già ricevute restano gestibili. Puoi continuare a inserire prenotazioni manuali. La riattivazione rispetta i normali giorni di apertura.</p>
-    {pastDate && <p className={styles.hint}>Puoi modificare i blocchi soltanto da oggi in avanti.</p>}
+    <p className={styles.hint}>Le aperture e i blocchi valgono solo per questa data. Puoi aprire anche i servizi normalmente chiusi. Restano validi gli orari di prenotazione e i tavoli disponibili. Le richieste già ricevute restano gestibili.</p>
+    {pastDate && <p className={styles.hint}>Puoi modificare le prenotazioni online soltanto da oggi in avanti.</p>}
     {saving && <p className={styles.hint} role="status">Salvataggio in corso…</p>}
     {notice && <p className={styles.notice} role="status">{notice}</p>}
     {error && <div className={styles.error} role="alert"><span>{error}</span>

@@ -37,12 +37,13 @@ export default function BookingPage() {
   const [confirmation, setConfirmation] = useState<BookingConfirmation | null>(null);
   const [now, setNow] = useState(currentTimeInRome);
   const today = todayInRome();
-  const visibleTimes = availableArrivalTimes(date, service, today, now);
+  const visibleTimes = availableArrivalTimes(date, service, today, now, availability?.opened?.[service]);
   const bookableAvailability = bookableServices(date, availability ?? emptyAvailability, today, now);
-  const closedDate = !isServiceOpenOnDate(date, "pranzo") && !isServiceOpenOnDate(date, "cena");
+  const closedDate = step !== 1 && availability && !checking &&
+    !isServiceOpenOnDate(date, "pranzo", availability.opened?.pranzo) && !isServiceOpenOnDate(date, "cena", availability.opened?.cena);
   const dateUnavailableError = !validDate(date) ? "" : closedDate
     ? "closedDate"
-    : !availableArrivalTimes(date, "pranzo", today, now).length && !availableArrivalTimes(date, "cena", today, now).length
+    : !availableArrivalTimes(date, "pranzo", today, now, true).length && !availableArrivalTimes(date, "cena", today, now, true).length
       ? "endedToday"
       : "";
   const dateUnavailableMessage = dateUnavailableError ? t.errors[dateUnavailableError] : "";
@@ -92,8 +93,8 @@ export default function BookingPage() {
     if (!validDate(date)) { setError("invalidDate"); return; }
     if (dateUnavailableError) { setError(dateUnavailableError); return; }
     setTime("");
-    if (!availableArrivalTimes(date, service).length) {
-      setService(availableArrivalTimes(date, "cena").length ? "cena" : "pranzo");
+    if (!availableArrivalTimes(date, service, today, now, true).length) {
+      setService(availableArrivalTimes(date, "cena", today, now, true).length ? "cena" : "pranzo");
     }
     setAvailability(null);
     setChecking(true);
@@ -104,7 +105,7 @@ export default function BookingPage() {
   async function confirm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
-    if (!validDate(date) || !availableArrivalTimes(date, service).includes(time)) {
+    if (!validDate(date) || !availableArrivalTimes(date, service, todayInRome(), currentTimeInRome(), availability?.opened?.[service]).includes(time)) {
       setStep(1);
       setTime("");
       setAvailability(null);
@@ -233,7 +234,7 @@ export default function BookingPage() {
             <button className={styles.secondary} type="button" onClick={() => { setStep(1); setError(""); }}>{t.back}</button>
             <button className={styles.primary} type="button" disabled={!bookableAvailability[service] || !visibleTimes.includes(time) || checking}
               onClick={() => {
-                if (!availableArrivalTimes(date, service).includes(time)) { setTime(""); setError("pastTime"); return; }
+                if (!availableArrivalTimes(date, service, todayInRome(), currentTimeInRome(), availability?.opened?.[service]).includes(time)) { setTime(""); setError("pastTime"); return; }
                 setStep(3); setError("");
               }}>{t.enterDetails} <span aria-hidden="true">→</span></button>
           </div>
