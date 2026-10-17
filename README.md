@@ -202,6 +202,32 @@ mostra invece lo storico completo. La Sala apre automaticamente il pranzo o la
 cena corrente secondo l'ora di Mola di Bari e mostra le tre prenotazioni online più
 recenti: premendo **Apri servizio** si passa alla data e al servizio corretti.
 
+## Controllo periodico di Supabase
+
+`web/netlify/functions/supabase-keepalive.mjs` legge al massimo un ID dalle
+categorie pubbliche del menù ogni sei ore (00:17, 06:17, 12:17 e 18:17 UTC).
+La lettura genera attività reale sul database anche quando nessuno visita il
+sito e il PC è spento. Usa solo `NEXT_PUBLIC_SUPABASE_URL` e
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, senza dati cliente o chiavi privilegiate.
+Le due variabili devono essere disponibili anche alle Functions su Netlify.
+
+Il controllo si attiva soltanto dopo un deploy di produzione contenente questa
+funzione; una modifica locale o un'anteprima non attiva il calendario. Dopo il
+deploy, verificare in **Netlify → Functions → supabase-keepalive** la presenza
+della pianificazione e usare **Run now**: nei log deve comparire
+`Controllo Supabase completato: database raggiungibile.` Errori HTTP, risposte
+inattese e richieste oltre dieci secondi fanno fallire l'esecuzione nei log.
+
+Le Scheduled Functions sono disponibili anche nel piano gratuito Netlify e
+consumano le normali quote di richieste e calcolo. Il controllo può prevenire
+la pausa Supabase per scarsa attività, ma non garantisce disponibilità continua
+sui piani gratuiti e non riattiva un progetto già sospeso. Supabase indica che
+in genere bastano poche richieste al database al giorno; per escludere la pausa
+automatica serve un piano a pagamento.
+
+Riferimenti: [pausa dei progetti Supabase](https://supabase.com/docs/guides/platform/free-project-pausing)
+e [Scheduled Functions Netlify](https://docs.netlify.com/build/functions/scheduled-functions/).
+
 ## Applicare il database di sviluppo su Supabase
 
 La CLI è installata nel progetto `web/`. Eseguire questi comandi dalla

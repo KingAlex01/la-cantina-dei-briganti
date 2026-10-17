@@ -4,5 +4,8 @@
 # Continua a controllare RESEND_API_KEY e SUPABASE_SECRET_KEY.
 SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,RESEND_FROM_EMAIL"
 
+[functions]
+directory = "netlify/functions"
+
 [[plugins]]
 package = "@netlify/plugin-nextjs"
