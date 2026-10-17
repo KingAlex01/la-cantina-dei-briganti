@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       arrival_time: reservation.arrival_time, party_size: reservation.party_size,
       name: reservation.name, table_name: "", code: reservation.code,
     };
-    const status = await sendBookingConfirmationEmail(client, booking, reservation.email);
+    const status = await sendBookingConfirmationEmail(client, booking, reservation.email, false);
     return Response.json({ status }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("Conferma email staff fallita:", error);

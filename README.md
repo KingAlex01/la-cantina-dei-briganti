@@ -202,6 +202,81 @@ mostra invece lo storico completo. La Sala apre automaticamente il pranzo o la
 cena corrente secondo l'ora di Mola di Bari e mostra le tre prenotazioni online più
 recenti: premendo **Apri servizio** si passa alla data e al servizio corretti.
 
+## Gestione della prenotazione da parte del cliente
+
+`/prenota/gestisci` permette di cercare una prenotazione fatta sul sito con il
+solo codice, senza account. Le prenotazioni inserite dallo staff restano gestite
+tramite contatto diretto. Il collegamento compare in `/prenota`, dopo l'invio e
+nelle conferme online, anche con modelli email personalizzati già salvati.
+
+- **Cancellazione:** richiede una conferma esplicita, libera il tavolo, conserva
+  lo storico e avvisa le due caselle staff già configurate.
+- **Note:** mantiene lo stato della prenotazione e avvisa lo staff con testo
+  precedente e nuovo; nuove note non vuote richiedono consenso separato.
+- **Data, servizio, orario o persone:** annulla la precedente e crea una nuova
+  richiesta `in_attesa`, con nuovo codice e nuova approvazione manuale. Le due
+  scritture avvengono nella stessa transazione: se la nuova richiesta non può
+  essere salvata, la precedente resta valida. Funziona anche quando il tavolo
+  originale è l'ultimo disponibile per lo stesso servizio.
+
+Le operazioni sono disponibili prima dell'orario di arrivo e solo per richieste
+in attesa o confermate. La Sala distingue cancellazioni cliente, sostituzioni e
+richieste da riconfermare; mostra lo storico prima/dopo. Una prenotazione
+cancellata dal cliente non può essere ripristinata. Le versioni impediscono che
+una pagina aperta da tempo sovrascriva un aggiornamento cliente o staff.
+
+Ogni nuova prenotazione riceve un codice casuale di 16 caratteri. I codici
+storici di sei caratteri restano compatibili. Il codice è una chiave di accesso:
+chi lo conosce può consultare i dettagli e le note. Non viene salvato nei cookie
+o negli archivi persistenti del browser né incluso nei collegamenti pubblici.
+Se la risposta a una
+sostituzione va persa, una ricerca con il vecchio codice recupera la richiesta
+più recente. La ricerca restituisce solo riepilogo e note, senza telefono,
+email, tavolo o identificativi interni.
+
+L'API usa solo il server e RPC riservate a `service_role`; le tabelle sensibili
+restano protette da RLS. La gestione limita gli accessi a cinque al minuto e
+venti all'ora per IP con un controllo persistente nel database e un limite
+aggiuntivo Netlify. L'identità usa l'header Netlify
+`x-nf-client-connection-ip`; vengono salvate solo impronte HMAC, con scadenza
+un'ora e rimozione delle impronte scadute nelle richieste successive. Fuori da
+localhost la route richiede `NETLIFY=true` e un IP Netlify valido, altrimenti
+rifiuta l'accesso. Non usa `X-Forwarded-For` fornito dal visitatore.
+
+L'evento viene registrato nella stessa transazione della modifica. Il tentativo
+email ha una chiave univoca per evento e una chiave di idempotenza Resend.
+Un invio fallito non annulla la modifica: l'evento rimane nella Sala e il
+tentativo fallito nel registro Notifiche. Non è previsto un reinvio automatico;
+un arresto del processo prima del tentativo conserva comunque l'evento.
+
+**Attivazione online:** questa modifica locale richiede la migrazione
+`20261017154813_customer_reservation_management.sql` e un deploy del codice.
+Applicare prima le migrazioni mancanti dopo l'anteprima `db push --dry-run`, poi
+pubblicare il codice e ricaricare le pagine staff già aperte. Nessuna variabile
+segreta nuova è richiesta; i destinatari e le chiavi Supabase/Resend restano
+quelli esistenti. Verificare sul dominio pubblico un flusso completo concordato
+con il titolare, inclusi recapito email e aggiornamenti Realtime. Non creare
+prenotazioni o inviare email reali senza autorizzazione.
+
+Verifiche locali ripetibili da `web/`:
+
+```powershell
+node --test scripts/*.test.mjs
+npm run lint
+npm run build
+```
+
+`web/scripts/verify-customer-management.mjs` applica tutte le migrazioni in un
+Postgres PGlite isolato e verifica transazioni, permessi, consenso, recupero e
+limiti. Richiede `@electric-sql/pglite` disponibile localmente oppure
+`PGLITE_MODULE_PATH` impostato sul percorso assoluto di `dist/index.js` del
+modulo; non legge `.env.local` e non accede al database online. PGlite non prova
+gare reali tra connessioni parallele: eventuali deadlock con spostamenti diretti
+dello staff producono rollback e HTTP 409, richiedendo una rilettura dello stato.
+
+Riferimenti: [permessi delle funzioni Supabase](https://supabase.com/docs/guides/database/functions),
+[limiti Netlify](https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/).
+
 ## Controllo periodico di Supabase
 
 `web/netlify/functions/supabase-keepalive.mjs` legge al massimo un ID dalle

@@ -184,6 +184,15 @@ export default function BookingPage() {
       </aside>
 
       <section className={styles.card} aria-label={t.booking}>
+        {step < 4 && <Link href="/prenota/gestisci" className={styles.managePrompt}>
+          <span className={styles.managePromptIcon} aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="5" width="18" height="16" rx="3" /><path d="M16 3v4M8 3v4M3 11h18M8 16h3" />
+            </svg>
+          </span>
+          <span className={styles.managePromptText}><strong>{t.manageBooking}</strong><span>{t.manageHint}</span></span>
+          <svg className={styles.managePromptArrow} aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m9 5 7 7-7 7" /></svg>
+        </Link>}
         {step < 4 && <div className={styles.progress} aria-label={t.progress(step)}>
           {[1, 2, 3].map((number) => <span key={number} className={number <= step ? styles.progressOn : ""} />)}
         </div>}
@@ -293,7 +302,8 @@ export default function BookingPage() {
           <div className={styles.code}>{t.requestCode} <strong>{confirmation.code}</strong></div>
           <p className={styles.privacy} role="status">{t.keepCode} {email.trim() ? t.confirmationEmail(email.trim()) : t.confirmationPhone}</p>
           <p className={styles.note}>{t.responseNote}</p>
-          <BookingContacts code={confirmation.code} />
+          <p className={styles.privacy}><Link href="/prenota/gestisci">{t.manageBooking} →</Link></p>
+          <BookingContacts />
           <button className={styles.secondary} type="button" onClick={restart}>{t.newBooking}</button>
         </div>}
         {step < 4 && <aside className={styles.bookingHelp} aria-label={t.help}>

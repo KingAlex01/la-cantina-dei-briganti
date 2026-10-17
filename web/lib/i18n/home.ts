@@ -7,6 +7,7 @@ type HomeContent = {
   titleEmphasis: string;
   description: string;
   bookTable: string;
+  manageBooking: string;
   bookingNote: string;
   discoverMenu: string;
   storyKicker: string;
@@ -38,6 +39,7 @@ export const homeContent: Record<SiteLanguage, HomeContent> = {
     titleEmphasis: "Senza fretta.",
     description: "Scegli data, orario e numero di persone. Al resto pensiamo noi: il tavolo resta vostro per tutto il servizio.",
     bookTable: "Prenota un tavolo",
+    manageBooking: "Gestisci prenotazione",
     bookingNote: "La richiesta sarà confermata dopo l’approvazione dello staff. Lo staff esamina le richieste durante gli orari di apertura. Per prenotazioni in giornata o se non ricevi risposta, chiamaci.",
     discoverMenu: "Scopri il menù",
     storyKicker: "La nostra storia",
@@ -74,6 +76,7 @@ export const homeContent: Record<SiteLanguage, HomeContent> = {
     titleEmphasis: "Take your time.",
     description: "Choose your date, arrival time and number of guests. We’ll take care of the rest: your table is yours for the whole lunch or dinner service.",
     bookTable: "Book a table",
+    manageBooking: "Manage your booking",
     bookingNote: "Your request will be confirmed after staff approval. Our staff reviews requests during opening hours. For same-day bookings or if you haven’t received a reply, please call us.",
     discoverMenu: "Discover the menu",
     storyKicker: "Our story",
@@ -110,6 +113,7 @@ export const homeContent: Record<SiteLanguage, HomeContent> = {
     titleEmphasis: "Sin prisas.",
     description: "Elige la fecha, la hora y el número de personas. Del resto nos ocupamos nosotros: la mesa será vuestra durante todo el servicio.",
     bookTable: "Reserva una mesa",
+    manageBooking: "Gestiona tu reserva",
     bookingNote: "La solicitud se confirmará tras la aprobación del personal. Revisamos las solicitudes durante el horario de apertura. Para reservas del mismo día o si no recibes respuesta, llámanos.",
     discoverMenu: "Descubre el menú",
     storyKicker: "Nuestra historia",
@@ -146,6 +150,7 @@ export const homeContent: Record<SiteLanguage, HomeContent> = {
     titleEmphasis: "Prenez votre temps.",
     description: "Choisissez la date, l’heure et le nombre de personnes. Nous nous occupons du reste : votre table vous est réservée pour tout le service.",
     bookTable: "Réserver une table",
+    manageBooking: "Gérer votre réservation",
     bookingNote: "Votre demande sera confirmée après l’accord du personnel. Nous examinons les demandes pendant les heures d’ouverture. Pour réserver le jour même ou si vous ne recevez pas de réponse, appelez-nous.",
     discoverMenu: "Découvrir la carte",
     storyKicker: "Notre histoire",

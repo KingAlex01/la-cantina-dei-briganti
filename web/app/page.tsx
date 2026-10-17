@@ -55,6 +55,7 @@ export default async function Home() {
           {content.description}
         </p>
         <Link href="/prenota" className={styles.bookingLink}>{content.bookTable} <span aria-hidden="true">↗</span></Link>
+        <Link href="/prenota/gestisci" className={`${styles.menuLink} ${styles.manageBookingLink}`}>{content.manageBooking} <span aria-hidden="true">↗</span></Link>
         <p className={styles.bookingNote}>{content.bookingNote}</p>
         <Link href="/menu" className={styles.menuLink}>{content.discoverMenu} <span aria-hidden="true">↗</span></Link>
       </section>

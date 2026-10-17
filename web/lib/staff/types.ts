@@ -31,6 +31,10 @@ export type Reservation = {
   source: "online" | "staff";
   code: string;
   created_at: string;
+  management_version?: string;
+  replaces_id?: string | null;
+  replaced_by_id?: string | null;
+  cancellation_reason?: "cliente" | "modifica_cliente" | null;
 };
 
 export type Customer = {

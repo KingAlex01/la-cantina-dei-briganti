@@ -6,8 +6,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, PointerEvent } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseClient } from "../../lib/supabase/client";
-import { MESSAGE_TEMPLATES, renderMessageTemplate } from "../../lib/notifications/templates";
+import { MESSAGE_TEMPLATES, renderMessageTemplate, withBookingManagementDetails } from "../../lib/notifications/templates";
 import NotificationsPanel from "./notifications-panel";
+import ReservationActivity from "./reservation-activity";
 import BookingControls from "./booking-controls";
 import { isServiceOpenOnDate } from "../../lib/public-booking";
 import type { Availability } from "../../lib/public-booking";
@@ -157,7 +158,10 @@ export default function StaffPage() {
   );
   const statsByCustomer = useMemo(() => new Map(stats.map((item) => [item.customer_id, item])), [stats]);
   const statusLabel = (reservation: Reservation) =>
-    reservation.status === "annullata" && reservation.source === "online" && !reservation.approved_at
+    reservation.cancellation_reason === "modifica_cliente" ? "Sostituita dal cliente"
+      : reservation.cancellation_reason === "cliente" ? "Cancellata dal cliente"
+      : reservation.status === "in_attesa" && reservation.replaces_id ? "Da riconfermare"
+      : reservation.status === "annullata" && reservation.source === "online" && !reservation.approved_at
       ? "Rifiutata" : STATUS_LABEL[reservation.status];
   const filteredCustomers = customers.filter((customer) => {
     const detail = statsByCustomer.get(customer.id);
@@ -254,7 +258,8 @@ export default function StaffPage() {
   }
 
   async function changeStatus(reservation: Reservation, status: ReservationStatus) {
-    if (!client || reservation.status === "in_attesa") return;
+    if (!client || reservation.status === "in_attesa" || reservation.cancellation_reason || reservation.replaced_by_id) return;
+    if (!reservation.management_version) { setError("Aggiorna la Sala prima di modificare la prenotazione."); return; }
     const patch: { status: ReservationStatus; table_id?: string } = { status };
     if (status === "confermata" && reservation.status !== "arrivato" && occupied.has(reservation.table_id)) {
       const replacement = freeTables.filter((table) => table.capacity >= reservation.party_size)
@@ -266,14 +271,20 @@ export default function StaffPage() {
       patch.table_id = replacement.id;
     }
     setBusy(true); setError("");
-    const { error: updateError } = await client.from("reservations").update(patch).eq("id", reservation.id);
+    const { data: updated, error: updateError } = await client.from("reservations").update(patch)
+      .eq("id", reservation.id).eq("management_version", reservation.management_version).select("id").maybeSingle();
     setBusy(false);
     if (updateError) setError(readableError(updateError.message));
+    else if (!updated) { setError("La prenotazione è cambiata. Controlla i dati aggiornati prima di riprovare."); await loadData(true); }
     else { setSelectedReservation(null); setNotice(patch.table_id ? "Prenotazione ripristinata e assegnata a un tavolo libero." : `Prenotazione ${STATUS_LABEL[status].toLowerCase()}.`); await loadData(true); }
   }
 
   async function decideReservation(reservation: Reservation, action: "accept" | "reject") {
     if (busy || reservation.status !== "in_attesa") return;
+    if (!reservation.management_version) {
+      setError("Aggiorna la Sala prima di decidere. Se il problema continua, verifica l'aggiornamento del database.");
+      return;
+    }
     setBusy(true); setError(""); setNotice("");
     try {
       const { data: sessionData, error: sessionError } = await client.auth.getSession();
@@ -284,7 +295,7 @@ export default function StaffPage() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${sessionData.session.access_token}`,
         },
-        body: JSON.stringify({ reservationId: reservation.id, action }),
+        body: JSON.stringify({ reservationId: reservation.id, action, version: reservation.management_version }),
       });
       const result = await response.json().catch(() => null);
       if (!response.ok) throw new Error(result?.error ?? "Errore del server durante la decisione. Aggiorna la Sala e riprova.");
@@ -302,11 +313,14 @@ export default function StaffPage() {
   }
 
   async function moveReservation(reservation: Reservation, tableId: string) {
-    if (!client || !tableId || tableId === reservation.table_id) return;
+    if (!client || !tableId || tableId === reservation.table_id || reservation.cancellation_reason || reservation.replaced_by_id) return;
+    if (!reservation.management_version) { setError("Aggiorna la Sala prima di modificare la prenotazione."); return; }
     setBusy(true); setError("");
-    const { error: moveError } = await client.from("reservations").update({ table_id: tableId }).eq("id", reservation.id);
+    const { data: updated, error: moveError } = await client.from("reservations").update({ table_id: tableId })
+      .eq("id", reservation.id).eq("management_version", reservation.management_version).select("id").maybeSingle();
     setBusy(false);
     if (moveError) setError(readableError(moveError.message));
+    else if (!updated) { setError("La prenotazione è cambiata. Controlla i dati aggiornati prima di riprovare."); await loadData(true); }
     else { setSelectedReservation(null); setNotice("Tavolo cambiato."); await loadData(true); }
   }
 
@@ -324,7 +338,7 @@ export default function StaffPage() {
   }
 
   function whatsappDecisionUrl(reservation: Reservation) {
-    const rejected = reservation.source === "online" && reservation.status === "annullata" && !reservation.approved_at;
+    const rejected = reservation.source === "online" && reservation.status === "annullata" && !reservation.approved_at && !reservation.cancellation_reason;
     if (reservation.status !== "confermata" && !rejected) return null;
     const digits = (reservation.phone ?? "").replace(/\D/g, "").replace(/^00/, "");
     const number = /^3\d{9}$/.test(digits) ? `39${digits}` : /^393\d{9}$/.test(digits) ? digits : "";
@@ -333,7 +347,7 @@ export default function StaffPage() {
     const people = `${reservation.party_size} ${reservation.party_size === 1 ? "persona" : "persone"}`;
     const message = rejected
       ? `Ciao ${customerName}, purtroppo non possiamo accettare la tua richiesta da La cantina dei briganti per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Contattaci per valutare insieme un’altra data o un altro orario.`
-      : `Ciao ${customerName}, la tua prenotazione da La cantina dei briganti è confermata per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Ti aspettiamo!`;
+      : withBookingManagementDetails(`Ciao ${customerName}, la tua prenotazione da La cantina dei briganti è confermata per ${people} ${dateLabel(reservation.date)} alle ${timeLabel(reservation.arrival_time)}. Codice ${reservation.code}. Ti aspettiamo!`, reservation.code, reservation.source === "online");
     return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
   }
 
@@ -421,7 +435,7 @@ export default function StaffPage() {
             <div className={styles.onlineItems}>{recentOnline.map((item) => <button key={item.id} type="button"
               className={date === item.date && service === item.service ? styles.onlineCurrent : ""}
               onClick={() => { setDate(item.date); setService(item.service); setSearch(""); setTab("sala"); }}>
-              <strong>{item.name} · In attesa</strong><span>{dateLabel(item.date)} · {item.service} {timeLabel(item.arrival_time)} · {item.party_size} {item.party_size === 1 ? "persona" : "persone"}</span>
+              <strong>{item.name} · {item.replaces_id ? "Modifica da riconfermare" : "In attesa"}</strong><span>{dateLabel(item.date)} · {item.service} {timeLabel(item.arrival_time)} · {item.party_size} {item.party_size === 1 ? "persona" : "persone"}</span>
               <span className={styles.onlineAction}>{date === item.date && service === item.service ? "Servizio mostrato" : "Apri servizio →"}</span>
             </button>)}</div>
           </section>}
@@ -501,7 +515,8 @@ export default function StaffPage() {
                     <button className={styles.reservationName} onClick={() => setSelectedReservation(res)}>{res.name}</button>
                     <p>{res.party_size} {res.party_size === 1 ? "persona" : "persone"}{res.source === "staff" ? " · staff" : ""}{customer ? ` · ${customer.visits ? `${customer.visits} visite` : "Prima volta"}` : ""}{customer?.no_shows ? ` · ${customer.no_shows} no-show` : ""}{customerRecord?.tags.length ? ` · ${customerRecord.tags.join(", ")}` : ""}</p>
                     {res.notes && <p className={styles.reservationNote}>{res.notes}</p>}
-                    <div className={styles.cardActions}>{res.status === "in_attesa" ? <><button disabled={busy} onClick={() => decideReservation(res, "accept")}>Accetta</button><button disabled={busy} onClick={() => decideReservation(res, "reject")}>Rifiuta</button></> : res.status === "confermata" ? <><button onClick={() => changeStatus(res, "arrivato")}>Arrivati</button><button onClick={() => copyReminder(res)}>Copia promemoria</button><button onClick={() => changeStatus(res, "no-show")}>No-show</button><button onClick={() => changeStatus(res, "annullata")}>Annulla</button></> : (res.source !== "online" || res.approved_at) ? <button onClick={() => changeStatus(res, "confermata")}>Riporta a confermata</button> : null}</div>
+                    {res.replaces_id && res.status === "in_attesa" && <p className={styles.reservationNote}>Il cliente ha modificato una prenotazione precedente, ora annullata. Serve una nuova conferma.</p>}
+                    <div className={styles.cardActions}>{res.status === "in_attesa" ? <><button disabled={busy} onClick={() => decideReservation(res, "accept")}>Accetta</button><button disabled={busy} onClick={() => decideReservation(res, "reject")}>Rifiuta</button></> : res.status === "confermata" ? <><button onClick={() => changeStatus(res, "arrivato")}>Arrivati</button><button onClick={() => copyReminder(res)}>Copia promemoria</button><button onClick={() => changeStatus(res, "no-show")}>No-show</button><button onClick={() => changeStatus(res, "annullata")}>Annulla</button></> : !res.cancellation_reason && !res.replaced_by_id && (res.source !== "online" || res.approved_at) ? <button onClick={() => changeStatus(res, "confermata")}>Riporta a confermata</button> : null}</div>
                   </article>;
                 }) : <p className={styles.empty}>{search ? "Nessuna prenotazione trovata." : "Ancora nessuna prenotazione per questo servizio."}</p>}
               </div>
@@ -545,13 +560,18 @@ export default function StaffPage() {
         <p>{dateLabel(selectedReservation.date)} · {selectedReservation.service} ore {timeLabel(selectedReservation.arrival_time)} · {selectedReservation.party_size} persone</p>
         <p>{selectedReservation.phone || "Cellulare non indicato"}{selectedReservation.email ? ` · ${selectedReservation.email}` : ""}</p>
         {selectedReservation.notes && <p className={styles.detailNote}>{selectedReservation.notes}</p>}
-        <label className={field}>Tavolo<select value={selectedReservation.table_id} onChange={(e) => moveReservation(selectedReservation, e.target.value)} disabled={busy}>{tables.map((table) => <option key={table.id} value={table.id} disabled={occupied.has(table.id) && table.id !== selectedReservation.table_id}>{table.name} · {table.capacity} posti{table.capacity < selectedReservation.party_size ? " (piccolo)" : ""}</option>)}</select></label>
+        {selectedReservation.cancellation_reason && <p className={styles.detailNote}>{selectedReservation.cancellation_reason === "modifica_cliente"
+          ? "Il cliente ha sostituito questa prenotazione con una nuova richiesta. La precedente resta annullata."
+          : "Il cliente ha cancellato questa prenotazione. Il tavolo è stato liberato."}</p>}
+        {selectedReservation.replaces_id && selectedReservation.status === "in_attesa" && <p className={styles.detailNote}>Modifica del cliente: la prenotazione precedente è annullata. Controlla i nuovi dati e invia una nuova conferma con “Accetta”.</p>}
+        <ReservationActivity key={selectedReservation.id} client={client} reservation={selectedReservation} />
+        <label className={field}>Tavolo<select value={selectedReservation.table_id} onChange={(e) => moveReservation(selectedReservation, e.target.value)} disabled={busy || Boolean(selectedReservation.cancellation_reason || selectedReservation.replaced_by_id)}>{tables.map((table) => <option key={table.id} value={table.id} disabled={occupied.has(table.id) && table.id !== selectedReservation.table_id}>{table.name} · {table.capacity} posti{table.capacity < selectedReservation.party_size ? " (piccolo)" : ""}</option>)}</select></label>
         <p className={styles.muted}>{selectedReservation.status === "in_attesa" ? "L'accettazione invia l'email di conferma se il cliente ha indicato un indirizzo." : "Le altre modifiche non inviano messaggi automatici al cliente."}</p>
         <div className={styles.modalActions}>
           {selectedReservation.phone && <a className={styles.secondaryButton} href={`tel:${selectedReservation.phone.replace(/[^\d+]/g, "")}`}>Chiama il cliente</a>}
           {whatsappDecisionUrl(selectedReservation) &&
             <a className={styles.secondaryButton} href={whatsappDecisionUrl(selectedReservation)!} target="_blank" rel="noopener noreferrer">{selectedReservation.status === "confermata" ? "Apri conferma su WhatsApp" : "Apri esito su WhatsApp"} ↗</a>}
-          {selectedReservation.status === "in_attesa" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => decideReservation(selectedReservation, "accept")}>Accetta</button><button className={styles.dangerText} disabled={busy} onClick={() => decideReservation(selectedReservation, "reject")}>Rifiuta</button></> : selectedReservation.status === "confermata" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "arrivato")}>Segna arrivati</button><button className={styles.secondaryButton} onClick={() => copyReminder(selectedReservation)}>Copia promemoria</button><button className={styles.secondaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "no-show")}>No-show</button><button className={styles.dangerText} disabled={busy} onClick={() => changeStatus(selectedReservation, "annullata")}>Annulla prenotazione</button></> : (selectedReservation.source !== "online" || selectedReservation.approved_at) ? <button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "confermata")}>Riporta a confermata</button> : null}
+          {selectedReservation.status === "in_attesa" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => decideReservation(selectedReservation, "accept")}>Accetta</button><button className={styles.dangerText} disabled={busy} onClick={() => decideReservation(selectedReservation, "reject")}>Rifiuta</button></> : selectedReservation.status === "confermata" ? <><button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "arrivato")}>Segna arrivati</button><button className={styles.secondaryButton} onClick={() => copyReminder(selectedReservation)}>Copia promemoria</button><button className={styles.secondaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "no-show")}>No-show</button><button className={styles.dangerText} disabled={busy} onClick={() => changeStatus(selectedReservation, "annullata")}>Annulla prenotazione</button></> : !selectedReservation.cancellation_reason && !selectedReservation.replaced_by_id && (selectedReservation.source !== "online" || selectedReservation.approved_at) ? <button className={styles.primaryButton} disabled={busy} onClick={() => changeStatus(selectedReservation, "confermata")}>Riporta a confermata</button> : null}
         </div>
         {whatsappDecisionUrl(selectedReservation) && <p className={styles.muted}>WhatsApp apre il messaggio già pronto. Controllalo e premi Invia nell’app.</p>}
       </section></div>}

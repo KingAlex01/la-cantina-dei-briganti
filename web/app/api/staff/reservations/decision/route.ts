@@ -26,13 +26,17 @@ export async function POST(request: Request) {
 
   let reservationId: string;
   let action: "accept" | "reject";
+  let version: string;
   try {
-    const parsed = await readJsonObject(request, 200);
+    const parsed = await readJsonObject(request, 300);
     if (typeof parsed.reservationId !== "string" ||
         !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(parsed.reservationId) ||
-        (parsed.action !== "accept" && parsed.action !== "reject")) throw new Error("invalid");
+        (parsed.action !== "accept" && parsed.action !== "reject") ||
+        typeof parsed.version !== "string" ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(parsed.version)) throw new Error("invalid");
     reservationId = parsed.reservationId;
     action = parsed.action;
+    version = parsed.version;
   } catch {
     return Response.json({ error: "Decisione non valida." }, { status: 400 });
   }
@@ -60,10 +64,11 @@ export async function POST(request: Request) {
 
     // Il filtro sullo stato consente una sola decisione anche con due operatori contemporanei.
     const status = action === "accept" ? "confermata" : "annullata";
-    const { data: reservation, error: updateError } = await client.from("reservations")
+    const decision = client.from("reservations")
       .update(action === "accept" ? { status, approved_at: new Date().toISOString() } : { status })
       .eq("id", reservationId).eq("source", "online")
-      .eq("status", "in_attesa")
+      .eq("status", "in_attesa").eq("management_version", version);
+    const { data: reservation, error: updateError } = await decision
       .select("id,date,service,arrival_time,party_size,name,email,code")
       .maybeSingle();
     if (updateError) {
@@ -75,7 +80,7 @@ export async function POST(request: Request) {
         return Response.json({ error: "Il tavolo non è più disponibile. Assegna un altro tavolo prima di accettare." }, { status: 409 });
       }
       if (updateError.code === "42703" || updateError.code === "PGRST204") {
-        return Response.json({ error: "Il database non è aggiornato per l'approvazione. Applica la migrazione 20260925000100." }, { status: 503 });
+        return Response.json({ error: "Il database non è aggiornato per la gestione cliente. Applica la migrazione 20261017154813." }, { status: 503 });
       }
       throw updateError;
     }

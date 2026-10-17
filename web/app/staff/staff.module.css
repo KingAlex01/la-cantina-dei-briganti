@@ -153,6 +153,12 @@
 .modal p { font-size: .86rem; }.modal .field { margin: 12px 0; }
 .close { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: #fff; cursor: pointer; font-size: 1.3rem; line-height: 1; }
 .detailNote { padding: 10px; border-radius: 8px; background: #f0eddf; }
+.customerActivity { margin: 18px 0; padding: 14px; border: 1px solid var(--line); border-radius: 8px; }
+.customerActivity h3 { margin: 0 0 10px; font-size: .9rem; }
+.customerActivity details + details { margin-top: 10px; }
+.customerActivity summary { cursor: pointer; font-size: .8rem; font-weight: 700; }
+.customerActivity summary span { color: var(--muted); font-weight: 400; }
+.customerActivity p { overflow-wrap: anywhere; line-height: 1.6; }
 .modalActions { justify-content: flex-end; margin-top: 20px; }
 .bookingForm { display: flex; flex-direction: column; gap: 14px; margin-top: 17px; }
 .checkbox { display: flex; align-items: start; gap: 9px; color: #5e695f; font-size: .79rem; }.checkbox input { margin-top: 2px; }

@@ -3,14 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { todayInRome } from "../../lib/staff/types";
-import { MESSAGE_TEMPLATES, renderMessageTemplate } from "../../lib/notifications/templates";
+import { MESSAGE_TEMPLATES, renderMessageTemplate, withBookingManagementDetails } from "../../lib/notifications/templates";
 import type { MessageTemplateKey } from "../../lib/notifications/templates";
 import styles from "./notifications.module.css";
 
 type Notification = {
   id: string;
   channel: "email" | "sms";
-  kind: "richiesta" | "conferma" | "promemoria" | "annullamento";
+  kind: "richiesta" | "conferma" | "promemoria" | "annullamento" | "modifica" | "note";
   recipient: string;
   subject: string | null;
   body: string;
@@ -20,13 +20,18 @@ type Notification = {
 
 const fields: { key: MessageTemplateKey; label: string; hint: string; maxLength: number }[] = [
   { key: "confirmEmailSubject", label: "Oggetto della conferma email", hint: "Inviata al cliente che indica un'email.", maxLength: 200 },
-  { key: "confirmEmailBody", label: "Testo della conferma email", hint: "Inviata al cliente che indica un'email.", maxLength: 5000 },
+  { key: "confirmEmailBody", label: "Testo della conferma email", hint: "Per le prenotazioni online aggiungiamo link gestione e avviso sul codice. Per quelle inserite dallo staff indichiamo di contattare il ristorante.", maxLength: 5000 },
   { key: "reminderText", label: "Promemoria da copiare", hint: "Lo staff lo copia e lo invia manualmente.", maxLength: 5000 },
 ];
 
 const sample = {
   name: "Giulia Bianchi", date: todayInRome(), arrival_time: "20:00",
   party_size: 4, code: "AB12CD",
+};
+
+const kindLabels: Record<Notification["kind"], string> = {
+  richiesta: "Nuova richiesta", conferma: "Conferma cliente", promemoria: "Promemoria",
+  annullamento: "Cancellazione cliente", modifica: "Modifica da riconfermare", note: "Note aggiornate dal cliente",
 };
 
 export default function NotificationsPanel({ client }: { client: SupabaseClient }) {
@@ -91,7 +96,9 @@ export default function NotificationsPanel({ client }: { client: SupabaseClient 
             ? <input value={draft[key]} maxLength={maxLength} onChange={(event) => setDraft((current) => ({ ...current, [key]: event.target.value }))} />
             : <textarea value={draft[key]} rows={key === "confirmEmailBody" ? 9 : 4} maxLength={maxLength} onChange={(event) => setDraft((current) => ({ ...current, [key]: event.target.value }))} />}
           <span className={styles.previewLabel}>Anteprima</span>
-          <span className={styles.preview}>{renderMessageTemplate(draft[key], sample)}</span>
+          <span className={styles.preview}>{key === "confirmEmailBody"
+            ? withBookingManagementDetails(renderMessageTemplate(draft[key], sample), sample.code)
+            : renderMessageTemplate(draft[key], sample)}</span>
         </label>)}
         <div className={styles.actions}><button type="button" className={styles.secondaryButton} onClick={() => setDraft({ ...MESSAGE_TEMPLATES })}>Ripristina testi iniziali</button>
           <button type="button" className={styles.primaryButton} onClick={() => void save()} disabled={saving || loading}>{saving ? "Salvataggio…" : "Salva modelli"}</button></div>
@@ -102,7 +109,7 @@ export default function NotificationsPanel({ client }: { client: SupabaseClient 
         <p>Ultimi 60 tentativi di invio. “Inviata” indica che il servizio email ha accettato il messaggio; la consegna finale dipende dalla casella del destinatario.</p>
         {loading ? <p>Caricamento…</p> : notifications.length ? <div className={styles.log}>
           {notifications.map((item) => <article key={item.id} className={styles.logItem}>
-            <div className={styles.logTop}><strong>{item.channel === "email" ? "Email" : "SMS"} · {item.kind}</strong>
+            <div className={styles.logTop}><strong>{item.channel === "email" ? "Email" : "SMS"} · {kindLabels[item.kind] ?? item.kind}</strong>
               <span className={item.status === "fallita" ? styles.failed : item.status === "inviata" ? styles.sent : styles.pending}>{item.status === "in_attesa" ? "In attesa" : item.status === "inviata" ? "Inviata" : "Fallita"}</span></div>
             <p>A: {item.recipient} · {new Date(item.created_at).toLocaleString("it-IT", { dateStyle: "short", timeStyle: "short" })}</p>
             {item.subject && <p>Oggetto: {item.subject}</p>}
