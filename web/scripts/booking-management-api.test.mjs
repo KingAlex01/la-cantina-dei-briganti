@@ -35,6 +35,7 @@ function scenario(context, options = {}) {
   context.after(() => { process.env = env; });
   process.env.SUPABASE_SECRET_KEY = "test-server-only-secret";
   delete process.env.NETLIFY;
+  delete process.env.SITE_ID;
   context.mock.method(console, "error", () => {});
   const state = { calls: [], emails: [], allowed: true, limitError: null, error: null, data: booking,
     emailStatus: "inviata", ...options };
@@ -116,6 +117,26 @@ test("in produzione l’identità usa solo l’IP Netlify e ignora X-Forwarded-F
   headers["x-nf-client-connection-ip"] = "203.0.113.13";
   await POST(request({}, headers, url));
   assert.notEqual(state.calls[4].args.p_key, first);
+});
+
+test("SITE_ID riconosce Netlify a runtime anche senza la variabile di build NETLIFY", async (context) => {
+  const state = scenario(context);
+  process.env.SITE_ID = "12345678-1234-4234-8234-123456789abc";
+  const url = "https://lacantinadeibriganti.com/api/public/reservations/manage";
+  const headers = { origin: "https://lacantinadeibriganti.com", "x-forwarded-for": "1.2.3.4" };
+  assert.equal((await POST(request({}, headers, url))).status, 503);
+  // Even a localhost URL cannot select the development fallback on Netlify.
+  assert.equal((await POST(request())).status, 503);
+  assert.equal(state.calls.length, 0);
+  headers["x-nf-client-connection-ip"] = "not-an-ip";
+  assert.equal((await POST(request({}, headers, url))).status, 503);
+  assert.equal(state.calls.length, 0);
+  headers["x-nf-client-connection-ip"] = " 203.0.113.12 ";
+  assert.equal((await POST(request({}, headers, url))).status, 200);
+  const first = state.calls[0].args.p_key;
+  headers["x-forwarded-for"] = "8.8.8.8";
+  assert.equal((await POST(request({}, headers, url))).status, 200);
+  assert.equal(state.calls[2].args.p_key, first);
 });
 
 test("cancellazione salvata invia un unico avviso staff legato all’evento", async (context) => {

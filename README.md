@@ -240,8 +240,11 @@ venti all'ora per IP con un controllo persistente nel database e un limite
 aggiuntivo Netlify. L'identità usa l'header Netlify
 `x-nf-client-connection-ip`; vengono salvate solo impronte HMAC, con scadenza
 un'ora e rimozione delle impronte scadute nelle richieste successive. Fuori da
-localhost la route richiede `NETLIFY=true` e un IP Netlify valido, altrimenti
-rifiuta l'accesso. Non usa `X-Forwarded-For` fornito dal visitatore.
+localhost la route riconosce Netlify tramite `SITE_ID`, disponibile nelle
+Functions a runtime, oppure `NETLIFY=true`, e richiede un IP Netlify valido.
+La sola variabile di build `NETLIFY` non è garantita durante le richieste.
+Senza questi controlli rifiuta l'accesso; non usa `X-Forwarded-For` fornito dal
+visitatore e non applica il fallback localhost nell'ambiente Netlify.
 
 L'evento viene registrato nella stessa transazione della modifica. Il tentativo
 email ha una chiave univoca per evento e una chiave di idempotenza Resend.
@@ -249,8 +252,12 @@ Un invio fallito non annulla la modifica: l'evento rimane nella Sala e il
 tentativo fallito nel registro Notifiche. Non è previsto un reinvio automatico;
 un arresto del processo prima del tentativo conserva comunque l'evento.
 
-**Attivazione online:** questa modifica locale richiede la migrazione
+**Attivazione online:** la funzione richiede la migrazione
 `20261017154813_customer_reservation_management.sql` e un deploy del codice.
+La migrazione è stata applicata al progetto collegato il 17 ottobre 2026;
+l'anteprima successiva conferma tutte le migrazioni allineate. Il codice
+pubblicato dal titolare richiedeva anche la correzione del riconoscimento
+Netlify a runtime descritta sopra.
 Applicare prima le migrazioni mancanti dopo l'anteprima `db push --dry-run`, poi
 pubblicare il codice e ricaricare le pagine staff già aperte. Nessuna variabile
 segreta nuova è richiesta; i destinatari e le chiavi Supabase/Resend restano

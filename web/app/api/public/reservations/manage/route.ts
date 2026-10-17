@@ -74,9 +74,11 @@ export async function POST(request: Request) {
       !SERVICE_TIMES[input.service].includes(input.time))) return reply({ error: "invalid" }, 400);
 
   try {
-    // Netlify overwrites this header with the connecting client's IP. Forwarded
-    // headers supplied by visitors must never define a rate limit identity.
-    const ip = process.env.NETLIFY === "true" ? request.headers.get("x-nf-client-connection-ip") : local ? "127.0.0.1" : null;
+    // SITE_ID is available in Netlify Functions at runtime; NETLIFY is normally
+    // a build variable. Netlify overwrites the connecting client's IP header.
+    // Visitor-supplied forwarded headers must never define a rate limit identity.
+    const netlifyRuntime = Boolean(process.env.SITE_ID) || process.env.NETLIFY === "true";
+    const ip = netlifyRuntime ? request.headers.get("x-nf-client-connection-ip")?.trim() : local ? "127.0.0.1" : null;
     const secret = process.env.SUPABASE_SECRET_KEY;
     if (!ip || !isIP(ip) || !secret) return reply({ error: "failed" }, 503);
     const key = createHmac("sha256", secret).update(`booking-management:${ip}`).digest("hex");
