@@ -12,11 +12,28 @@ export async function generateMetadata() {
   return pageMetadata("/privacy", content.metadataTitle, content.metadataDescription, language);
 }
 
+const providerReferences: Record<string, { href: string; label: string }> = {
+  "{supabaseDpa}": { href: "https://supabase.com/legal/customer-resources/data-processing-addendum", label: "Supabase (DPA)" },
+  "{netlifyDpa}": { href: "https://www.netlify.com/pdf/netlify-dpa.pdf", label: "Netlify (DPA)" },
+  "{resendDpa}": { href: "https://resend.com/legal/dpa", label: "Resend (DPA)" },
+  "{ovhDpa}": { href: "https://contract.eu.ovhapis.com/1.0/pdf/OVH_Data_Protection_Agreement-it.pdf", label: "OVHcloud (DPA)" },
+  "{googlePrivacy}": { href: "https://policies.google.com/privacy", label: "Google (Privacy)" },
+  "{googleTransfers}": { href: "https://policies.google.com/privacy/frameworks", label: "Google" },
+  "{googleRetention}": { href: "https://policies.google.com/technologies/retention", label: "Google" },
+  "{supabaseLogs}": { href: "https://supabase.com/pricing", label: "Supabase" },
+  "{supabaseBackups}": { href: "https://supabase.com/docs/guides/platform/backups", label: "Supabase" },
+  "{netlifyLogs}": { href: "https://docs.netlify.com/manage/monitoring/logs/", label: "Netlify" },
+  "{netlifyObservability}": { href: "https://docs.netlify.com/manage/monitoring/observability/overview/", label: "Netlify (Observability)" },
+  "{resendRetention}": { href: "https://resend.com/security/gdpr", label: "Resend" },
+};
+
 function privacyParagraph(text: string, authority: string) {
-  return text.split(/(\{(?:controller|email|authority)\})/g).map((part, index) => {
+  return text.split(/(\{[a-zA-Z]+\})/g).map((part, index) => {
     if (part === "{controller}") return <strong key={index}>PARENTE SNC di Francesco e Vito Parente</strong>;
     if (part === "{email}") return <a key={index} href="mailto:prenotazioni@lacantinadeibriganti.com">prenotazioni@lacantinadeibriganti.com</a>;
     if (part === "{authority}") return <a key={index} href="https://www.garanteprivacy.it/" rel="noopener noreferrer">{authority}</a>;
+    const reference = providerReferences[part];
+    if (reference) return <a key={index} href={reference.href} rel="noopener noreferrer">{reference.label}</a>;
     return <Fragment key={index}>{part}</Fragment>;
   });
 }
