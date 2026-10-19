@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import Link from "next/link";
+import LegalFooter from "../LegalFooter";
 import LanguageSelector from "../LanguageSelector";
 import { getRequestLanguage } from "../../lib/i18n/server";
 import { privacyContent } from "../../lib/i18n/privacy";
@@ -60,7 +61,7 @@ export default async function PrivacyPage() {
           {section.paragraphs.map((paragraph) => <p key={paragraph}>{privacyParagraph(paragraph, content.authority)}</p>)}
         </section>)}
       </article>
-      <footer className={styles.footer}><Link href="/prenota">{content.back}</Link><Link href="/">{content.home}</Link></footer>
+      <LegalFooter className={styles.footer}><Link href="/prenota">{content.back}</Link><Link href="/">{content.home}</Link></LegalFooter>
     </div>
   </main>;
 }

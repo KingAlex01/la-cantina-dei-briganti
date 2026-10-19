@@ -1,17 +1,15 @@
 .footer {
-  padding: 24px 24px 96px;
-  border-top: 1px solid #b9aa8638;
-  color: #f5efe1;
-  background: #13281f;
-  font-size: .8125rem;
-  line-height: 1.7;
+  padding: 20px max(20px, calc((100vw - 1320px) / 2)) 28px;
+  color: #6b746b;
+  background: #ede7d8;
 }
 
-.inner { width: min(100%, 1160px); margin: 0 auto; }
-.inner p { margin: 0 0 8px; overflow-wrap: anywhere; }
-.inner a { color: #ead3a2; text-decoration: underline; text-underline-offset: 3px; }
-.inner a:focus-visible { outline: 2px solid #ead3a2; outline-offset: 4px; }
-
-@media (max-width: 520px) {
-  .footer { padding-right: 20px; padding-left: 20px; }
+.details {
+  flex-basis: 100%;
+  width: 100%;
+  margin: 0;
+  color: inherit;
+  font-size: .76rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
 }

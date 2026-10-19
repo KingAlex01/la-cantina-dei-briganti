@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import LegalFooter from "../../LegalFooter";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { addDays, availableArrivalTimes, currentTimeInRome, dateLabel, todayInRome, validDate, type Service } from "../../../lib/public-booking";
 import { bookingCopy } from "../../../lib/i18n/booking";
@@ -231,6 +232,6 @@ export default function ManageBookingPage() {
         </aside>
       </section>
     </div>
-    <footer className={base.footer}><Link href="/">← {b.home}</Link><span>{b.footer}</span></footer>
+    <LegalFooter className={base.footer}><Link href="/">← {b.home}</Link><span>{b.footer}</span></LegalFooter>
   </main>;
 }

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { RESTAURANT } from "../lib/restaurant";
 import { getRequestLanguage } from "../lib/i18n/server";
 import LanguageProvider from "./LanguageProvider";
-import LegalFooter from "./LegalFooter";
 import "@fontsource/fraunces/latin-500.css";
 import "@fontsource/public-sans/latin-400.css";
 import "@fontsource/public-sans/latin-600.css";
@@ -22,7 +21,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <LanguageProvider initialLanguage={language}>
           {children}
-          <LegalFooter />
         </LanguageProvider>
       </body>
     </html>

@@ -104,7 +104,7 @@
 .contactActions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 .contactActions a { max-width: 100%; gap: 8px; text-decoration: none; }
 .confirmed .contactActions .secondary { margin-top: 0; }
-.footer { display: flex; width: min(100% - 48px, 1200px); justify-content: space-between; gap: 15px; margin: auto; padding: 19px 0 27px; border-top: 1px solid rgba(245, 239, 225, .2); color: rgba(245, 239, 225, .63); font-size: .78rem; }
+.footer { display: flex; flex-wrap: wrap; width: min(100% - 48px, 1200px); justify-content: space-between; gap: 15px; margin: auto; padding: 19px 0 27px; border-top: 1px solid rgba(245, 239, 225, .2); color: rgba(245, 239, 225, .63); font-size: .78rem; }
 .footer a { color: #ead3a2; text-decoration: none; }
 .footer a:hover { text-decoration: underline; }
 .page button:focus-visible, .page a:focus-visible { outline: 2px solid #a9812f; outline-offset: 3px; }

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import LegalFooter from "../LegalFooter";
 import { useMemo, useState } from "react";
 import { ALLERGENS } from "../../lib/menu/types";
 import LanguageSelector from "../LanguageSelector";
@@ -117,7 +118,7 @@ export default function DigitalMenu({ categories, items, sourceLanguage, preview
           <a href="https://www.tripadvisor.it/Restaurant_Review-g1078047-d14075097-Reviews-La_cantina_dei_briganti-Mola_di_Bari_Province_of_Bari_Puglia.html" target="_blank" rel="noopener noreferrer">{copy.tripadvisorReviews} <span aria-hidden="true">↗</span></a>
         </div>
       </section>
-      <footer className={styles.footer}><span>La cantina dei briganti · Mola di Bari</span><Link href="/prenota">{copy.reserve} ↗</Link></footer>
+      <LegalFooter className={styles.footer}><span>La cantina dei briganti · Mola di Bari</span><Link href="/prenota">{copy.reserve} ↗</Link></LegalFooter>
     </div>
   </main>;
 }

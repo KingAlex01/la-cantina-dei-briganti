@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import LegalFooter from "./LegalFooter";
 import InviteRedirect from "./invite-redirect";
 import LanguageSelector from "./LanguageSelector";
 import WhatsAppFloatingButton from "./WhatsAppFloatingButton";
@@ -105,13 +106,13 @@ export default async function Home() {
         </div>
       </section>
 
-      <footer className={styles.footer}>
+      <LegalFooter className={styles.footer}>
         <span>© La cantina dei briganti · Mola di Bari</span>
         <div className={styles.footerLinks}>
           <Link href="/privacy" className={styles.footerLink}>{content.privacy}</Link>
           <Link href="/staff" className={styles.footerLink}>{content.staffAccess} <span aria-hidden="true">↗</span></Link>
         </div>
-      </footer>
+      </LegalFooter>
       <WhatsAppFloatingButton phoneNumber={RESTAURANT.phone} side="right" />
     </main>
   );

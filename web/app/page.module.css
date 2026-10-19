@@ -195,6 +195,7 @@
 
 .footer {
   display: flex;
+  flex-wrap: wrap;
   width: min(100% - 40px, 1140px);
   align-items: center;
   justify-content: space-between;

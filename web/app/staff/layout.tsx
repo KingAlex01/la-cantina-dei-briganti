@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import LegalFooter from "../LegalFooter";
 
 export const metadata: Metadata = {
   title: "Area staff | La cantina dei briganti",
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function StaffLayout({ children }: LayoutProps<"/staff">) {
-  return <div lang="it">{children}</div>;
+  return <div lang="it">{children}<LegalFooter /></div>;
 }

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import LegalFooter from "../LegalFooter";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -312,6 +313,6 @@ export default function BookingPage() {
         </aside>}
       </section>
     </div>
-    <footer className={styles.footer}><Link href="/">← {t.home}</Link><span>{t.footer}</span></footer>
+    <LegalFooter className={styles.footer}><Link href="/">← {t.home}</Link><span>{t.footer}</span></LegalFooter>
   </main>;
 }
