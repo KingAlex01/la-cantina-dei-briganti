@@ -1,5 +1,9 @@
 # Gestionale prenotazioni — La cantina dei briganti
 
+## Menù novembre 2026 pubblicato (12 novembre 2026)
+
+Su richiesta del titolare, importato nel progetto Supabase `mhlmxkvwdgzfgoigicjc` il menù di novembre dai PDF IT/EN e dalle nuove traduzioni ES/FR basate sull'inglese. Sono presenti 4 categorie e 26 voci, con prezzi, allergeni e asterischi verificati sui PDF. Aggiornato `web/lib/menu/current-menu.json`; fonti, dati revisionati, backup precedente e importazione atomica documentati in `menu-sorgenti/2026-11/README.md`. Creati e verificati anche i PDF ES/FR nello stile del riferimento. `menu:check` superato e rilettura integrale come `anon` identica ai dati locali. Non è stato possibile verificare il rendering sul dominio pubblico dall'ambiente corrente. Nessuna modifica allo schema o all'interfaccia, nessun commit, push o deploy. Questa nota aggiorna lo stato storico del menù riportato sotto.
+
 Questo file riassume le decisioni di progetto e lo stato del codice al **10 ottobre 2026**. Leggilo prima di scrivere codice. Rispondi sempre in **italiano**. Per sapere cosa è pubblicato controlla anche l'ultimo deploy Netlify: le modifiche locali non sono automaticamente online.
 
 ## Stato attuale: online, locale, da completare

@@ -29,9 +29,9 @@
         ],
         "name": {
           "it": "Polpo* in umido con patate e olive taggiasche",
-          "en": "Octopus* with potatoes and olives",
-          "es": "Pulpo* guisado con patatas y aceitunas Taggiasca",
-          "fr": "Poulpe* mijoté aux pommes de terre et olives Taggiasca"
+          "en": "Stewed octopus* with potatoes and olives",
+          "es": "Pulpo* guisado con patatas y aceitunas",
+          "fr": "Poulpe* mijoté aux pommes de terre et olives"
         }
       },
       {
@@ -71,7 +71,7 @@
         "name": {
           "it": "Tartare di manzo battuta al coltello con popcorn e mayo alla senape",
           "en": "Beef tartare with popcorn and mustard mayonnaise",
-          "es": "Tartar de ternera a cuchillo con palomitas y mayonesa de mostaza",
+          "es": "Tartar de ternera con palomitas y mayonesa de mostaza",
           "fr": "Tartare de bœuf avec pop-corn et mayonnaise à la moutarde"
         }
       },
@@ -79,14 +79,13 @@
         "position": 6,
         "price": 7,
         "allergens": [
-          1,
-          2
+          1
         ],
         "name": {
-          "it": "Frisa con capocollo di Martina, stracciatella e pomodoro secco",
-          "en": "Frisa with capocollo of Martina Franca, creamy cheese and sun-dried tomato",
-          "es": "Frisa con capocollo de Martina Franca, stracciatella y tomate seco",
-          "fr": "Frisa au capocollo de Martina Franca, stracciatella et tomate séchée"
+          "it": "Lampascioni fritti con vincotto di fichi",
+          "en": "Fried lampascioni (wild onions) with fig vincotto syrup",
+          "es": "Lampascioni fritos (cebollas silvestres) con sirope de vincotto de higos",
+          "fr": "Lampascioni frits (oignons sauvages) au sirop de vincotto de figues"
         }
       },
       {
@@ -99,9 +98,9 @@
         ],
         "name": {
           "it": "Baccalà* mantecato croccante, mayo all'aglio e crema di zucchina alla poverella",
-          "en": "Crispy salt cod* with garlic mayonnaise and zucchini cream",
-          "es": "Bacalao* salado crujiente con mayonesa de ajo y crema de calabacín",
-          "fr": "Brandade de morue croustillante*, mayonnaise à l'ail et crème de courgettes"
+          "en": "Crispy whipped salt cod* with garlic mayonnaise and zucchini cream",
+          "es": "Brandada de bacalao* crujiente con mayonesa de ajo y crema de calabacín",
+          "fr": "Brandade de morue* croustillante, mayonnaise à l'ail et crème de courgettes"
         }
       },
       {
@@ -127,9 +126,9 @@
         ],
         "name": {
           "it": "Gambero* in tempura e salsa ’nduja",
-          "en": "Lightly fried shrimp* with ’nduja sauce (spicy sauce)",
-          "es": "Gamba* en tempura con salsa de ’nduja",
-          "fr": "Crevette* en tempura et sauce ’nduja"
+          "en": "Tempura shrimp* with ’nduja sauce (spicy sauce)",
+          "es": "Gamba* en tempura con salsa de ’nduja (salsa picante)",
+          "fr": "Crevette* en tempura et sauce ’nduja (sauce piquante)"
         }
       },
       {
@@ -139,8 +138,8 @@
         "name": {
           "it": "Salmone marinato agli agrumi con insalatina di finocchio e melograno",
           "en": "Citrus-marinated salmon with fennel and pomegranate",
-          "es": "Salmón marinado a los cítricos con ensaladita de hinojo y granada",
-          "fr": "Saumon mariné aux agrumes avec salade de fenouil et grenade"
+          "es": "Salmón marinado a los cítricos con hinojo y granada",
+          "fr": "Saumon mariné aux agrumes avec fenouil et grenade"
         }
       },
       {
@@ -152,8 +151,8 @@
         ],
         "name": {
           "it": "Acciughe del Cantabrico, pane croccante e burro salato",
-          "en": "Anchovies with crispy bread and salted butter",
-          "es": "Anchoas del Cantábrico, pan crujiente y mantequilla salada",
+          "en": "Cantabrian anchovies with crispy bread and salted butter",
+          "es": "Anchoas del Cantábrico con pan crujiente y mantequilla salada",
           "fr": "Anchois de la mer Cantabrique, pain croustillant et beurre salé"
         }
       },
@@ -162,10 +161,10 @@
         "price": 20,
         "allergens": [],
         "name": {
-          "it": "Tagliere di salumi e formaggi",
-          "en": "Selection of cured meats and cheeses",
-          "es": "Tabla de embutidos y quesos",
-          "fr": "Planche de charcuteries et fromages"
+          "it": "Tagliere di salumi e formaggi pugliesi",
+          "en": "Puglian cured meats and cheese selection",
+          "es": "Selección de embutidos y quesos de Apulia",
+          "fr": "Sélection de charcuteries et fromages des Pouilles"
         }
       },
       {
@@ -191,15 +190,15 @@
         "allergens": [],
         "name": {
           "it": "Antipasto misto dei briganti",
-          "en": "Mixed starter",
-          "es": "Entrante mixto de los bandidos",
-          "fr": "Entrée mixte des brigands"
+          "en": "Briganti mixed starter",
+          "es": "Entrante mixto Briganti",
+          "fr": "Entrée mixte Briganti"
         },
         "description": {
           "it": "5 portate scelte dallo chef · Minimo 2 porzioni",
           "en": "Five courses chosen by the chef · Minimum 2 portions",
-          "es": "5 platos seleccionados por el chef · Mínimo 2 porciones",
-          "fr": "5 plats choisis par le chef · Au moins 2 portions"
+          "es": "Cinco platos elegidos por el chef · Mínimo 2 porciones",
+          "fr": "Cinq plats choisis par le chef · Minimum 2 portions"
         }
       }
     ]
@@ -221,16 +220,16 @@
           3
         ],
         "name": {
-          "it": "Riso “Acquerello” con funghi cardoncelli, scampi* e polvere di lime",
-          "en": "Rice with mushrooms, langoustines* and lime",
-          "es": "Arroz con setas de cardo, cigalas* y polvo de lima",
-          "fr": "Riz aux pleurotes, langoustines* et poudre de citron vert"
+          "it": "Riso “Acquerello” con mazzancolle* locali al profumo di limone e timo",
+          "en": "Rice with local prawns*, lemon and thyme",
+          "es": "Arroz con langostinos* locales, limón y tomillo",
+          "fr": "Riz aux crevettes* locales, citron et thym"
         },
         "description": {
           "it": "Minimo 2 porzioni",
           "en": "Minimum 2 portions",
           "es": "Mínimo 2 porciones",
-          "fr": "Au moins 2 portions"
+          "fr": "Minimum 2 portions"
         }
       },
       {
@@ -242,9 +241,9 @@
         ],
         "name": {
           "it": "Strascinata al grano arso del pastificio artigianale “Sabatelli” con zucca, salsiccia e crema al parmigiano",
-          "en": "Strascinata al grano arso (burnt wheat pasta) with pumpkin, sausage and Parmesan cream",
-          "es": "Strascinata de trigo quemado con calabaza, salchicha y crema de parmesano",
-          "fr": "Strascinata au blé brûlé avec citrouille, saucisse et crème de parmesan"
+          "en": "Burnt wheat pasta with pumpkin, sausage and Parmesan cream",
+          "es": "Pasta de trigo tostado con calabaza, salchicha y crema de parmesano",
+          "fr": "Pâtes au blé torréfié, courge, saucisse et crème de parmesan"
         }
       },
       {
@@ -256,10 +255,10 @@
           3
         ],
         "name": {
-          "it": "Mezzo pacchero del pastificio artigianale “Valdoro” con gambero rosso*, crema di stracciatella e cappero fritto",
-          "en": "Mezzo pacchero with red shrimp*, creamy cheese and fried capers",
-          "es": "Mezzo pacchero “Valdoro” con gamba roja*, crema de stracciatella y alcaparra frita",
-          "fr": "Mezzo pacchero aux crevettes rouges*, crème de stracciatella et câpres frites"
+          "it": "Calamarata del pastificio artigianale “Valdoro” con gambero rosso* (cotto e crudo), crema di stracciatella e cappero fritto",
+          "en": "Calamarata pasta with red prawns* (cooked and raw), stracciatella cream and crispy capers",
+          "es": "Pasta calamarata con gambas rojas* (cocinadas y crudas), crema de stracciatella y alcaparras crujientes",
+          "fr": "Pâtes calamarata aux crevettes rouges* (cuites et crues), crème de stracciatella et câpres croustillantes"
         }
       },
       {
@@ -272,8 +271,8 @@
         "name": {
           "it": "Maccheroncino del pastificio artigianale “Valdoro” con salsa ’nduja, burratina e polvere di olive",
           "en": "Maccheroncino with ’nduja sauce (spicy sauce), burratina and olive powder",
-          "es": "Maccheroncino con salsa de ’nduja, burratina y polvo de aceitunas",
-          "fr": "Maccheroncino avec sauce ’nduja, burratina et poudre d'olives"
+          "es": "Maccheroncino con salsa de ’nduja (salsa picante), burratina y polvo de aceitunas",
+          "fr": "Maccheroncino à la sauce ’nduja (sauce piquante), burratina et poudre d'olives"
         }
       },
       {
@@ -283,24 +282,24 @@
           1
         ],
         "name": {
-          "it": "Tubettino del pastificio artigianale “Valdoro” con zuppa di scorfano",
-          "en": "Tubettino with scorpionfish soup",
-          "es": "Tubettino con sopa de cabracho",
-          "fr": "Tubettino avec soupe de rascasse"
+          "it": "Pacchero del pastificio artigianale “Valdoro” con ragù di scorfano*",
+          "en": "Paccheri pasta with scorpionfish* ragù",
+          "es": "Pasta paccheri con ragú de cabracho*",
+          "fr": "Pâtes paccheri au ragoût de rascasse*"
         }
       },
       {
         "position": 6,
-        "price": 12,
+        "price": 10,
         "allergens": [
           1,
           2
         ],
         "name": {
-          "it": "Spaghetto del pastificio artigianale “Valdoro” con burro, alici del Cantabrico e tartare di manzo",
-          "en": "Spaghetti with butter, anchovies and beef tartare",
-          "es": "Espagueti con mantequilla, anchoas del Cantábrico y tartar de ternera",
-          "fr": "Spaghetti au beurre, anchois de la mer Cantabrique et tartare de bœuf"
+          "it": "Spaghetto del pastificio artigianale “Valdoro” con cime di rape, crema di pecorino e pan fritto",
+          "en": "Spaghetti with “Cime di rape”, pecorino cream and crispy bread",
+          "es": "Espaguetis con “cime di rape” (grelos), crema de pecorino y pan crujiente",
+          "fr": "Spaghetti aux « cime di rape » (pousses de navet), crème de pecorino et pain croustillant"
         }
       }
     ]
@@ -323,8 +322,8 @@
         "name": {
           "it": "Polpo* scottato su crema di carote, salsa alla ’nduja e polvere di olive",
           "en": "Seared octopus* with carrot cream, ’nduja sauce (spicy sauce) and olive powder",
-          "es": "Pulpo* marcado sobre crema de zanahoria, salsa de ’nduja y polvo de aceitunas",
-          "fr": "Poulpe* saisi sur crème de carottes, sauce ’nduja et poudre d'olives"
+          "es": "Pulpo* marcado con crema de zanahoria, salsa de ’nduja (salsa picante) y polvo de aceitunas",
+          "fr": "Poulpe* saisi, crème de carottes, sauce ’nduja (sauce piquante) et poudre d'olives"
         }
       },
       {
@@ -334,10 +333,10 @@
           1
         ],
         "name": {
-          "it": "Pesce spada scottato, crema di melanzane e menta",
-          "en": "Seared swordfish with eggplant cream and mint",
-          "es": "Pez espada marcado, crema de berenjena y menta",
-          "fr": "Espadon saisi, crème d'aubergine et menthe"
+          "it": "Pesce spada scottato, crema di zucca e chips di patate dolci",
+          "en": "Seared swordfish with pumpkin cream and sweet potato crisps",
+          "es": "Pez espada marcado con crema de calabaza y chips de boniato",
+          "fr": "Espadon saisi, crème de courge et chips de patate douce"
         }
       },
       {
@@ -347,8 +346,8 @@
         "name": {
           "it": "Filetto di ricciola con cicoriella ripassata e il suo fondo",
           "en": "Amberjack with sautéed chicory and pan sauce",
-          "es": "Filete de pez limón con achicoria salteada y su jugo",
-          "fr": "Filet de sériole avec chicorée sautée et son jus"
+          "es": "Pez limón con achicoria salteada y su jugo",
+          "fr": "Sériole avec chicorée sautée et son jus"
         }
       },
       {
@@ -357,9 +356,9 @@
         "allergens": [],
         "name": {
           "it": "Stracotto di maialino al Primitivo con patata rustica e il suo jus",
-          "en": "Slow-cooked pork with red wine, rustic potato and pan sauce",
-          "es": "Estofado de cochinillo al vino Primitivo con patata rústica y su jugo",
-          "fr": "Porcelet braisé au vin Primitivo avec pomme de terre rustique et son jus"
+          "en": "Slow-braised pork in Primitivo wine with rustic potatoes and pan sauce",
+          "es": "Cerdo braseado a fuego lento al vino Primitivo con patatas rústicas y su jugo",
+          "fr": "Porc braisé au vin Primitivo, pommes de terre rustiques et son jus"
         }
       },
       {
@@ -370,9 +369,9 @@
         ],
         "name": {
           "it": "Tagliata di manzo con rucola e scaglie di pecorino",
-          "en": "Sliced beef with rocket and sheep’s milk cheese",
-          "es": "Entrecot de ternera trinchado con rúcula y lascas de queso pecorino",
-          "fr": "Émincé de bœuf avec roquette et copeaux de pecorino"
+          "en": "Sliced beef with rocket and shavings of pecorino cheese",
+          "es": "Ternera en lonchas con rúcula y lascas de pecorino",
+          "fr": "Bœuf tranché avec roquette et copeaux de pecorino"
         }
       }
     ]

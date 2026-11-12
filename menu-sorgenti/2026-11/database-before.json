@@ -1,0 +1,628 @@
+{
+  "items": [
+    {
+      "id": "1a3ac6a7-d14c-402f-95e0-b7ed53a1384f",
+      "name": {
+        "en": "Rice with mushrooms, langoustines* and lime",
+        "es": "Arroz con setas de cardo, cigalas* y polvo de lima",
+        "fr": "Riz aux pleurotes, langoustines* et poudre de citron vert",
+        "it": "Riso “Acquerello” con funghi cardoncelli, scampi* e polvere di lime"
+      },
+      "price": 12,
+      "position": 1,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "64a98746-68d6-45f6-9fd5-970956b14ae7",
+      "description": {
+        "en": "Minimum 2 portions",
+        "es": "Mínimo 2 porciones",
+        "fr": "Au moins 2 portions",
+        "it": "Minimo 2 porzioni"
+      },
+      "allergen_codes": [
+        2,
+        3
+      ]
+    },
+    {
+      "id": "b5c85195-3484-4e5e-bc36-ecae615e0883",
+      "name": {
+        "en": "Strascinata al grano arso (burnt wheat pasta) with pumpkin, sausage and Parmesan cream",
+        "es": "Strascinata de trigo quemado con calabaza, salchicha y crema de parmesano",
+        "fr": "Strascinata au blé brûlé avec citrouille, saucisse et crème de parmesan",
+        "it": "Strascinata al grano arso del pastificio artigianale “Sabatelli” con zucca, salsiccia e crema al parmigiano"
+      },
+      "price": 10,
+      "position": 2,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "64a98746-68d6-45f6-9fd5-970956b14ae7",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "7eb7b24e-7a84-4acc-8858-58a7273da76f",
+      "name": {
+        "en": "Mezzo pacchero with red shrimp*, creamy cheese and fried capers",
+        "es": "Mezzo pacchero “Valdoro” con gamba roja*, crema de stracciatella y alcaparra frita",
+        "fr": "Mezzo pacchero aux crevettes rouges*, crème de stracciatella et câpres frites",
+        "it": "Mezzo pacchero del pastificio artigianale “Valdoro” con gambero rosso*, crema di stracciatella e cappero fritto"
+      },
+      "price": 14,
+      "position": 3,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "64a98746-68d6-45f6-9fd5-970956b14ae7",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "da5f687d-e3c4-4745-8016-1caf2b8c409a",
+      "name": {
+        "en": "Maccheroncino with ’nduja sauce (spicy sauce), burratina and olive powder",
+        "es": "Maccheroncino con salsa de ’nduja, burratina y polvo de aceitunas",
+        "fr": "Maccheroncino avec sauce ’nduja, burratina et poudre d'olives",
+        "it": "Maccheroncino del pastificio artigianale “Valdoro” con salsa ’nduja, burratina e polvere di olive"
+      },
+      "price": 10,
+      "position": 4,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "64a98746-68d6-45f6-9fd5-970956b14ae7",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "fa26f3e0-286b-4f03-95d3-d4781a0764c8",
+      "name": {
+        "en": "Tubettino with scorpionfish soup",
+        "es": "Tubettino con sopa de cabracho",
+        "fr": "Tubettino avec soupe de rascasse",
+        "it": "Tubettino del pastificio artigianale “Valdoro” con zuppa di scorfano"
+      },
+      "price": 12,
+      "position": 5,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "64a98746-68d6-45f6-9fd5-970956b14ae7",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1
+      ]
+    },
+    {
+      "id": "5a45b1c0-b689-4d45-9e04-43b346194571",
+      "name": {
+        "en": "Spaghetti with butter, anchovies and beef tartare",
+        "es": "Espagueti con mantequilla, anchoas del Cantábrico y tartar de ternera",
+        "fr": "Spaghetti au beurre, anchois de la mer Cantabrique et tartare de bœuf",
+        "it": "Spaghetto del pastificio artigianale “Valdoro” con burro, alici del Cantabrico e tartare di manzo"
+      },
+      "price": 12,
+      "position": 6,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "64a98746-68d6-45f6-9fd5-970956b14ae7",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "f274e75c-50fe-4299-9a17-7e159567294c",
+      "name": {
+        "en": "Seared octopus* with carrot cream, ’nduja sauce (spicy sauce) and olive powder",
+        "es": "Pulpo* marcado sobre crema de zanahoria, salsa de ’nduja y polvo de aceitunas",
+        "fr": "Poulpe* saisi sur crème de carottes, sauce ’nduja et poudre d'olives",
+        "it": "Polpo* scottato su crema di carote, salsa alla ’nduja e polvere di olive"
+      },
+      "price": 18,
+      "position": 1,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "bec89520-b22f-4ae2-88d3-9633a89c02b5",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        6
+      ]
+    },
+    {
+      "id": "17b55aab-0a8f-45df-a38e-6188be3dc8aa",
+      "name": {
+        "en": "Seared swordfish with eggplant cream and mint",
+        "es": "Pez espada marcado, crema de berenjena y menta",
+        "fr": "Espadon saisi, crème d'aubergine et menthe",
+        "it": "Pesce spada scottato, crema di melanzane e menta"
+      },
+      "price": 16,
+      "position": 2,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "bec89520-b22f-4ae2-88d3-9633a89c02b5",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1
+      ]
+    },
+    {
+      "id": "4a9d9eaf-9652-4c2c-93fd-471a9f43ca28",
+      "name": {
+        "en": "Amberjack with sautéed chicory and pan sauce",
+        "es": "Filete de pez limón con achicoria salteada y su jugo",
+        "fr": "Filet de sériole avec chicorée sautée et son jus",
+        "it": "Filetto di ricciola con cicoriella ripassata e il suo fondo"
+      },
+      "price": 16,
+      "position": 3,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "bec89520-b22f-4ae2-88d3-9633a89c02b5",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": []
+    },
+    {
+      "id": "59598db5-eb00-4d51-860a-291658ba048e",
+      "name": {
+        "en": "Slow-cooked pork with red wine, rustic potato and pan sauce",
+        "es": "Estofado de cochinillo al vino Primitivo con patata rústica y su jugo",
+        "fr": "Porcelet braisé au vin Primitivo avec pomme de terre rustique et son jus",
+        "it": "Stracotto di maialino al Primitivo con patata rustica e il suo jus"
+      },
+      "price": 16,
+      "position": 4,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "bec89520-b22f-4ae2-88d3-9633a89c02b5",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": []
+    },
+    {
+      "id": "fb63f92d-589f-4ff5-a976-693526cd96c8",
+      "name": {
+        "en": "Sliced beef with rocket and sheep’s milk cheese",
+        "es": "Entrecot de ternera trinchado con rúcula y lascas de queso pecorino",
+        "fr": "Émincé de bœuf avec roquette et copeaux de pecorino",
+        "it": "Tagliata di manzo con rucola e scaglie di pecorino"
+      },
+      "price": 18,
+      "position": 5,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "bec89520-b22f-4ae2-88d3-9633a89c02b5",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        2
+      ]
+    },
+    {
+      "id": "1196186f-0124-4b55-8342-9579488f6bfc",
+      "name": {
+        "en": "Fava beans and chicory with crispy bread and onions",
+        "es": "Habas y achicoria con pan crujiente y cebolla crujiente",
+        "fr": "Fèves et chicorée avec pain croustillant et oignon croustillant",
+        "it": "Fave e cicorie con pane croccante e cipolla crispy"
+      },
+      "price": 7,
+      "position": 1,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1
+      ]
+    },
+    {
+      "id": "2df02d37-fa6d-4eba-b834-43419fd7cf53",
+      "name": {
+        "en": "Octopus* with potatoes and olives",
+        "es": "Pulpo* guisado con patatas y aceitunas Taggiasca",
+        "fr": "Poulpe* mijoté aux pommes de terre et olives Taggiasca",
+        "it": "Polpo* in umido con patate e olive taggiasche"
+      },
+      "price": 10,
+      "position": 2,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        6
+      ]
+    },
+    {
+      "id": "1a49d018-52cb-4212-949c-bffd4b23c228",
+      "name": {
+        "en": "Fried meatballs",
+        "es": "Albóndigas de carne fritas",
+        "fr": "Boulettes de viande frites",
+        "it": "Polpettine di carne fritte"
+      },
+      "price": 8,
+      "position": 3,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "5f4a4411-4940-4a8f-afed-0550bdddcc21",
+      "name": {
+        "en": "Meatballs in tomato sauce",
+        "es": "Albóndigas en salsa de tomate",
+        "fr": "Boulettes de viande en sauce tomate",
+        "it": "Polpettine di carne al sugo"
+      },
+      "price": 10,
+      "position": 4,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "ecc6f902-debd-4c03-957b-8f1f3d507821",
+      "name": {
+        "en": "Beef tartare with popcorn and mustard mayonnaise",
+        "es": "Tartar de ternera a cuchillo con palomitas y mayonesa de mostaza",
+        "fr": "Tartare de bœuf avec pop-corn et mayonnaise à la moutarde",
+        "it": "Tartare di manzo battuta al coltello con popcorn e mayo alla senape"
+      },
+      "price": 9,
+      "position": 5,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        5
+      ]
+    },
+    {
+      "id": "078f66f1-97b7-4f64-a081-bfed24831cf6",
+      "name": {
+        "en": "Frisa with capocollo of Martina Franca, creamy cheese and sun-dried tomato",
+        "es": "Frisa con capocollo de Martina Franca, stracciatella y tomate seco",
+        "fr": "Frisa au capocollo de Martina Franca, stracciatella et tomate séchée",
+        "it": "Frisa con capocollo di Martina, stracciatella e pomodoro secco"
+      },
+      "price": 7,
+      "position": 6,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "2c042c7d-2eea-4759-9763-1e56e6a5e24e",
+      "name": {
+        "en": "Crispy salt cod* with garlic mayonnaise and zucchini cream",
+        "es": "Bacalao* salado crujiente con mayonesa de ajo y crema de calabacín",
+        "fr": "Brandade de morue croustillante*, mayonnaise à l'ail et crème de courgettes",
+        "it": "Baccalà* mantecato croccante, mayo all'aglio e crema di zucchina alla poverella"
+      },
+      "price": 10,
+      "position": 7,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2,
+        5
+      ]
+    },
+    {
+      "id": "39d55e6c-bfb7-4fee-98c6-ce927044bcf7",
+      "name": {
+        "en": "Seared squid* with fava bean cream and carrot chips",
+        "es": "Calamar* marcado sobre crema de habas y chips de zanahoria",
+        "fr": "Calmar* saisi sur crème de fèves et chips de carottes",
+        "it": "Calamaro* scottato su crema di fave e chips di carote"
+      },
+      "price": 10,
+      "position": 8,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        2,
+        6
+      ]
+    },
+    {
+      "id": "4ad899dd-a3f5-4f71-97f2-c1c755e8bc64",
+      "name": {
+        "en": "Lightly fried shrimp* with ’nduja sauce (spicy sauce)",
+        "es": "Gamba* en tempura con salsa de ’nduja",
+        "fr": "Crevette* en tempura et sauce ’nduja",
+        "it": "Gambero* in tempura e salsa ’nduja"
+      },
+      "price": 9,
+      "position": 9,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        3
+      ]
+    },
+    {
+      "id": "774caf31-b938-49b9-ad2a-7abee440a001",
+      "name": {
+        "en": "Citrus-marinated salmon with fennel and pomegranate",
+        "es": "Salmón marinado a los cítricos con ensaladita de hinojo y granada",
+        "fr": "Saumon mariné aux agrumes avec salade de fenouil et grenade",
+        "it": "Salmone marinato agli agrumi con insalatina di finocchio e melograno"
+      },
+      "price": 10,
+      "position": 10,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": []
+    },
+    {
+      "id": "898adfa7-1ec9-44d6-9e37-dc44f4aacf13",
+      "name": {
+        "en": "Anchovies with crispy bread and salted butter",
+        "es": "Anchoas del Cantábrico, pan crujiente y mantequilla salada",
+        "fr": "Anchois de la mer Cantabrique, pain croustillant et beurre salé",
+        "it": "Acciughe del Cantabrico, pane croccante e burro salato"
+      },
+      "price": 13,
+      "position": 11,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": "b3a89402-4067-42a3-baed-40e99f10254b",
+      "name": {
+        "en": "Selection of cured meats and cheeses",
+        "es": "Tabla de embutidos y quesos",
+        "fr": "Planche de charcuteries et fromages",
+        "it": "Tagliere di salumi e formaggi"
+      },
+      "price": 20,
+      "position": 12,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": []
+    },
+    {
+      "id": "496ec078-7190-419e-ac28-8a6938b6abc5",
+      "name": {
+        "en": "Raw seafood selection*",
+        "es": "Selección de marisco crudo*",
+        "fr": "Sélection de fruits de mer crus*",
+        "it": "Selezione di crudo mare*"
+      },
+      "price": 20,
+      "position": 13,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "Subject to availability",
+        "es": "Según disponibilidad",
+        "fr": "Selon disponibilité",
+        "it": "Su disponibilità"
+      },
+      "allergen_codes": []
+    },
+    {
+      "id": "1edc9d03-7cc4-4923-81b3-26fcab783eac",
+      "name": {
+        "en": "Mixed starter",
+        "es": "Entrante mixto de los bandidos",
+        "fr": "Entrée mixte des brigands",
+        "it": "Antipasto misto dei briganti"
+      },
+      "price": 15,
+      "position": 14,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "description": {
+        "en": "Five courses chosen by the chef · Minimum 2 portions",
+        "es": "5 platos seleccionados por el chef · Mínimo 2 porciones",
+        "fr": "5 plats choisis par le chef · Au moins 2 portions",
+        "it": "5 portate scelte dallo chef · Minimo 2 porzioni"
+      },
+      "allergen_codes": []
+    },
+    {
+      "id": "0316a146-922c-4778-b6bb-1d6074a4d903",
+      "name": {
+        "en": "Chef’s dessert",
+        "es": "Postre del chef",
+        "fr": "Dessert du chef",
+        "it": "Dessert dello chef"
+      },
+      "price": 6,
+      "position": 1,
+      "created_at": "2026-10-01T18:24:43.39085+00:00",
+      "category_id": "da16ffe0-0058-47fa-ad5f-922406d4c1a8",
+      "description": {
+        "en": "",
+        "es": "",
+        "fr": "",
+        "it": ""
+      },
+      "allergen_codes": []
+    }
+  ],
+  "catalog": {
+    "id": true,
+    "updated_at": "2026-10-01T18:24:43.846671+00:00",
+    "source_language": "it"
+  },
+  "categories": [
+    {
+      "id": "d218ae69-022a-4d8b-8945-e5be58567f7a",
+      "name": {
+        "en": "Starters",
+        "es": "Entrantes",
+        "fr": "Entrées",
+        "it": "Antipasti"
+      },
+      "position": 1,
+      "created_at": "2026-10-01T18:24:43.39085+00:00"
+    },
+    {
+      "id": "64a98746-68d6-45f6-9fd5-970956b14ae7",
+      "name": {
+        "en": "Pasta & rice",
+        "es": "Primeros platos",
+        "fr": "Pâtes et riz",
+        "it": "Primi"
+      },
+      "position": 2,
+      "created_at": "2026-10-01T18:24:43.39085+00:00"
+    },
+    {
+      "id": "bec89520-b22f-4ae2-88d3-9633a89c02b5",
+      "name": {
+        "en": "Main courses",
+        "es": "Segundos platos",
+        "fr": "Plats principaux",
+        "it": "Secondi"
+      },
+      "position": 3,
+      "created_at": "2026-10-01T18:24:43.39085+00:00"
+    },
+    {
+      "id": "da16ffe0-0058-47fa-ad5f-922406d4c1a8",
+      "name": {
+        "en": "Desserts",
+        "es": "Postres",
+        "fr": "Desserts",
+        "it": "Dessert"
+      },
+      "position": 4,
+      "created_at": "2026-10-01T18:24:43.39085+00:00"
+    }
+  ],
+  "import_function": "CREATE OR REPLACE FUNCTION public.import_menu(p_language text, p_items jsonb)\n RETURNS integer\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_source text;\r\n  v_row jsonb;\r\n  v_category_id uuid;\r\n  v_position integer;\r\n  v_item_position integer;\r\n  v_existing_price numeric(8,2);\r\n  v_existing_allergens smallint[];\r\n  v_expected_count integer;\r\n  v_count integer := 0;\r\nbegin\r\n  if p_language not in ('it','en','es','fr','de') or jsonb_typeof(p_items) <> 'array'\r\n     or jsonb_array_length(p_items) = 0 then\r\n    raise exception 'Lingua o menu non valido';\r\n  end if;\r\n  perform pg_catalog.pg_advisory_xact_lock(8675309);\r\n  select source_language into v_source from public.menu_catalog where id = true;\r\n  if v_source is null or v_source = p_language then\r\n    delete from public.menu_categories where position > 0;\r\n    insert into public.menu_catalog(id, source_language, updated_at)\r\n      values (true, p_language, now())\r\n      on conflict (id) do update set source_language = excluded.source_language, updated_at = now();\r\n  else\r\n    select count(*) into v_expected_count from public.menu_items;\r\n    if v_expected_count <> jsonb_array_length(p_items) then\r\n      raise exception 'Numero di piatti diverso dal menu di riferimento';\r\n    end if;\r\n  end if;\r\n  for v_row in select value from jsonb_array_elements(p_items) loop\r\n    v_position := (v_row->>'category_position')::integer;\r\n    v_item_position := (v_row->>'position')::integer;\r\n    if v_position is null or v_item_position is null or v_position < 1 or v_item_position < 1\r\n       or nullif(btrim(v_row->>'category'), '') is null\r\n       or nullif(btrim(v_row->>'name'), '') is null\r\n       or (v_row->>'price')::numeric < 0 then\r\n      raise exception 'Riga del menu non valida';\r\n    end if;\r\n    if v_source is null or v_source = p_language then\r\n      insert into public.menu_categories(position, name)\r\n        values (v_position, jsonb_build_object(p_language, v_row->>'category'))\r\n        on conflict (position) do nothing;\r\n      select id into v_category_id from public.menu_categories where position = v_position;\r\n      insert into public.menu_items(category_id, position, name, description, price, allergen_codes)\r\n        values (v_category_id, v_item_position,\r\n          jsonb_build_object(p_language, v_row->>'name'),\r\n          jsonb_build_object(p_language, coalesce(v_row->>'description', '')),\r\n          (v_row->>'price')::numeric,\r\n          array(select value::smallint from jsonb_array_elements_text(v_row->'allergens')));\r\n    else\r\n      select id into v_category_id from public.menu_categories where position = v_position;\r\n      if v_category_id is null then raise exception 'Categoria non presente nel menu di riferimento'; end if;\r\n      update public.menu_categories set name = name || jsonb_build_object(p_language, v_row->>'category')\r\n        where id = v_category_id;\r\n      select price, allergen_codes into v_existing_price, v_existing_allergens from public.menu_items\r\n        where category_id = v_category_id and position = v_item_position;\r\n      if v_existing_price is null or v_existing_price <> (v_row->>'price')::numeric then\r\n        raise exception 'Ordine o prezzo diverso dal menu di riferimento';\r\n      end if;\r\n      if v_existing_allergens <> array(select value::smallint from jsonb_array_elements_text(v_row->'allergens')) then\r\n        raise exception 'Allergeni diversi dal menu di riferimento';\r\n      end if;\r\n      update public.menu_items set\r\n        name = name || jsonb_build_object(p_language, v_row->>'name'),\r\n        description = description || jsonb_build_object(p_language, coalesce(v_row->>'description', ''))\r\n        where category_id = v_category_id and position = v_item_position;\r\n    end if;\r\n    v_count := v_count + 1;\r\n  end loop;\r\n  update public.menu_catalog set updated_at = now() where id = true;\r\n  return v_count;\r\nend;\r\n$function$\n"
+}
