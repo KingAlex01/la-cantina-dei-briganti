@@ -10,11 +10,13 @@ type Glyph = {
 type PositionedGlyph = Glyph & { screenX: number; screenY: number; opacity: number };
 type Spark = { x: number; y: number; vx: number; vy: number; age: number; life: number; size: number; character: string };
 type Ripple = { x: number; y: number; radius: number; age: number };
+type ProtectedArea = { left: number; right: number; top: number; bottom: number };
 
 const GOLD = "#dfc58e";
 const IVORY = "#fff1c9";
 const COPPER = "#e39376";
 const TAU = Math.PI * 2;
+const PROTECTED_CONTENT = "header img, section h1, section p, section a, section > div, label";
 const seed = (x: number, y: number) => {
   const value = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
   return value - Math.floor(value);
@@ -53,6 +55,8 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
   let top = 0;
   let treeHeight = 0;
   let fontSize = 12;
+  let protectedAreas: ProtectedArea[] = [];
+  let activeTouchId: number | null = null;
   let glyphs: PositionedGlyph[] = [];
   let sparks: Spark[] = [];
   let ripples: Ripple[] = [];
@@ -64,7 +68,7 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
   let playing = false;
   let parallaxX = 0;
   let parallaxY = 0;
-  const pointer = { clientX: 0, clientY: 0, x: 0, y: 0, previousX: 0, previousY: 0, active: false, moved: false };
+  const pointer = { clientX: 0, clientY: 0, x: 0, y: 0, previousX: 0, previousY: 0, active: false };
 
   function addSpark(x: number, y: number, burst = false) {
     const limit = width < 600 ? 64 : 110;
@@ -76,8 +80,8 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed - 13,
       age: 0,
-      life: .45 + Math.random() * .65,
-      size: 4 + Math.random() * 7,
+      life: .6 + Math.random() * .65,
+      size: (width < 600 ? 8 : 5) + Math.random() * 7,
       character: Math.random() > .5 ? "+" : ".",
     });
   }
@@ -91,6 +95,17 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     pointer.y = pointer.clientY - rect.top;
   }
 
+  function textProtectionAt(x: number, y: number) {
+    let protection = 1;
+    for (const area of protectedAreas) {
+      const dx = Math.max(area.left - x, 0, x - area.right);
+      const dy = Math.max(area.top - y, 0, y - area.bottom);
+      const distance = Math.min(1, Math.hypot(dx, dy) / 24);
+      protection = Math.min(protection, .14 + .86 * distance * distance * (3 - 2 * distance));
+    }
+    return protection;
+  }
+
   function paint(dt: number, animate: boolean) {
     if (!context || !width || !height) return;
     context.clearRect(0, 0, width, height);
@@ -102,18 +117,6 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
       const ease = 1 - Math.exp(-dt * 5);
       parallaxX += (targetX - parallaxX) * ease;
       parallaxY += (targetY - parallaxY) * ease;
-      if (pointer.active && pointer.moved) {
-        const dx = pointer.x - pointer.previousX;
-        const dy = pointer.y - pointer.previousY;
-        const count = Math.min(5, Math.ceil(Math.hypot(dx, dy) / 8));
-        for (let i = 0; i < count; i++) {
-          const amount = (i + 1) / Math.max(count, 1);
-          addSpark(pointer.previousX + dx * amount, pointer.previousY + dy * amount);
-        }
-        pointer.previousX = pointer.x;
-        pointer.previousY = pointer.y;
-        pointer.moved = false;
-      }
     }
 
     const time = animate ? elapsed : 0;
@@ -143,13 +146,14 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
         rippleLight += Math.max(0, 1 - Math.abs(distance - ripple.radius) / 40) * Math.max(0, 1 - ripple.age / 1.4);
       }
       const shimmer = animate ? .8 + .2 * Math.sin(time * (glyph.ornament ? 1.35 : .65) + glyph.phase + glyph.y * 7) : .9;
-      context.globalAlpha = Math.min(.95, glyph.opacity * shimmer + proximity * .48 + rippleLight * .45);
+      // Interaction light respects the same text protection as the resting tree.
+      context.globalAlpha = Math.min(.95, glyph.opacity * shimmer + proximity * .48 + rippleLight * .45) * textProtectionAt(x, y);
       context.fillStyle = proximity > .35 || rippleLight > .35 ? IVORY : glyph.ornament ? COPPER : GOLD;
       context.fillText(glyph.character, x, y);
     }
 
     // A small typographic star; glow is restricted to this single mark.
-    context.globalAlpha = animate ? .78 + Math.sin(time * 1.1) * .12 : .82;
+    context.globalAlpha = (animate ? .78 + Math.sin(time * 1.1) * .12 : .82) * textProtectionAt(width / 2 + sway, top - fontSize * 1.7);
     context.fillStyle = IVORY;
     context.font = `${fontSize * 2.7}px Consolas, "Courier New", monospace`;
     context.shadowColor = GOLD;
@@ -167,7 +171,7 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
         spark.x += spark.vx * dt;
         spark.y += spark.vy * dt;
         spark.vy += 14 * dt;
-        context.globalAlpha = Math.max(0, 1 - spark.age / spark.life) * .85;
+        context.globalAlpha = Math.max(0, 1 - spark.age / spark.life) * .95 * textProtectionAt(spark.x, spark.y);
         context.fillStyle = spark.character === "+" ? IVORY : GOLD;
         context.font = `${spark.size}px Consolas, "Courier New", monospace`;
         context.fillText(spark.character, spark.x, spark.y);
@@ -201,7 +205,7 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
       window.cancelAnimationFrame(frame);
       frame = 0;
       pointer.active = false;
-      pointer.moved = false;
+      activeTouchId = null;
       sparks = [];
       ripples = [];
       paint(0, false);
@@ -218,56 +222,113 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    const header = host.querySelector("header");
-    top = (header ? header.getBoundingClientRect().bottom - rect.top : height * .2) + 40;
-    treeHeight = Math.max(1, height - top - 42);
-    const treeWidth = Math.min(width * .94, treeHeight * 1.5, 1100);
-    fontSize = Math.max(7, Math.min(treeWidth / 65, treeHeight / 51 * 1.08, 15));
-    const hero = host.querySelector("section");
-    const heroRect = hero?.getBoundingClientRect();
-    const centerY = heroRect ? heroRect.top - rect.top + heroRect.height * .43 : height * .58;
+    // Fill the introduction from above the logo to the bottom edge, also on phones.
+    top = Math.max(88, Math.min(height * .105, 102));
+    treeHeight = Math.max(1, height - top - 36);
+    const treeWidth = Math.min(width * 1.12, treeHeight * 1.5, 1320);
+    fontSize = Math.max(9, Math.min(treeWidth / 43, treeHeight / 51 * 1.08, 17));
+    protectedAreas = [];
+    for (const element of host.querySelectorAll(PROTECTED_CONTENT)) {
+      // Text line rectangles leave the spaces between lines and blocks illuminated.
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const areas = element.matches("img, label") ? [element.getBoundingClientRect()] : Array.from(range.getClientRects());
+      for (const area of areas) {
+        if (area.width && area.height) protectedAreas.push({
+          left: area.left - rect.left - 3,
+          right: area.right - rect.left + 3,
+          top: area.top - rect.top - 3,
+          bottom: area.bottom - rect.top + 3,
+        });
+      }
+    }
     glyphs = GLYPHS.map((glyph) => {
       const screenX = width / 2 + glyph.x * treeWidth;
       const screenY = top + glyph.y * treeHeight;
-      const nx = (screenX - width / 2) / Math.min(width * .37, 380);
-      const ny = (screenY - centerY) / Math.max(treeHeight * .55, 1);
-      const textProtection = 1 - .76 * Math.exp(-(nx * nx * 2 + ny * ny * 1.5));
-      return { ...glyph, screenX, screenY, opacity: (glyph.ornament ? .85 : glyph.edge ? .76 : .42) * textProtection };
+      return { ...glyph, screenX, screenY, opacity: glyph.ornament ? .95 : glyph.edge ? .9 : .56 };
     });
     pointer.active = false;
-    pointer.moved = false;
+    activeTouchId = null;
     sparks = [];
     ripples = [];
     paint(0, playing);
     host.dataset.christmasReady = "true";
   }
 
-  function onPointerMove(event: PointerEvent) {
-    if (!playing || !event.isPrimary) return;
+  function movePointer(clientX: number, clientY: number) {
     const entering = !pointer.active;
-    pointer.clientX = event.clientX;
-    pointer.clientY = event.clientY;
+    pointer.clientX = clientX;
+    pointer.clientY = clientY;
     pointer.active = true;
+    locatePointer();
     if (entering) {
-      locatePointer();
       pointer.previousX = pointer.x;
       pointer.previousY = pointer.y;
     }
-    pointer.moved = true;
+    const dx = pointer.x - pointer.previousX;
+    const dy = pointer.y - pointer.previousY;
+    const count = Math.min(8, Math.ceil(Math.hypot(dx, dy) / 8));
+    // Queue on input, so quick swipes survive touchend or a skipped mobile frame.
+    for (let i = 0; i < count; i++) {
+      const amount = (i + 1) / count;
+      addSpark(pointer.previousX + dx * amount, pointer.previousY + dy * amount);
+    }
+    pointer.previousX = pointer.x;
+    pointer.previousY = pointer.y;
   }
 
-  function onPointerDown(event: PointerEvent) {
-    if (!playing || !event.isPrimary || event.button !== 0) return;
-    if (event.target instanceof Element && event.target.closest("a, button, input, select, textarea, label")) return;
-    onPointerMove(event);
-    locatePointer();
+  function onPointerMove(event: PointerEvent) {
+    if (!playing || !event.isPrimary || event.pointerType === "touch") return;
+    movePointer(event.clientX, event.clientY);
+  }
+
+  function isControl(target: EventTarget | null) {
+    return target instanceof Element && Boolean(target.closest("a, button, input, select, textarea, label"));
+  }
+
+  function burst() {
     if (ripples.length < 4) ripples.push({ x: pointer.x, y: pointer.y, radius: 0, age: 0 });
     for (let i = 0; i < 16; i++) addSpark(pointer.x, pointer.y, true);
   }
 
-  function onPointerLeave() { pointer.active = false; pointer.moved = false; }
-  function onPointerEnd(event: PointerEvent) { if (event.pointerType !== "mouse") onPointerLeave(); }
-  function onScroll() { rectDirty = true; pointer.active = false; pointer.moved = false; }
+  function onPointerDown(event: PointerEvent) {
+    if (!playing || !event.isPrimary || event.button !== 0 || event.pointerType === "touch") return;
+    if (isControl(event.target)) return;
+    onPointerMove(event);
+    burst();
+  }
+
+  function onPointerLeave() { if (activeTouchId === null) pointer.active = false; }
+  function onPointerEnd(event: PointerEvent) {
+    if (event.pointerType !== "touch" && (event.type === "pointercancel" || event.pointerType !== "mouse")) onPointerLeave();
+  }
+  function onScroll() { rectDirty = true; onPointerLeave(); }
+
+  // Browsers cancel touch PointerEvents when native scrolling starts. Passive Touch
+  // Events keep the trail alive during a swipe without blocking scrolling or zoom.
+  function onTouchStart(event: TouchEvent) {
+    if (!playing || activeTouchId !== null || isControl(event.target)) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    activeTouchId = touch.identifier;
+    pointer.active = false;
+    movePointer(touch.clientX, touch.clientY);
+    burst();
+  }
+
+  function onTouchMove(event: TouchEvent) {
+    if (!playing || activeTouchId === null) return;
+    const touch = Array.from(event.changedTouches).find((touch) => touch.identifier === activeTouchId);
+    if (touch) movePointer(touch.clientX, touch.clientY);
+  }
+
+  function onTouchEnd(event: TouchEvent) {
+    const touch = Array.from(event.changedTouches).find((touch) => touch.identifier === activeTouchId);
+    if (!touch) return;
+    if (playing && event.type !== "touchcancel") movePointer(touch.clientX, touch.clientY);
+    activeTouchId = null;
+    pointer.active = false;
+  }
 
   const resizeObserver = new ResizeObserver(resize);
   const intersectionObserver = new IntersectionObserver(([entry]) => {
@@ -275,17 +336,23 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     syncPlayback();
   });
   resizeObserver.observe(host);
+  for (const element of host.querySelectorAll(PROTECTED_CONTENT)) resizeObserver.observe(element);
   intersectionObserver.observe(host);
   host.addEventListener("pointermove", onPointerMove, { passive: true });
   host.addEventListener("pointerdown", onPointerDown, { passive: true });
   host.addEventListener("pointerleave", onPointerLeave);
   host.addEventListener("pointerup", onPointerEnd, { passive: true });
-  host.addEventListener("pointercancel", onPointerLeave);
+  host.addEventListener("pointercancel", onPointerEnd);
+  host.addEventListener("touchstart", onTouchStart, { passive: true });
+  host.addEventListener("touchmove", onTouchMove, { passive: true });
+  host.addEventListener("touchend", onTouchEnd, { passive: true });
+  host.addEventListener("touchcancel", onTouchEnd, { passive: true });
   window.addEventListener("scroll", onScroll, { passive: true });
   document.addEventListener("visibilitychange", syncPlayback);
   motionPreference.addEventListener("change", syncPlayback);
   resize();
   syncPlayback();
+  void document.fonts?.ready.then(resize);
 
   return () => {
     disposed = true;
@@ -297,7 +364,11 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     host.removeEventListener("pointerdown", onPointerDown);
     host.removeEventListener("pointerleave", onPointerLeave);
     host.removeEventListener("pointerup", onPointerEnd);
-    host.removeEventListener("pointercancel", onPointerLeave);
+    host.removeEventListener("pointercancel", onPointerEnd);
+    host.removeEventListener("touchstart", onTouchStart);
+    host.removeEventListener("touchmove", onTouchMove);
+    host.removeEventListener("touchend", onTouchEnd);
+    host.removeEventListener("touchcancel", onTouchEnd);
     window.removeEventListener("scroll", onScroll);
     document.removeEventListener("visibilitychange", syncPlayback);
     motionPreference.removeEventListener("change", syncPlayback);

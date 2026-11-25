@@ -16,7 +16,7 @@ class Target extends EventTarget {
   get listenerCount() { return [...this.listeners.values()].reduce((n, entries) => n + entries.size, 0); }
 }
 
-function fixture({ reduced = false, width = 1000, canvasAvailable = true } = {}) {
+function fixture({ reduced = false, width = 1000, height = 900, canvasAvailable = true, protectedAreas = [] } = {}) {
   const originals = new Map(["window", "document", "Element", "ResizeObserver", "IntersectionObserver"].map(key => [key, Object.getOwnPropertyDescriptor(globalThis, key)]));
   const frames = new Map();
   const observers = [];
@@ -28,15 +28,32 @@ function fixture({ reduced = false, width = 1000, canvasAvailable = true } = {})
     requestAnimationFrame: callback => { const id = ++frameId; frames.set(id, callback); return id; },
     cancelAnimationFrame: id => frames.delete(id),
   });
-  const doc = Object.assign(new Target(), { hidden: false });
+  const doc = Object.assign(new Target(), {
+    hidden: false,
+    createRange: () => {
+      let selected;
+      return {
+        selectNodeContents: element => { selected = element; },
+        getClientRects: () => [selected.getBoundingClientRect()],
+      };
+    },
+  });
   class Element extends Target { closest() { return null; } }
   const host = Object.assign(new Element(), {
     dataset: {},
-    getBoundingClientRect: () => ({ left: 0, top: 0, width, height: 900 }),
+    getBoundingClientRect: () => ({ left: 0, top: 0, width, height }),
+    querySelectorAll: () => protectedAreas.map(area => ({
+      matches: () => false,
+      getBoundingClientRect: () => ({ ...area, width: area.right - area.left, height: area.bottom - area.top }),
+    })),
     querySelector: selector => ({ getBoundingClientRect: () => selector === "header" ? { bottom: 160 } : { top: 160, height: 740 } }),
   });
   const draws = [];
-  const context = { clearRect() {}, setTransform() {}, fillText: (...args) => draws.push(args) };
+  const drawStyles = [];
+  const context = { clearRect() {}, setTransform() {}, fillText: (...args) => {
+    draws.push(args);
+    drawStyles.push({ args, opacity: context.globalAlpha, font: context.font });
+  } };
   const canvas = { width: 0, height: 0, getContext: () => canvasAvailable ? context : null };
   class Observer {
     disconnected = false;
@@ -46,16 +63,24 @@ function fixture({ reduced = false, width = 1000, canvasAvailable = true } = {})
   }
   Object.assign(globalThis, { window: win, document: doc, Element, ResizeObserver: Observer, IntersectionObserver: Observer });
   return {
-    host, canvas, frames, observers, motion, win, doc, draws,
+    host, canvas, frames, observers, motion, win, doc, draws, drawStyles,
     frame(now) {
       draws.length = 0;
+      drawStyles.length = 0;
       const pending = [...frames];
       frames.clear();
       for (const [, callback] of pending) callback(now);
       return draws.length;
     },
-    pointer(type, x, y) {
-      host.dispatchEvent(Object.assign(new Event(type), { isPrimary: true, button: 0, pointerType: "mouse", clientX: x, clientY: y }));
+    pointer(type, x, y, pointerType = "mouse") {
+      host.dispatchEvent(Object.assign(new Event(type), { isPrimary: true, button: 0, pointerType, clientX: x, clientY: y }));
+    },
+    touch(type, x, y, identifier = 1) {
+      const event = Object.assign(new Event(type, { cancelable: true }), {
+        changedTouches: [{ identifier, clientX: x, clientY: y }],
+      });
+      host.dispatchEvent(event);
+      assert.equal(event.defaultPrevented, false, "native touch scrolling and zoom remain available");
     },
     restore() {
       for (const [key, descriptor] of originals) {
@@ -75,6 +100,64 @@ test("reduced motion draws a still tree without scheduling frames", () => {
     assert.equal(f.frames.size, 0);
     f.pointer("pointermove", 200, 400);
     assert.equal(f.frames.size, 0);
+    dispose();
+  } finally { f.restore(); }
+});
+
+test("the mobile tree fills the introduction above the logo and almost edge to edge", () => {
+  for (const width of [320, 390, 430, 768]) {
+    const f = fixture({ reduced: true, width, height: 844 });
+    try {
+      const dispose = mountChristmasScene(f.host, f.canvas);
+      const star = f.draws.at(-2);
+      assert.ok(star[2] > 60 && star[2] < 90, "the star sits above the logo and below the language control");
+      const tree = f.draws.filter(([, , y]) => y > 60 && y < 810);
+      assert.ok(Math.min(...tree.map(([, x]) => x)) < width * .08);
+      assert.ok(Math.max(...tree.map(([, x]) => x)) > width * .92);
+      assert.ok(Math.max(...tree.map(([, , y]) => y)) >= 800);
+      assert.ok(f.drawStyles.slice(0, -2).every(({ font }) => Number.parseFloat(font) >= 9));
+      dispose();
+    } finally { f.restore(); }
+  }
+});
+
+test("text stays protected while surrounding branches and interaction lights remain visible", () => {
+  const f = fixture({ width: 390, protectedAreas: [{ left: 90, right: 300, top: 330, bottom: 460 }] });
+  try {
+    const dispose = mountChristmasScene(f.host, f.canvas);
+    f.pointer("pointerdown", 195, 390);
+    f.frame(1000);
+    const protectedDraws = f.drawStyles.filter(({ args: [, x, y] }) => x >= 90 && x <= 300 && y >= 330 && y <= 460);
+    const exposedBranches = f.drawStyles.filter(({ args: [character, , y] }) => ["/", "\\"].includes(character) && y > 500);
+    assert.ok(protectedDraws.length > 20);
+    assert.ok(protectedDraws.every(({ opacity }) => opacity <= .14), "even a ripple under text stays dim");
+    assert.ok(exposedBranches.some(({ opacity }) => opacity > .5), "branches retain visible contrast");
+    dispose();
+  } finally { f.restore(); }
+});
+
+test("finger swipes keep a fading trail after pointer cancellation, scrolling and a quick lift", () => {
+  const f = fixture({ width: 390 });
+  try {
+    const dispose = mountChristmasScene(f.host, f.canvas);
+    const baseline = f.frame(1000);
+    f.touch("touchstart", 40, 260);
+    f.touch("touchmove", 100, 300);
+    f.pointer("pointercancel", 100, 300, "touch");
+    f.win.dispatchEvent(new Event("scroll"));
+    f.touch("touchmove", 190, 400);
+    f.touch("touchend", 230, 440);
+    assert.ok(f.frame(1040) > baseline, "a complete swipe between frames still paints a trail");
+    for (let i = 0; i < 40; i++) {
+      f.touch("touchstart", 40, 260);
+      f.touch("touchmove", 290, 440);
+      f.touch("touchend", 290, 440);
+    }
+    assert.ok(f.frame(1080) <= baseline + 64, "the mobile particle limit also applies to touch");
+    for (let i = 0; i < 100; i++) f.frame(1120 + i * 40);
+    assert.equal(f.frame(5200), baseline, "sparkles fade after the finger leaves");
+    f.touch("touchmove", 340, 600);
+    assert.equal(f.frame(5240), baseline, "an ended touch cannot restart the trail");
     dispose();
   } finally { f.restore(); }
 });

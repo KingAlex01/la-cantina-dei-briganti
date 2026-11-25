@@ -20,17 +20,17 @@
 }
 
 .still {
-  inset: 24% 0 30px;
+  inset: 88px 0 26px;
   display: grid;
   align-content: center;
   margin: 0;
   color: #dfc58e;
-  opacity: .22;
+  opacity: .48;
   font-family: Consolas, "Courier New", monospace;
-  font-size: clamp(6px, 1.1vw, 13px);
-  line-height: 1.1;
+  font-size: clamp(8px, 2.1vw, 15px);
+  line-height: clamp(12px, 2.5svh, 25px);
   text-align: center;
-  mask-image: radial-gradient(ellipse 48% 52% at center, #0003, #000 80%);
+  mask-image: radial-gradient(ellipse 40% 42% at center, #0003, #000 85%);
 }
 
 .scene[data-christmas-ready="true"] .canvas { opacity: 1; }

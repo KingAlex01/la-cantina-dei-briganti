@@ -27,6 +27,18 @@
         "Use Canvas 2D without new dependencies"
       ],
       "reference": "https://21st.dev/community/components/explore/ascii-art"
+    },
+    {
+      "date": "2026-11-25",
+      "direction": "Albero ASCII a tutta altezza, leggibile su smartphone",
+      "requestedByUser": true,
+      "scope": "Enlarge the existing Christmas tree across the green introduction without changing the page layout",
+      "constraints": [
+        "Larger glyphs and brighter branches on phones",
+        "Dim only the actual text lines, logo and language control, including interaction highlights",
+        "Passive touch trail must survive native scrolling and pointer cancellation",
+        "Preserve booking actions, native scrolling, reduced motion and bounded animation resources"
+      ]
     }
   ]
 }
