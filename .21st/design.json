@@ -37,7 +37,7 @@
       "constraints": [
         "Larger, semibold light-gold glyphs with bright ivory ornaments and a subtle ornament glow",
         "Keep a bright resting tree throughout the shimmer cycle",
-        "Use lighter attenuation behind text: 38% minimum visibility and a narrower 14px transition, as requested by the user",
+        "Soften only the tree close to text: 22% visibility behind text with an 18px transition; preserve the bright branches elsewhere, as requested by the user",
         "Dim only the actual text lines, logo and language control, including interaction highlights",
         "Passive touch trail must survive native scrolling and pointer cancellation",
         "Preserve booking actions, native scrolling, reduced motion and bounded animation resources"

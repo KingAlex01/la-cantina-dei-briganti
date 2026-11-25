@@ -130,8 +130,8 @@ test("text stays protected while surrounding branches and interaction lights rem
     const protectedDraws = f.drawStyles.filter(({ args: [, x, y] }) => x >= 90 && x <= 300 && y >= 330 && y <= 460);
     const exposedBranches = f.drawStyles.filter(({ args: [character, , y] }) => ["/", "\\"].includes(character) && y > 500);
     assert.ok(protectedDraws.length > 20);
-    assert.ok(protectedDraws.every(({ opacity }) => opacity <= .38), "highlights under text retain a lighter attenuation");
-    assert.ok(protectedDraws.some(({ opacity }) => opacity > .25), "the tree remains visible behind text");
+    assert.ok(protectedDraws.every(({ opacity }) => opacity <= .22), "highlights stay softer only around text");
+    assert.ok(protectedDraws.some(({ opacity }) => opacity > .15), "the tree remains visible behind text");
     assert.ok(exposedBranches.some(({ opacity }) => opacity > .8), "branches retain strong visible contrast");
     dispose();
   } finally { f.restore(); }

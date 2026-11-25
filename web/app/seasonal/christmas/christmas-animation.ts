@@ -100,8 +100,8 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     for (const area of protectedAreas) {
       const dx = Math.max(area.left - x, 0, x - area.right);
       const dy = Math.max(area.top - y, 0, y - area.bottom);
-      const distance = Math.min(1, Math.hypot(dx, dy) / 14);
-      protection = Math.min(protection, .38 + .62 * distance * distance * (3 - 2 * distance));
+      const distance = Math.min(1, Math.hypot(dx, dy) / 18);
+      protection = Math.min(protection, .22 + .78 * distance * distance * (3 - 2 * distance));
     }
     return protection;
   }
@@ -238,10 +238,10 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
       const areas = element.matches("img, label") ? [element.getBoundingClientRect()] : Array.from(range.getClientRects());
       for (const area of areas) {
         if (area.width && area.height) protectedAreas.push({
-          left: area.left - rect.left - 1,
-          right: area.right - rect.left + 1,
-          top: area.top - rect.top - 1,
-          bottom: area.bottom - rect.top + 1,
+          left: area.left - rect.left - 2,
+          right: area.right - rect.left + 2,
+          top: area.top - rect.top - 2,
+          bottom: area.bottom - rect.top + 2,
         });
       }
     }
