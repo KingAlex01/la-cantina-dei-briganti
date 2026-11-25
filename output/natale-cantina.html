@@ -1,0 +1,151 @@
+<div id="cantina-natale-preview">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;1,500&family=Public+Sans:wght@400;600;700&display=swap');
+    #cantina-natale-preview { width:100%; }
+    #cantina-natale-preview .cn-scene { --cn-pine:#173127; --cn-cream:#f5efe1; --cn-gold:#dfc58e; --cn-ornament:#e39376; position:relative; isolation:isolate; display:flex; min-height:600px; box-sizing:border-box; overflow:hidden; flex-direction:column; align-items:center; justify-content:center; padding:58px 28px 42px; color:var(--cn-cream); background:linear-gradient(145deg,#13281f,#1f3b32 56%,#10231b); text-align:center; font-family:'Public Sans',Arial,sans-serif; }
+    #cantina-natale-preview .cn-tree { position:absolute; z-index:-2; inset:0; pointer-events:none; user-select:none; }
+    #cantina-natale-preview .cn-tree svg { display:block; width:100%; height:100%; }
+    #cantina-natale-preview .cn-copy { width:min(100%,650px); position:relative; }
+    #cantina-natale-preview .cn-copy::before { content:''; position:absolute; z-index:-1; inset:-20px -60px; pointer-events:none; background:radial-gradient(ellipse at center,rgba(23,49,39,.94) 2%,rgba(23,49,39,.72) 35%,rgba(23,49,39,0) 72%); }
+    #cantina-natale-preview .cn-kicker { margin:0 0 28px; color:var(--cn-gold); font-size:11px; font-weight:600; letter-spacing:2.1px; line-height:1.7; text-transform:uppercase; }
+    #cantina-natale-preview .cn-title { margin:0; color:var(--cn-cream); font-family:'Fraunces',Georgia,serif; font-size:clamp(39px,7vw,68px); font-weight:500; line-height:1.04; letter-spacing:-3px; text-wrap:balance; }
+    #cantina-natale-preview .cn-title em { color:#d3b77b; font-weight:500; }
+    #cantina-natale-preview .cn-rule { width:116px; height:1px; margin:28px auto 22px; background:linear-gradient(90deg,transparent,#d3b77b,transparent); }
+    #cantina-natale-preview .cn-description { max-width:480px; margin:0 auto; color:var(--cn-cream); font-size:15px; line-height:1.65; text-wrap:pretty; }
+    #cantina-natale-preview .cn-book { display:inline-flex; align-items:center; justify-content:center; gap:24px; margin:26px 0 12px; padding:15px 25px; border:1px solid #d3b77b; border-radius:40px; background:var(--cn-gold); color:#183226; font:700 14px 'Public Sans',Arial,sans-serif; text-decoration:none; transition:transform .2s,background .2s; }
+    #cantina-natale-preview .cn-book:hover { transform:translateY(-2px); background:#f1d9a5; }
+    #cantina-natale-preview .cn-book:focus-visible { outline:2px solid var(--cn-cream); outline-offset:4px; }
+    #cantina-natale-preview .cn-manage { display:block; color:#e4d1a9; font-size:12px; font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+    #cantina-natale-preview .cn-note { max-width:430px; margin:17px auto 0; color:#d3c5a9; font-size:11px; line-height:1.7; }
+    #cantina-natale-preview .cn-menu { display:inline-block; margin-top:16px; color:#e4d1a9; font-size:12px; font-weight:600; text-decoration:underline; text-underline-offset:4px; }
+    #cantina-natale-preview .cn-pixel .cn-copy::before { inset:-35px -65px; background:radial-gradient(ellipse at 48% 48%,rgba(23,49,39,.96) 7%,rgba(23,49,39,.82) 40%,rgba(23,49,39,0) 77%); }
+    #cantina-natale-preview .cn-dots .cn-copy::before { background:radial-gradient(ellipse at center,rgba(23,49,39,.96) 10%,rgba(23,49,39,.79) 38%,rgba(23,49,39,0) 73%); }
+    #cantina-natale-preview .cn-light { transform-box:fill-box; transform-origin:center; }
+    #cantina-natale-preview .cn-animated .cn-light { animation:cn-twinkle 4s ease-in-out infinite alternate; animation-delay:var(--cn-delay,0s); }
+    @keyframes cn-twinkle { from{opacity:.45} to{opacity:1} }
+    @media(max-width:480px) {
+      #cantina-natale-preview .cn-scene { min-height:650px; padding:74px 22px 52px; }
+      #cantina-natale-preview .cn-kicker { font-size:10px; letter-spacing:1.4px; }
+      #cantina-natale-preview .cn-title { font-size:43px; letter-spacing:-2px; }
+      #cantina-natale-preview .cn-description { font-size:14px; }
+      #cantina-natale-preview .cn-copy::before { inset:-25px -32px; }
+    }
+    @media(prefers-reduced-motion:reduce) { #cantina-natale-preview .cn-light { animation:none!important; } #cantina-natale-preview .cn-book { transition:none; } }
+  </style>
+  <div class="viz-carousel" aria-label="Tre proposte di albero di Natale per la Cantina" data-previous-label="Precedente" data-next-label="Successiva">
+    <section data-variant="ASCII dorato" aria-label="ASCII dorato">
+      <div class="cn-scene cn-ascii" data-tree="ascii" aria-label="Albero ASCII dorato, centrato dietro al testo">
+        <div class="cn-tree" aria-hidden="true"></div>
+        <div class="cn-copy">
+          <p class="cn-kicker">Mola di Bari · La cantina dei briganti</p>
+          <h2 class="cn-title">Ci vediamo a tavola.<br><em>Senza fretta.</em></h2>
+          <div class="cn-rule" aria-hidden="true"></div>
+          <p class="cn-description">Scegli data, orario e numero di persone. Al resto pensiamo noi: il tavolo resta vostro per tutto il servizio.</p>
+          <button class="cn-book cursor-interaction" type="button" aria-label="Anteprima del pulsante Prenota un tavolo">Prenota un tavolo <span aria-hidden="true">↗</span></button>
+          <span class="cn-manage">Gestisci prenotazione ↗</span>
+          <p class="cn-note">La richiesta sarà confermata dopo l’approvazione dello staff. Per prenotazioni in giornata o se non ricevi risposta, chiamaci.</p>
+          <span class="cn-menu">Scopri il menù ↗</span>
+        </div>
+      </div>
+    </section>
+    <section data-variant="Pixel rétro" aria-label="Pixel rétro" hidden>
+      <div class="cn-scene cn-pixel" data-tree="pixel" aria-label="Albero pixel, spostato a destra dietro al testo">
+        <div class="cn-tree" aria-hidden="true"></div>
+        <div class="cn-copy">
+          <p class="cn-kicker">Mola di Bari · La cantina dei briganti</p>
+          <h2 class="cn-title">Ci vediamo a tavola.<br><em>Senza fretta.</em></h2>
+          <div class="cn-rule" aria-hidden="true"></div>
+          <p class="cn-description">Scegli data, orario e numero di persone. Al resto pensiamo noi: il tavolo resta vostro per tutto il servizio.</p>
+          <button class="cn-book cursor-interaction" type="button" aria-label="Anteprima del pulsante Prenota un tavolo">Prenota un tavolo <span aria-hidden="true">↗</span></button>
+          <span class="cn-manage">Gestisci prenotazione ↗</span>
+          <p class="cn-note">La richiesta sarà confermata dopo l’approvazione dello staff. Per prenotazioni in giornata o se non ricevi risposta, chiamaci.</p>
+          <span class="cn-menu">Scopri il menù ↗</span>
+        </div>
+      </div>
+    </section>
+    <section data-variant="Luci puntinate" aria-label="Luci puntinate" hidden>
+      <div class="cn-scene cn-dots" data-tree="dots" aria-label="Sagoma di albero composta da piccoli punti e ghirlande luminose">
+        <div class="cn-tree" aria-hidden="true"></div>
+        <div class="cn-copy">
+          <p class="cn-kicker">Mola di Bari · La cantina dei briganti</p>
+          <h2 class="cn-title">Ci vediamo a tavola.<br><em>Senza fretta.</em></h2>
+          <div class="cn-rule" aria-hidden="true"></div>
+          <p class="cn-description">Scegli data, orario e numero di persone. Al resto pensiamo noi: il tavolo resta vostro per tutto il servizio.</p>
+          <button class="cn-book cursor-interaction" type="button" aria-label="Anteprima del pulsante Prenota un tavolo">Prenota un tavolo <span aria-hidden="true">↗</span></button>
+          <span class="cn-manage">Gestisci prenotazione ↗</span>
+          <p class="cn-note">La richiesta sarà confermata dopo l’approvazione dello staff. Per prenotazioni in giornata o se non ricevi risposta, chiamaci.</p>
+          <span class="cn-menu">Scopri il menù ↗</span>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+    (function(){
+      const root = document.getElementById('cantina-natale-preview');
+      const ns = 'http://www.w3.org/2000/svg';
+      const hash = (a,b) => { const n=Math.sin(a*127.1+b*311.7)*43758.5453; return n-Math.floor(n); };
+      const add = (parent,type,attrs,text) => { const e=document.createElementNS(ns,type); Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v))); if(text!==undefined)e.textContent=text; parent.appendChild(e); return e; };
+      function tree(kind){
+        const svg=document.createElementNS(ns,'svg');
+        svg.setAttribute('viewBox','0 0 736 600'); svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+        const layer=add(svg,'g',{});
+        const center=kind==='pixel'?511:368;
+        const gold='var(--cn-gold)', red='var(--cn-ornament)';
+        if(kind==='ascii'){
+          for(let row=0;row<40;row++){
+            const y=85+row*12, width=16+row*7.4;
+            for(let col=-Math.floor(width/10);col<=Math.floor(width/10);col++){
+              const x=center+col*10, edge=Math.abs(col*10)/width, rand=hash(row,col);
+              if(edge<.8&&rand<.48)continue;
+              const ornament=rand>.968;
+              const char=ornament?'o':edge>.85?(col<0?'/':'\\'):['.',':','+','*'][Math.floor(hash(col,row)*4)];
+              add(layer,'text',{x,y,fill:ornament?red:gold,opacity:ornament?.97:edge>.85?.66:.28,'font-family':'Consolas,monospace','font-size':ornament?14:12,'text-anchor':'middle',class:ornament?'cn-light':'',style:'--cn-delay:'+(-hash(col,row)*4)+'s'},char);
+            }
+          }
+          add(layer,'text',{x:center,y:72,fill:gold,'font-family':'Consolas,monospace','font-size':34,'text-anchor':'middle'},'*');
+          add(layer,'text',{x:center,y:585,fill:gold,opacity:.45,'font-family':'Consolas,monospace','font-size':18,'text-anchor':'middle'},'|||');
+        }else if(kind==='pixel'){
+          const step=12;
+          for(let row=0;row<37;row++){
+            const y=102+row*step;
+            const tier=row<11?0:row<22?1:2;
+            const width=18+row*5.8-(tier===0?0:tier===1?26:48);
+            for(let col=-Math.floor(width/step);col<=Math.floor(width/step);col++){
+              const rand=hash(row,col), x=center+col*step;
+              const edge=Math.abs(col*step)/width, ornament=rand>.963;
+              add(layer,'rect',{x,y,width:10,height:10,fill:ornament?(rand>.984?red:gold):['#589b73','#76b886','#416e52'][Math.floor(hash(col,row)*3)],opacity:ornament?1:edge>.8?.8:.48,class:ornament?'cn-light':'',style:'--cn-delay:'+(-rand*4)+'s'});
+            }
+          }
+          const star=[[0,-2],[0,-1],[-2,0],[-1,0],[0,0],[1,0],[2,0],[-1,1],[0,1],[1,1],[-1,2],[1,2]];
+          star.forEach(([x,y])=>add(layer,'rect',{x:center-4+x*9,y:77+y*9,width:8,height:8,fill:gold}));
+          add(layer,'rect',{x:center-11,y:548,width:22,height:35,fill:'#c59b67',opacity:.8});
+          [[-34,555,34,25,gold],[23,561,30,21,red]].forEach(([x,y,w,h,c])=>{add(layer,'rect',{x:center+x,y,width:w,height:h,fill:c,opacity:.8});add(layer,'rect',{x:center+x+w/2-2,y,width:4,height:h,fill:'#f5efe1',opacity:.7});});
+        }else{
+          for(let row=0;row<56;row++){
+            const y=83+row*8.5,width=10+row*5.2;
+            for(let col=-Math.floor(width/9);col<=Math.floor(width/9);col++){
+              const rand=hash(row,col),x=center+col*9;
+              if(rand<.51)continue;
+              add(layer,'circle',{cx:x,cy:y,r:rand>.95?1.9:1,fill:rand>.95?gold:'#8aab86',opacity:rand>.95?.84:.36});
+            }
+          }
+          for(let i=0;i<245;i++){
+            const p=i/244,y=91+p*458,width=15+p*275;
+            const x=center+Math.sin(p*Math.PI*9)*width;
+            add(layer,'circle',{cx:x,cy:y,r:i%11===0?3:1.7,fill:i%19===0?red:gold,opacity:.92,class:i%4===0?'cn-light':'',style:'--cn-delay:'+(-hash(i,9)*4)+'s'});
+          }
+          add(layer,'text',{x:center,y:74,fill:gold,'font-family':'Consolas,monospace','font-size':32,'text-anchor':'middle'},'+');
+          for(let i=0;i<18;i++)add(layer,'circle',{cx:center-8+hash(i,2)*16,cy:563+hash(i,4)*24,r:1.3,fill:gold,opacity:.6});
+        }
+        return svg;
+      }
+      root.querySelectorAll('.cn-scene').forEach(scene=>{
+        scene.querySelector('.cn-tree').appendChild(tree(scene.dataset.tree));
+        const state={intensity:100,ornament:'#e39376',animated:false};
+        function render(){scene.querySelector('.cn-tree').style.opacity=state.intensity/100;scene.style.setProperty('--cn-ornament',state.ornament);scene.classList.toggle('cn-animated',state.animated);}
+        render();
+        if(globalThis.Tweak){const tweak=new Tweak({container:scene,onChange:render});tweak.addSlider(state,'intensity',{label:'Intensità albero',min:25,max:100,step:5,unit:'%'});tweak.addColorPicker(state,'ornament',{label:'Decorazioni'});tweak.addToggle(state,'animated',{label:'Luci animate'});}
+      });
+    })();
+  </script>
+</div>

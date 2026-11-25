@@ -1,0 +1,32 @@
+{
+  "project": "La cantina dei briganti",
+  "stack": "Next.js App Router, React, CSS Modules",
+  "colors": {
+    "pine": "#1f3b32",
+    "cream": "#f5efe1",
+    "gold": "#dfc58e",
+    "seasonalCopper": "#e39376"
+  },
+  "decisions": [
+    {
+      "date": "2026-11-25",
+      "direction": "ASCII dorato",
+      "scope": "Christmas decoration behind the existing homepage introduction",
+      "requestedByUser": true,
+      "interactions": [
+        "Slow light shimmer and subtle tree movement",
+        "Pointer proximity lights up and gently displaces characters",
+        "Short gold ASCII pointer trail",
+        "Light ripple on background click or touch"
+      ],
+      "constraints": [
+        "Preserve existing copy, typography, logo, layout and booking links",
+        "Keep the native pointer and normal touch scrolling",
+        "Respect reduced motion; omit the visible pause control as requested by the user",
+        "Stop animation offscreen and in hidden tabs",
+        "Use Canvas 2D without new dependencies"
+      ],
+      "reference": "https://21st.dev/community/components/explore/ascii-art"
+    }
+  ]
+}

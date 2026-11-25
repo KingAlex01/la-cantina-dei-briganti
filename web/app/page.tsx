@@ -4,6 +4,7 @@ import LegalFooter from "./LegalFooter";
 import InviteRedirect from "./invite-redirect";
 import LanguageSelector from "./LanguageSelector";
 import WhatsAppFloatingButton from "./WhatsAppFloatingButton";
+import ChristmasScene from "./seasonal/christmas/ChristmasScene";
 import { OPENING_HOURS } from "../lib/public-booking";
 import { RESTAURANT, restaurantStructuredData } from "../lib/restaurant";
 import { homeContent } from "../lib/i18n/home";
@@ -25,7 +26,7 @@ export default async function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(restaurantStructuredData).replace(/</g, "\\u003c") }} />
       <InviteRedirect />
       <div className={styles.grain} aria-hidden="true" />
-      <div className={styles.introScreen}>
+      <ChristmasScene className={styles.introScreen}>
       <div className={styles.languageBar}><LanguageSelector tone="dark" /></div>
       <header className={styles.header}>
         <span className={styles.headerLine} aria-hidden="true" />
@@ -60,7 +61,7 @@ export default async function Home() {
         <p className={styles.bookingNote}>{content.bookingNote}</p>
         <Link href="/menu" className={styles.menuLink}>{content.discoverMenu} <span aria-hidden="true">↗</span></Link>
       </section>
-      </div>
+      </ChristmasScene>
 
       <section className={styles.story} aria-labelledby="story-title">
         <div className={styles.storyInner}>
