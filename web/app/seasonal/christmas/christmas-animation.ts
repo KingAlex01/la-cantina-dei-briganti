@@ -13,8 +13,8 @@ type Ripple = { x: number; y: number; radius: number; age: number };
 type ProtectedArea = { left: number; right: number; top: number; bottom: number };
 
 const GOLD = "#dfc58e";
+const TREE_GOLD = "#ffe1a3";
 const IVORY = "#fff1c9";
-const COPPER = "#e39376";
 const TAU = Math.PI * 2;
 const PROTECTED_CONTENT = "header img, section h1, section p, section a, section > div, label";
 const seed = (x: number, y: number) => {
@@ -100,8 +100,8 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     for (const area of protectedAreas) {
       const dx = Math.max(area.left - x, 0, x - area.right);
       const dy = Math.max(area.top - y, 0, y - area.bottom);
-      const distance = Math.min(1, Math.hypot(dx, dy) / 24);
-      protection = Math.min(protection, .14 + .86 * distance * distance * (3 - 2 * distance));
+      const distance = Math.min(1, Math.hypot(dx, dy) / 14);
+      protection = Math.min(protection, .38 + .62 * distance * distance * (3 - 2 * distance));
     }
     return protection;
   }
@@ -123,7 +123,8 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     const sway = animate ? Math.sin(time * .38) * 1.8 + parallaxX : 0;
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.font = `${fontSize}px Consolas, "Courier New", monospace`;
+    context.font = `600 ${fontSize}px Consolas, "Courier New", monospace`;
+    context.shadowColor = TREE_GOLD;
     context.shadowBlur = 0;
 
     for (const glyph of glyphs) {
@@ -145,15 +146,17 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
         const distance = Math.hypot(x - ripple.x, y - ripple.y);
         rippleLight += Math.max(0, 1 - Math.abs(distance - ripple.radius) / 40) * Math.max(0, 1 - ripple.age / 1.4);
       }
-      const shimmer = animate ? .8 + .2 * Math.sin(time * (glyph.ornament ? 1.35 : .65) + glyph.phase + glyph.y * 7) : .9;
+      const shimmer = animate ? .9 + .1 * Math.sin(time * (glyph.ornament ? 1.35 : .65) + glyph.phase + glyph.y * 7) : 1;
+      const protection = textProtectionAt(x, y);
       // Interaction light respects the same text protection as the resting tree.
-      context.globalAlpha = Math.min(.95, glyph.opacity * shimmer + proximity * .48 + rippleLight * .45) * textProtectionAt(x, y);
-      context.fillStyle = proximity > .35 || rippleLight > .35 ? IVORY : glyph.ornament ? COPPER : GOLD;
+      context.globalAlpha = Math.min(1, glyph.opacity * shimmer + proximity * .48 + rippleLight * .45) * protection;
+      context.fillStyle = proximity > .35 || rippleLight > .35 || glyph.ornament ? IVORY : TREE_GOLD;
+      context.shadowBlur = glyph.ornament && protection > .65 ? 5 : 0;
       context.fillText(glyph.character, x, y);
     }
 
-    // A small typographic star; glow is restricted to this single mark.
-    context.globalAlpha = (animate ? .78 + Math.sin(time * 1.1) * .12 : .82) * textProtectionAt(width / 2 + sway, top - fontSize * 1.7);
+    // Keep a brighter star, with ornament glow confined to spaces around the text.
+    context.globalAlpha = (animate ? .9 + Math.sin(time * 1.1) * .08 : .95) * textProtectionAt(width / 2 + sway, top - fontSize * 1.7);
     context.fillStyle = IVORY;
     context.font = `${fontSize * 2.7}px Consolas, "Courier New", monospace`;
     context.shadowColor = GOLD;
@@ -161,8 +164,8 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     context.fillText("*", width / 2 + sway, top - fontSize * 1.7);
     context.shadowBlur = 0;
     context.font = `${fontSize}px Consolas, "Courier New", monospace`;
-    context.globalAlpha = .36;
-    context.fillStyle = GOLD;
+    context.globalAlpha = .7;
+    context.fillStyle = TREE_GOLD;
     context.fillText("|||", width / 2 + sway, top + treeHeight + fontSize * 1.5);
 
     if (animate) {
@@ -226,7 +229,7 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     top = Math.max(88, Math.min(height * .105, 102));
     treeHeight = Math.max(1, height - top - 36);
     const treeWidth = Math.min(width * 1.12, treeHeight * 1.5, 1320);
-    fontSize = Math.max(9, Math.min(treeWidth / 43, treeHeight / 51 * 1.08, 17));
+    fontSize = Math.max(10, Math.min(treeWidth / 39, treeHeight / 51 * 1.08, 17));
     protectedAreas = [];
     for (const element of host.querySelectorAll(PROTECTED_CONTENT)) {
       // Text line rectangles leave the spaces between lines and blocks illuminated.
@@ -235,17 +238,17 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
       const areas = element.matches("img, label") ? [element.getBoundingClientRect()] : Array.from(range.getClientRects());
       for (const area of areas) {
         if (area.width && area.height) protectedAreas.push({
-          left: area.left - rect.left - 3,
-          right: area.right - rect.left + 3,
-          top: area.top - rect.top - 3,
-          bottom: area.bottom - rect.top + 3,
+          left: area.left - rect.left - 1,
+          right: area.right - rect.left + 1,
+          top: area.top - rect.top - 1,
+          bottom: area.bottom - rect.top + 1,
         });
       }
     }
     glyphs = GLYPHS.map((glyph) => {
       const screenX = width / 2 + glyph.x * treeWidth;
       const screenY = top + glyph.y * treeHeight;
-      return { ...glyph, screenX, screenY, opacity: glyph.ornament ? .95 : glyph.edge ? .9 : .56 };
+      return { ...glyph, screenX, screenY, opacity: glyph.ornament || glyph.edge ? 1 : .9 };
     });
     pointer.active = false;
     activeTouchId = null;

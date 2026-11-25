@@ -115,7 +115,7 @@ test("the mobile tree fills the introduction above the logo and almost edge to e
       assert.ok(Math.min(...tree.map(([, x]) => x)) < width * .08);
       assert.ok(Math.max(...tree.map(([, x]) => x)) > width * .92);
       assert.ok(Math.max(...tree.map(([, , y]) => y)) >= 800);
-      assert.ok(f.drawStyles.slice(0, -2).every(({ font }) => Number.parseFloat(font) >= 9));
+      assert.ok(f.drawStyles.slice(0, -2).every(({ font }) => Number(font.match(/([\d.]+)px/)[1]) >= 10));
       dispose();
     } finally { f.restore(); }
   }
@@ -130,8 +130,9 @@ test("text stays protected while surrounding branches and interaction lights rem
     const protectedDraws = f.drawStyles.filter(({ args: [, x, y] }) => x >= 90 && x <= 300 && y >= 330 && y <= 460);
     const exposedBranches = f.drawStyles.filter(({ args: [character, , y] }) => ["/", "\\"].includes(character) && y > 500);
     assert.ok(protectedDraws.length > 20);
-    assert.ok(protectedDraws.every(({ opacity }) => opacity <= .14), "even a ripple under text stays dim");
-    assert.ok(exposedBranches.some(({ opacity }) => opacity > .5), "branches retain visible contrast");
+    assert.ok(protectedDraws.every(({ opacity }) => opacity <= .38), "highlights under text retain a lighter attenuation");
+    assert.ok(protectedDraws.some(({ opacity }) => opacity > .25), "the tree remains visible behind text");
+    assert.ok(exposedBranches.some(({ opacity }) => opacity > .8), "branches retain strong visible contrast");
     dispose();
   } finally { f.restore(); }
 });

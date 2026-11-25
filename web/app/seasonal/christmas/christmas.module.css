@@ -24,13 +24,14 @@
   display: grid;
   align-content: center;
   margin: 0;
-  color: #dfc58e;
-  opacity: .48;
+  color: #ffe1a3;
+  opacity: .78;
   font-family: Consolas, "Courier New", monospace;
   font-size: clamp(8px, 2.1vw, 15px);
+  font-weight: 600;
   line-height: clamp(12px, 2.5svh, 25px);
   text-align: center;
-  mask-image: radial-gradient(ellipse 40% 42% at center, #0003, #000 85%);
+  mask-image: radial-gradient(ellipse 40% 42% at center, #0008, #000 85%);
 }
 
 .scene[data-christmas-ready="true"] .canvas { opacity: 1; }
