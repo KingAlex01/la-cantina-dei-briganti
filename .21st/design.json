@@ -5,7 +5,9 @@
     "pine": "#1f3b32",
     "cream": "#f5efe1",
     "gold": "#dfc58e",
-    "seasonalTreeGold": "#ffe1a3",
+    "seasonalTreeGreen": "#061a10",
+    "seasonalOrnamentRed": "#d44b43",
+    "seasonalOrnamentYellow": "#e5b94d",
     "seasonalCopper": "#e39376"
   },
   "decisions": [
@@ -41,6 +43,20 @@
         "Dim only the actual text lines, logo and language control, including interaction highlights",
         "Passive touch trail must survive native scrolling and pointer cancellation",
         "Preserve booking actions, native scrolling, reduced motion and bounded animation resources"
+      ]
+    },
+    {
+      "date": "2026-11-28",
+      "direction": "Albero ASCII verde molto scuro con decorazioni rosse e gialle",
+      "requestedByUser": true,
+      "scope": "Recolor the existing Christmas tree while preserving its full-height mobile layout",
+      "constraints": [
+        "Use a tree green darker than the existing green page background",
+        "Scatter more red baubles and warm-yellow stars across the tree, keeping the existing red baubles in place",
+        "Preserve ornament colors during pointer and touch interactions",
+        "Keep the gold star and pointer trail",
+        "Preserve the existing local attenuation around text and native touch scrolling",
+        "Match the static fallback to the same dark-green, red and yellow palette"
       ]
     }
   ]

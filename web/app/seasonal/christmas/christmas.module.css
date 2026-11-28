@@ -24,8 +24,8 @@
   display: grid;
   align-content: center;
   margin: 0;
-  color: #ffe1a3;
-  opacity: .78;
+  color: #061a10;
+  opacity: .95;
   font-family: Consolas, "Courier New", monospace;
   font-size: clamp(8px, 2.1vw, 15px);
   font-weight: 600;
@@ -33,6 +33,10 @@
   text-align: center;
   mask-image: radial-gradient(ellipse 40% 42% at center, #0008, #000 85%);
 }
+
+.stillOrnament { color: #d44b43; }
+.stillYellowOrnament { color: #e5b94d; }
+.stillStar { color: #fff1c9; }
 
 .scene[data-christmas-ready="true"] .canvas { opacity: 1; }
 .scene[data-christmas-ready="true"] .still { visibility: hidden; }

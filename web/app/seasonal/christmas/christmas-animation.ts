@@ -4,6 +4,7 @@ type Glyph = {
   character: string;
   phase: number;
   ornament: boolean;
+  yellowOrnament: boolean;
   edge: boolean;
 };
 
@@ -13,7 +14,12 @@ type Ripple = { x: number; y: number; radius: number; age: number };
 type ProtectedArea = { left: number; right: number; top: number; bottom: number };
 
 const GOLD = "#dfc58e";
-const TREE_GOLD = "#ffe1a3";
+const TREE_GREEN = "#061a10";
+const TREE_ACTIVE_GREEN = "#0b2819";
+const ORNAMENT_RED = "#d44b43";
+const ORNAMENT_ACTIVE_RED = "#ef6b5e";
+const ORNAMENT_YELLOW = "#e5b94d";
+const ORNAMENT_ACTIVE_YELLOW = "#ffdb73";
 const IVORY = "#fff1c9";
 const TAU = Math.PI * 2;
 const PROTECTED_CONTENT = "header img, section h1, section p, section a, section > div, label";
@@ -31,13 +37,15 @@ const GLYPHS: Glyph[] = Array.from({ length: 51 }, (_, row) => {
     const col = index - columns;
     const random = seed(row, col);
     const edge = Math.abs(col) >= columns - 1;
-    const ornament = !edge && random > .967;
+    const ornament = !edge && random > .93;
+    const yellowOrnament = ornament && random < .96;
     return {
       x: col / 86,
       y,
-      character: ornament ? "o" : edge ? col < 0 ? "/" : "\\" : ".:+*"[Math.floor(seed(col, row) * 4)],
+      character: ornament ? yellowOrnament ? "✦" : "●" : edge ? col < 0 ? "/" : "\\" : ".:+*"[Math.floor(seed(col, row) * 4)],
       phase: random * TAU,
       ornament,
+      yellowOrnament,
       edge,
     };
   }).filter((glyph) => glyph.edge || glyph.ornament || seed(row + 73, glyph.x) > .3);
@@ -124,7 +132,7 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.font = `600 ${fontSize}px Consolas, "Courier New", monospace`;
-    context.shadowColor = TREE_GOLD;
+    context.shadowColor = ORNAMENT_RED;
     context.shadowBlur = 0;
 
     for (const glyph of glyphs) {
@@ -150,7 +158,13 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
       const protection = textProtectionAt(x, y);
       // Interaction light respects the same text protection as the resting tree.
       context.globalAlpha = Math.min(1, glyph.opacity * shimmer + proximity * .48 + rippleLight * .45) * protection;
-      context.fillStyle = proximity > .35 || rippleLight > .35 || glyph.ornament ? IVORY : TREE_GOLD;
+      const highlighted = proximity > .35 || rippleLight > .35;
+      const ornamentColor = glyph.yellowOrnament ? ORNAMENT_YELLOW : ORNAMENT_RED;
+      const ornamentHighlight = glyph.yellowOrnament ? ORNAMENT_ACTIVE_YELLOW : ORNAMENT_ACTIVE_RED;
+      context.fillStyle = glyph.ornament
+        ? highlighted ? ornamentHighlight : ornamentColor
+        : highlighted ? TREE_ACTIVE_GREEN : TREE_GREEN;
+      if (glyph.ornament) context.shadowColor = ornamentColor;
       context.shadowBlur = glyph.ornament && protection > .65 ? 5 : 0;
       context.fillText(glyph.character, x, y);
     }
@@ -165,7 +179,7 @@ export function mountChristmasScene(host: HTMLElement, canvas: HTMLCanvasElement
     context.shadowBlur = 0;
     context.font = `${fontSize}px Consolas, "Courier New", monospace`;
     context.globalAlpha = .7;
-    context.fillStyle = TREE_GOLD;
+    context.fillStyle = TREE_GREEN;
     context.fillText("|||", width / 2 + sway, top + treeHeight + fontSize * 1.5);
 
     if (animate) {
